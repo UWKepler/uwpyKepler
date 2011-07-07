@@ -1,3 +1,4 @@
 
 import io
-#import 
+#import detrend
+#import lightcurve
