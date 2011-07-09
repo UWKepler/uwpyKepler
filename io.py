@@ -15,8 +15,8 @@ def ReadLightCurve(KeplerID):
     results = cursor.fetchall()
     
     time    = num.array([x[2] for x in results])
-    rawflux = num.array([x[5] for x in results])
-    rawerr  = num.array([x[6] for x in results])
+    #rawflux = num.array([x[5] for x in results])
+    #rawerr  = num.array([x[6] for x in results])
     corflux = num.array([x[7] for x in results])
     corerr  = num.array([x[8] for x in results])
     
@@ -34,14 +34,13 @@ def ReadLightCurve(KeplerID):
     
     return {'kid':KeplerID,'x':time,'y':corflux,'yerr':corerr}
 
-
-def splitgap(d1):
-	"""This function finds gaps and splits data into portions...
+def splitgap(d1,gapsize):
+	"""
+        This function finds gaps and splits data into portions.
 	"""
 	
 	#defining new empty lists and stuff
-	dt =[]
-	DT=[]
+        DT = []
 	pcount=0
 	xarr=[]
 	yarr=[]
@@ -51,19 +50,15 @@ def splitgap(d1):
 	tend=[]
 	pd={}
 	
-	#minimum sized gap that we are flagging, 2.4 hours
-	gapsize = .1
-	
-	#The grand master loop >=}
+	# minimum sized gap that we are flagging, 2.4 hours
+	# The grand master loop >=}
 	for i in range(len(d1['x'])- 1):
 		dt =  d1['x'][i + 1]- d1['x'][i]
 		if dt > gapsize:
-	
-		#Collecting the time and magnitude of gap every time we detect one.
+		# Collecting the time and magnitude of gap every time we detect one.
 			DT.append(dt)
 			tstart.append(d1['x'][i])
 			tend.append(d1['x'][i + 1])
-			
 			pcount += 1
 			pd['portion' + str(pcount)] = {'kid':d1['kid'],'x':xarr, 'y':yarr, 'yerr':yerrarr,'TransitFlag':transitflag}
 			xarr=[]
@@ -127,6 +122,8 @@ def FlagLightCurve(pd):
 	tenumber = len(transitelist)
 	
 	if tsnumber != tenumber:
+                print 'Number of Start times does not equal number of End times'
+                print tsnumber, tenumber
 		sys.exit(1)
 
         TransitFlag = []
@@ -141,11 +138,8 @@ def FlagLightCurve(pd):
 	
 	#return {'kid':pd['kid'],'x':num.array(outtime),'y':num.array(outflux),'yerr':num.array(outerr)}
 
-
 def FlagOutliers(d2,medwin,threshold):
     """ This function flags outliers ... """
-    
-    # add parameters of threshold and medwin
     
     dout = {}
     for portion in d2.keys():
@@ -176,56 +170,48 @@ def FlagOutliers(d2,medwin,threshold):
                 OutlierFlag.append(False) 
             if el == 0:
                 OutlierFlag.append(True)
-        print len(outliers), len(d2[portion]['x']), portion, len(OutlierFlag)
+                
         dout[portion] = {'kid':d2[portion]['kid'],'x':num.array(d2[portion]['x']),'y':num.array(outliers),'yerr':num.array(d2[portion]['yerr']),'TransitFlag':d2[portion]['TransitFlag'],'OutlierFlag':OutlierFlag}
         
     return dout
 	
-
-#def ReadKOITable(input parameters):
-    #""" This function reads the Kepler database and returns ... """
-
-
-#def checkifKnownPlanet(input parameters):
-    #""" returns True is Kepler ID matches a planet in the datatable ... """
-
-
-#def detrend(d3, win1, win2, order):
-    ##win1 is the inner edge of window, win2 is outer edge of window.
+def detrend(d3, window, order):
     
-    #dout = {}
-    #for portion in d3.keys():
-        #npts = len(d3[portion]['x'])
-        #print portion, npts
-        #t0= d3[portion]['x']
-        #y0= d3[portion]['y']
-        #dtreflux = []
-        #for i in range(npts):
-            #tlow_start = t0[j] - win1
-            #tlow_end = t0[j] - win2
-            #thigh_start = t0[j] + win2
-            #thigh_end = t0[j] + win1
-            #t_test =
-            #if t_test > tlow_start and  t_test < tlow_end:
-                #indwin.append(t_test.ij)
-                ##need to add outlier flags so we can check
-                #if ((t0[j] > t0[i] - win2) and (t0[j] < t0[i] - win1)) or ((t0[j] > t0[i]+ win1) and (t0[j] < t0[i] + win2)):
-              
-                    #indwin = []
+    dout = {}
+    for portion in d3.keys():
         
-            ##print len(indwin)
-            ##print indwin
-                ##indwin = num.where(((t0 > t0[i] - win2) and (t0 < t0[i] - win1)) or ((t0 > t0[i]+ win1) and (t0 < t0[i] + win2)))
-                ##indwin = (((t0 > t0[i] - win2) and (t0 < t0[i] - win1)) or ((t0 > t0[i]+ win1) and (t0 < t0[i] + win2))).nonzero()
-                ##print indwin
-            #twin = t0[indwin] - t0[i]
-            #fwin = y0[indwin]
+        
+        npts = len(d3[portion]['x'])
+        
+        t0= d3[portion]['x']
+        y0= d3[portion]['y']
+        dtreflux = []
+        for i in range(npts):
+            tlow_start = t0[j] - win1
+            tlow_end = t0[j] - win2
+            thigh_start = t0[j] + win2
+            thigh_end = t0[j] + win1
+            t_test =
+            if t_test > tlow_start and  t_test < tlow_end:
+                indwin.append(t_test.ij)
+                #need to add outlier flags so we can check
+                if ((t0[j] > t0[i] - win2) and (t0[j] < t0[i] - win1)) or ((t0[j] > t0[i]+ win1) and (t0[j] < t0[i] + win2)):
                 
-            #coeff = scipy.polyfit(twin, fwin, order)
-            #dtreflux.append(coeff[0])
-        #dout[portion] = {'kid':d3[portion]['kid'],'x':num.array(d3[portion]['x']),'y':num.array(dtreflux),'yerr':num.array(d3[portion]['yerr']),'TransitFlag':num.array(d3[portion]['TransitFlag']), 'OutlierFlag':num.array(d3[portion]['OutlierFlag'])}
+                    indwin = []
         
-    #return dout
+            #print len(indwin)
+            #print indwin
+                #indwin = num.where(((t0 > t0[i] - win2) and (t0 < t0[i] - win1)) or ((t0 > t0[i]+ win1) and (t0 < t0[i] + win2)))
+                #indwin = (((t0 > t0[i] - win2) and (t0 < t0[i] - win1)) or ((t0 > t0[i]+ win1) and (t0 < t0[i] + win2))).nonzero()
+                #print indwin
+            twin = t0[indwin] - t0[i]
+            fwin = y0[indwin]
+                
+            coeff = scipy.polyfit(twin, fwin, order)
+            dtreflux.append(coeff[0])
+        dout[portion] = {'kid':d3[portion]['kid'],'x':num.array(d3[portion]['x']),'y':num.array(dtreflux),'yerr':num.array(d3[portion]['yerr']),'TransitFlag':num.array(d3[portion]['TransitFlag']), 'OutlierFlag':num.array(d3[portion]['OutlierFlag'])}
+        
+    return dout
                 
 def detrend2(d3, portion, order):
     
