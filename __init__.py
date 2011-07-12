@@ -1,4 +1,3 @@
 
-import io
-#import detrend
-#import lightcurve
+import lc
+import proc
