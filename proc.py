@@ -1,3 +1,7 @@
+import sys
+import numpy as num
+import scipy
+import pylab
 
 def removeOutliers(d):
     """ returns array without outliers """
@@ -41,21 +45,42 @@ def removeTransits(d):
 
     return dout
 
-def detrendData(data, windowsize, polyorder):
+def detrendData(data, minwindow, maxwindow, polyorder):
 
-    d = removeOutliers(removeTransits(data3))
-    dout = {}
-    for portion in d.keys():
-        if windowsize < len(d[portion]['x'])/2e0:
-            i1 = max(0,i-medhalf)
-            i2 = min(npts, i + medhalf)
-            xdata = d[portion]['x'][i1:i2]
-            ydata = d[portion]['y'][i1:i2]
+    #dout = data.copy()
+    print data.keys()
+    for portion in data.keys():
+        nsize = len(data[portion]['x'])
+        nfullwindows = int(num.floor(nsize/maxwindow))
+        leftover = nsize - nfullwindows*maxwindow
+        i1 = 0
+        i2 = maxwindow+1
+        #print portion, nsize, nfullwindows
+        if nfullwindows == 0:
+            i1 = 0
+            i2 = nsize
+            nfullwindows = 1
+        for i in range(nfullwindows):
+            xdata = data[portion]['x'][i1:i2]
+            ydata = data[portion]['y'][i1:i2]
+            print len(xdata), len(ydata)
             coeff = scipy.polyfit(xdata,ydata, polyorder)
-            outx = scipy.polyval(coeff,data[portion]['x'])
-        import pylab
-        pylab.plot(d[portion]['x'],d[portion]['y'],'b.')
-        pylab.plot(d3[portion]['x'],out,'b.')
-        pylab.show()
-        dout[portion] = {'x':d3[portion]['x'],'y':out}
-        return 
+            outx = scipy.polyval(coeff,num.ma.getdata(data[portion]['x'][i1:i2]))
+            print len(num.ma.getdata(data[portion]['y'][i1:i2])), type(num.ma.getdata(data[portion]['y'][i1:i2]))
+            print len(outx), type(outx), len(data[portion]['y'][i1:i2])
+            print data[portion]['y'][i1]/outx[0]
+            data[portion]['y'][i1:i2] = data[portion]['y'][i1:i2]/outx 
+            #pylab.plot(xdata,ydata,'bo')
+            #pylab.plot(xdata,outx,'r.')
+            #pylab.show()
+            #dout[portion]['y'] = outx 
+            i1 = i2
+            i2 = i2+maxwindow
+        #pylab.plot(num.ma.getdata(data[portion]['x']),num.ma.getdata(data[portion]['y']), 'g.')
+    #pylab.show()
+        #pylab.plot(d[portion]['x'],d[portion]['y'],'b.')
+        #pylab.plot(d3[portion]['x'],out,'b.')
+        #pylab.show()
+        #dout[portion] = {'x':d3[portion]['x'],'y':out}
+    return data
+        
