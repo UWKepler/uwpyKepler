@@ -86,7 +86,7 @@ def detrendData(data, window, polyorder):
             outx = scipy.polyval(coeff,data[portion]['x'][i1:i2])
         
             #pylab.plot(xdata,ydata,'bo')
-            #pylab.plot(data[portion]['x'][i1:i2],outx,'r-')
+            pylab.plot(data[portion]['x'][i1:i2],outx,'y-')
             #pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'y.')
             
             d0 = data[portion]['x'][i1:i2]

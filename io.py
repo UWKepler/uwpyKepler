@@ -146,3 +146,15 @@ def FlagOutliers(data,medwin,threshold):
         dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'MaskBoth':mask3}
         
     return dout
+
+
+def ApplyMask(data,mask):
+	""" This function applies a given mask """
+	
+	for portion in data.keys():
+		for key in data[portion].keys():
+			if key in 'xyerr':
+				data[portion][key].mask = data[portion][mask]
+				
+	
+	return data
