@@ -27,16 +27,35 @@ for portion in d4.keys():
     d4 = kep.io.ApplyMask(d4,Mask)
     #print num.ma.count_masked(d4[portion]['x'])
     pylab.plot(d4[portion]['x'],d4[portion]['y'],'b.')
+    
     Mask = 'OutlierMask'
     d4 = kep.io.ApplyMask(d4,Mask)
     #print num.ma.count_masked(d4[portion]['x'])
-    pylab.plot(d4[portion]['x'],d4[portion]['y'],'ro')
-    Mask = 'TransitMask'
+    pylab.plot(d4[portion]['x'],d4[portion]['y'],'r.')
+    Mask = 'OTMask'
     d4 = kep.io.ApplyMask(d4,Mask)
     #print num.ma.count_masked(d4[portion]['x'])
     pylab.plot(d4[portion]['x'],d4[portion]['y'],'y.')
-    Mask = 'OTMask'
+    pylab.title('Object ' + keplerId)
+    pylab.xlabel('Time in BJD')
+    pylab.ylabel('Flux')
+    pylab.legend(('Outliers', 'Transits','Data'),'lower right', shadow=True)
+    #Mask = 'OTMask'
     #print num.ma.count_masked(d4[portion]['x'])
+    
+pylab.show()
+
+d3 = kep.io.ApplyMask(d3,'UnMasked')
+
+for portion in d4.keys():
+	pylab.plot(d3[portion]['x'],d3[portion]['y'],'b.')
+	pylab.plot(d4[portion]['x'],d4[portion]['Correction'],'k-',linewidth=3)
+	pylab.title('Object ' + keplerId)
+	pylab.xlabel('Time in BJD')
+	pylab.ylabel('Flux')
+	pylab.legend(('Data', 'Correction Function'),
+           'upper right', shadow=True)
+
 
 
 pylab.show()

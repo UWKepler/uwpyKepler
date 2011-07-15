@@ -22,6 +22,7 @@ def detrendData(data, window, polyorder):
         newarr = num.ma.masked_array([])
         newx = num.ma.masked_array([])
         newerr = num.ma.masked_array([])
+	correction = num.array([])
         if nfullwindows == 0:
             i1 = 0
             i2 = nsize
@@ -33,7 +34,6 @@ def detrendData(data, window, polyorder):
             ydata = data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == False)]
             # find the fit
             coeff = scipy.polyfit(xdata,ydata, polyorder)
-            pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'bo')
 
             # unmask data and apply the polynomial
             data[portion]['x'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
@@ -41,22 +41,19 @@ def detrendData(data, window, polyorder):
             data[portion]['yerr'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             
             outx = scipy.polyval(coeff,data[portion]['x'][i1:i2])
-            pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'r.')
-
-            pylab.plot(data[portion]['x'][i1:i2],outx,'k-',linewidth=3)
-        
+         
             d1 = data[portion]['y'][i1:i2]/outx
             d2 = data[portion]['yerr'][i1:i2]/outx
             print num.ma.count(xdata), num.ma.count(ydata), num.ma.count(d1), num.ma.count(d2)
             
             newarr = num.ma.hstack( (newarr,d1))
             newerr = num.ma.hstack( (newerr,d2))
+	    correction = num.hstack((correction,outx))
             i1 = i2
             i2 = i2+window
         
-        pylab.show()
         data = ApplyMask(data,'UnMasked')
-        dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked']}
+        dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':correction}
         
     return dout
         
