@@ -17,11 +17,11 @@ d2 = kep.io.FlagTransits(d1)
 
 pd = kep.io.SplitGap(d2,.1)
 
-d3 = kep.io.FlagOutliers(pd,8,3)
-d4 = kep.proc.detrendData(d3,75,5)
+d3 = kep.io.FlagOutliers(pd,10,4)
+d4 = kep.proc.detrendData(d3,100,7)
 
 print len(d4.keys()), ' portions'
-
+#sys.exit()
 for portion in d4.keys():
     Mask = 'UnMasked'
     d4 = kep.io.ApplyMask(d4,Mask)

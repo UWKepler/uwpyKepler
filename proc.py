@@ -29,12 +29,11 @@ def detrendData(data, window, polyorder):
         for i in range(nfullwindows):
             if i == nfullwindows-1:
                 i2 = i2 + leftover
-            xdata = num.ma.copy(data[portion]['x'][i1:i2])
-            ydata = num.ma.copy(data[portion]['y'][i1:i2])
-            
+            xdata = data[portion]['x'][i1:i2][num.where(data[portion]['x'][i1:i2].mask == False)]
+            ydata = data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == False)]
             # find the fit
             coeff = scipy.polyfit(xdata,ydata, polyorder)
-            pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'b.')
+            pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'bo')
 
             # unmask data and apply the polynomial
             data[portion]['x'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
@@ -42,7 +41,8 @@ def detrendData(data, window, polyorder):
             data[portion]['yerr'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             
             outx = scipy.polyval(coeff,data[portion]['x'][i1:i2])
-            
+            pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'r.')
+
             pylab.plot(data[portion]['x'][i1:i2],outx,'k-',linewidth=3)
         
             d1 = data[portion]['y'][i1:i2]/outx
