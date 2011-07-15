@@ -6,6 +6,9 @@ import scipy
 def ReadLightCurve(KeplerID):
     """ This function reads the Kepler database and returns the 
     corrected lightcurve in a dictionary
+    
+    Input = KeplerID
+    Output = Dictionary with time, flux and fluxerror data
     """
 
     db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
@@ -32,7 +35,13 @@ def ReadLightCurve(KeplerID):
     return {'kid':KeplerID,'x':time,'y':corflux,'yerr':corerr}
 
 def FlagTransits(pd):
-    	""" This function flags data arrays for known transits """
+    	""" This function flags points within a tranit and
+        applies a mask.
+         
+         Input = data dictionary
+         Output = data dictionary with addition of the keys
+         'TransitMask' and 'UnMasked'
+        """
 
         # reading planetary data from database
         db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
@@ -41,7 +50,7 @@ def FlagTransits(pd):
         cursor.execute(foo1)
         results = cursor.fetchall()
         period, t0, dur = results[0][0], results[0][1], results[0][2]
-        dur = (dur/24e0)
+        dur = (1.1*dur/24e0)
         t0 = t0 + 54900e0
         # defining start and end time lists
         width = dur/period
@@ -61,17 +70,21 @@ def FlagTransits(pd):
 def SplitGap(data,gapsize):
 	"""
         This function finds gaps and splits data into portions.
-        The gapsize must be provided in days.
+        
+        Input =  data - data dictionary
+                 gapsize - size of gap in days
+               
+        Output = new data dictionary with data split into portions
 	"""
 	
-	#defining new empty lists and stuff
+	# defining new empty lists and stuff
 	pcount=0
         istamps=[]
-        #transitflag = []
 	pd={}
 	
 	# minimum sized gap that we are flagging, 2.4 hours
 	# The grand master loop >=}
+        # to make portion slices
 	for i in range(len(data['x'])-1):
 		dt =  data['x'][i+1]- data['x'][i]
                 if pcount == 0:
@@ -84,6 +97,7 @@ def SplitGap(data,gapsize):
                     pcount += 1
         i1 = i+1
         istamps.append([i0,i1])
+        # Applying slices
         for j in range(len(istamps)):
             pd['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
              
@@ -91,59 +105,54 @@ def SplitGap(data,gapsize):
                 
 def FlagOutliers(data,medwin,threshold):
     """ This function flags outliers. 
-        medwin is the window size used to compute the median
-        threshold is the sigma-clipping factor (suggested, 3 or greater)
+        Inputs - data = data dictionary
+               - medwin = the window size used to compute the median
+               - threshold = the sigma-clipping factor (suggested, 3 or greater)
+        Outputs - the data dictionary now contains mask arrays named
+                'OutlierMask' and 'BothMask'
     """
     
     dout = {}
+    # cycling through portions
     for portion in data.keys():
         data[portion]['x'].mask = data[portion]['TransitMask']
         data[portion]['y'].mask = data[portion]['TransitMask']
         data[portion]['yerr'].mask = data[portion]['TransitMask']
         npts = len(data[portion]['x'])
-        #print num.ma.count_masked(data[portion]['x'])
-        #print len(==True)
+        
+        # defining the window
         medflux = []
         medhalf = (medwin-1)/2
-        #print npts, len(data[portion]['x'].mask),len(data[portion]['x'].data)
+
+        # placing the window and computing the median
         for i in range(npts):
             i1 = max(0,i-medhalf)
             i2 = min(npts, i + medhalf)
             medflux.append(num.median(data[portion]['y'][i1:i2]))
         
+        # finding outliers
         medflux = num.array(medflux)
         outliers = data[portion]['y'] - medflux
         
         outliers.sort()
-        #print outliers[0:5], outliers[-5:-1]
         sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
         outliers = data[portion]['y'] - medflux
         
-        #check = abs(outliers)<threshold*sigma
-
+        # tagging outliers (which are not part of the transit)
         idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
-        #print "idx", len(idx[0])
+
+        # creating the outlier mask
         data[portion]['x'].mask = data[portion]['UnMasked']
-        #data[portion]['y'].mask = data[portion]['UnMasked']
-        #data[portion]['yerr'].mask = data[portion]['UnMasked']
-        #print "lengths of stuff",len(data[portion]['x']), len(data[portion]['x'].mask)
-        #data[portion]['y'].mask = data[portion]['UnMasked']
-        #data[portion]['yerr'].mask = data[portion]['UnMasked']
-        
-        #import pdb; pdb.set_trace()
         data[portion]['x'][idx[0]] = num.ma.masked
         
-        #tempmask=num.ma.copy(data[portion]['x'].mask)
-        #mask2 = num.where((tempmask ))
-        #print len(out[0]), 'here'
-        #print num.ma.count_masked(data[portion]['x']), ' here'
         mask2 = num.ma.copy(data[portion]['x'].mask)
         
         data[portion]['OutlierMask']=mask2
         
+        # creating the outlier + transit mask
         mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
-        #print num.ma.count_masked(mask2), num.ma.count_masked(mask3), num.ma.count_masked(data[portion]['TransitMask']), npts, portion
-        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'MaskBoth':mask3}
+        
+        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
         
     return dout
 
@@ -151,10 +160,15 @@ def FlagOutliers(data,medwin,threshold):
 def ApplyMask(data,mask):
 	""" This function applies a given mask """
 	
+        # loop through portions
 	for portion in data.keys():
+                # match data keys and apply mask
+
 		for key in data[portion].keys():
 			if key in 'xyerr':
-				data[portion][key].mask = data[portion][mask]
+                            if mask != 'UnMasked':
+                                data[portion][key].mask = data[portion]['UnMasked']
+                            data[portion][key].mask = data[portion][mask]
 				
 	
 	return data
