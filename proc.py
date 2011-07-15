@@ -34,23 +34,27 @@ def detrendData(data, window, polyorder):
             
             # find the fit
             coeff = scipy.polyfit(xdata,ydata, polyorder)
-            
+            pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'b.')
+
             # unmask data and apply the polynomial
             data[portion]['x'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             data[portion]['y'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             data[portion]['yerr'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             
             outx = scipy.polyval(coeff,data[portion]['x'][i1:i2])
+            
+            pylab.plot(data[portion]['x'][i1:i2],outx,'k-',linewidth=3)
         
             d1 = data[portion]['y'][i1:i2]/outx
             d2 = data[portion]['yerr'][i1:i2]/outx
-            print len(xdata), len(ydata), len(d1), len(d2)
+            print num.ma.count(xdata), num.ma.count(ydata), num.ma.count(d1), num.ma.count(d2)
             
             newarr = num.ma.hstack( (newarr,d1))
             newerr = num.ma.hstack( (newerr,d2))
             i1 = i2
             i2 = i2+window
-            
+        
+        pylab.show()
         data = ApplyMask(data,'UnMasked')
         dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked']}
         

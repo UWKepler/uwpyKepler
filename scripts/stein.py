@@ -17,8 +17,8 @@ d2 = kep.io.FlagTransits(d1)
 
 pd = kep.io.SplitGap(d2,.1)
 
-d3 = kep.io.FlagOutliers(pd,8,4)    
-d4 = kep.proc.detrendData(d3,200,11)
+d3 = kep.io.FlagOutliers(pd,8,3)
+d4 = kep.proc.detrendData(d3,75,5)
 
 print len(d4.keys()), ' portions'
 

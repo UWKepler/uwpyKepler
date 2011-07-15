@@ -50,7 +50,7 @@ def FlagTransits(pd):
         cursor.execute(foo1)
         results = cursor.fetchall()
         period, t0, dur = results[0][0], results[0][1], results[0][2]
-        dur = (1.1*dur/24e0)
+        dur = (1.2*dur/24e0)
         t0 = t0 + 54900e0
         # defining start and end time lists
         width = dur/period
