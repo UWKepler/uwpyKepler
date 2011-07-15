@@ -50,9 +50,11 @@ def FlagTransits(pd):
         phase= (pd['x']-t0)/period-(pd['x']-t0)//period
         idx=num.where((phase>maxphase)|(phase<minphase))
         #import pdb; pdb.set_trace()
+        mask0=num.ma.getmaskarray(pd['x'])
         pd['x'][idx]= num.ma.masked
-        pd['y'][idx]= num.ma.masked
-        pd['yerr'][idx]= num.ma.masked
+        mask1=num.ma.copy(pd['x'].mask)
+        pd['TransitMask']=mask1
+        pd['UnMasked']=mask0
 
         return pd
 
@@ -83,7 +85,7 @@ def SplitGap(data,gapsize):
         i1 = i+1
         istamps.append([i0,i1])
         for j in range(len(istamps)):
-            pd['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1]}
+            pd['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
              
         return pd
                 
@@ -95,12 +97,15 @@ def FlagOutliers(data,medwin,threshold):
     
     dout = {}
     for portion in data.keys():
-        
+        data[portion]['x'].mask = data[portion]['TransitMask']
+        data[portion]['y'].mask = data[portion]['TransitMask']
+        data[portion]['yerr'].mask = data[portion]['TransitMask']
         npts = len(data[portion]['x'])
+        #print num.ma.count_masked(data[portion]['x'])
+        #print len(==True)
         medflux = []
         medhalf = (medwin-1)/2
-        OutlierFlag = []
-        
+        #print npts, len(data[portion]['x'].mask),len(data[portion]['x'].data)
         for i in range(npts):
             i1 = max(0,i-medhalf)
             i2 = min(npts, i + medhalf)
@@ -110,17 +115,27 @@ def FlagOutliers(data,medwin,threshold):
         outliers = data[portion]['y'] - medflux
         
         outliers.sort()
+        #print outliers[0:5], outliers[-5:-1]
         sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
         outliers = data[portion]['y'] - medflux
         
         #check = abs(outliers)<threshold*sigma
 
         idx=num.where(abs(num.array(outliers))>threshold*sigma)
+        #print len(idx[0]),
+        data[portion]['x'].mask = data[portion]['UnMasked']
+        #data[portion]['y'].mask = data[portion]['UnMasked']
+        #data[portion]['yerr'].mask = data[portion]['UnMasked']
+        
         #import pdb; pdb.set_trace()
-        data[portion]['x'][idx] = num.ma.masked
-        data[portion]['y'][idx] = num.ma.masked
-        data[portion]['yerr'][idx] = num.ma.masked
-                
-        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':num.array(data[portion]['yerr'])}
+        data[portion]['x'][idx[0]] = num.ma.masked
+        
+        mask2=num.ma.copy(data[portion]['x'].mask)
+        out = num.where((mask2 & data[portion]['TransitMask']))
+        print len(out[0]), 'here'
+        data[portion]['OutlierMask']=mask2
+        mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
+        #print num.ma.count_masked(mask2), num.ma.count_masked(mask3), num.ma.count_masked(data[portion]['TransitMask']), npts, portion
+        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'MaskBoth':mask3}
         
     return dout

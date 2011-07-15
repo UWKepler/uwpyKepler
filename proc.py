@@ -2,6 +2,9 @@ import sys
 import numpy as num
 import scipy
 import pylab
+#num.warning.warn(action = 'ignore')
+import warnings
+warnings.simplefilter('ignore', num.RankWarning)
 
 def removeOutliers(d):
     """ returns array without outliers """
@@ -45,42 +48,59 @@ def removeTransits(d):
 
     return dout
 
-def detrendData(data, minwindow, maxwindow, polyorder):
+def detrendData(data, window, polyorder):
 
-    #dout = data.copy()
-    print data.keys()
+    dout = {}
+    #print data.keys()
     for portion in data.keys():
+        data[portion]['x'].mask = data[portion]['MaskBoth']
+        data[portion]['y'].mask = data[portion]['MaskBoth']
+        data[portion]['yerr'].mask = data[portion]['MaskBoth']
         nsize = len(data[portion]['x'])
-        nfullwindows = int(num.floor(nsize/maxwindow))
-        leftover = nsize - nfullwindows*maxwindow
+        nfullwindows = int(num.floor(nsize/window))
+        leftover = nsize - nfullwindows*window
         i1 = 0
-        i2 = maxwindow+1
+        i2 = window+1
         #print portion, nsize, nfullwindows
+        newarr = num.ma.masked_array([])
+        newx = num.ma.masked_array([])
+        newerr = num.ma.masked_array([])
         if nfullwindows == 0:
             i1 = 0
             i2 = nsize
             nfullwindows = 1
         for i in range(nfullwindows):
-            xdata = data[portion]['x'][i1:i2]
-            ydata = data[portion]['y'][i1:i2]
-            print len(xdata), len(ydata)
+            if i == nfullwindows-1:
+                i2 = i2 + leftover
+            xdata = num.ma.copy(data[portion]['x'][i1:i2])
+            ydata = num.ma.copy(data[portion]['y'][i1:i2])
+            #print len(xdata), len(ydata), i1, i2, portion
+            # find the fit
             coeff = scipy.polyfit(xdata,ydata, polyorder)
-            outx = scipy.polyval(coeff,num.ma.getdata(data[portion]['x'][i1:i2]))
-            print len(num.ma.getdata(data[portion]['y'][i1:i2])), type(num.ma.getdata(data[portion]['y'][i1:i2]))
-            print len(outx), type(outx), len(data[portion]['y'][i1:i2])
-            print data[portion]['y'][i1]/outx[0]
-            data[portion]['y'][i1:i2] = data[portion]['y'][i1:i2]/outx 
+            
+            #unmask data and apply the polynomial
+            data[portion]['x'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
+            data[portion]['y'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
+            data[portion]['yerr'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
+            
+            outx = scipy.polyval(coeff,data[portion]['x'][i1:i2])
+        
             #pylab.plot(xdata,ydata,'bo')
-            #pylab.plot(xdata,outx,'r.')
-            #pylab.show()
-            #dout[portion]['y'] = outx 
+            #pylab.plot(data[portion]['x'][i1:i2],outx,'r-')
+            #pylab.plot(data[portion]['x'][i1:i2],data[portion]['y'][i1:i2],'y.')
+            
+            d0 = data[portion]['x'][i1:i2]
+            d1 = data[portion]['y'][i1:i2]/outx
+            d2 = data[portion]['yerr'][i1:i2]/outx
+            #print len(outx), len(data[portion]['y'][i1:i2]), len(newarr), len(d1), len(d2)
+            #print num.shape(outx), num.shape(data[portion]['y'][i1:i2]), num.shape(newarr), num.shape(d1), num.shape(d2)
+            newx = num.ma.hstack((newarr,d0))
+            newarr = num.ma.hstack( (newarr,d1))
+            newerr = num.ma.hstack( (newerr,d2))
             i1 = i2
-            i2 = i2+maxwindow
-        #pylab.plot(num.ma.getdata(data[portion]['x']),num.ma.getdata(data[portion]['y']), 'g.')
+            i2 = i2+window
+        dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'MaskBoth':data[portion]['MaskBoth'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked']}
+        
     #pylab.show()
-        #pylab.plot(d[portion]['x'],d[portion]['y'],'b.')
-        #pylab.plot(d3[portion]['x'],out,'b.')
-        #pylab.show()
-        #dout[portion] = {'x':d3[portion]['x'],'y':out}
-    return data
+    return dout
         
