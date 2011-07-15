@@ -121,19 +121,26 @@ def FlagOutliers(data,medwin,threshold):
         
         #check = abs(outliers)<threshold*sigma
 
-        idx=num.where(abs(num.array(outliers))>threshold*sigma)
-        #print len(idx[0]),
+        idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
+        #print "idx", len(idx[0])
         data[portion]['x'].mask = data[portion]['UnMasked']
+        #data[portion]['y'].mask = data[portion]['UnMasked']
+        #data[portion]['yerr'].mask = data[portion]['UnMasked']
+        #print "lengths of stuff",len(data[portion]['x']), len(data[portion]['x'].mask)
         #data[portion]['y'].mask = data[portion]['UnMasked']
         #data[portion]['yerr'].mask = data[portion]['UnMasked']
         
         #import pdb; pdb.set_trace()
         data[portion]['x'][idx[0]] = num.ma.masked
         
-        mask2=num.ma.copy(data[portion]['x'].mask)
-        out = num.where((mask2 & data[portion]['TransitMask']))
-        print len(out[0]), 'here'
+        #tempmask=num.ma.copy(data[portion]['x'].mask)
+        #mask2 = num.where((tempmask ))
+        #print len(out[0]), 'here'
+        #print num.ma.count_masked(data[portion]['x']), ' here'
+        mask2 = num.ma.copy(data[portion]['x'].mask)
+        
         data[portion]['OutlierMask']=mask2
+        
         mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
         #print num.ma.count_masked(mask2), num.ma.count_masked(mask3), num.ma.count_masked(data[portion]['TransitMask']), npts, portion
         dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'MaskBoth':mask3}
