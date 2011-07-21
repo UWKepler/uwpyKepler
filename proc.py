@@ -1,4 +1,5 @@
 import sys
+import MySQLdb
 import numpy as num
 import scipy
 import pylab
@@ -8,7 +9,7 @@ warnings.simplefilter('ignore', num.RankWarning)
 from uwpyKepler.io import ApplyMask
  
 def detrendData(data, window, polyorder):
-
+    """Detrends the data"""
     dout = {}
     # loop through portions
     data = ApplyMask(data,'OTMask')
@@ -56,4 +57,152 @@ def detrendData(data, window, polyorder):
         dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':correction}
         
     return dout
+
+def cutOutliers(data,medwin,threshold):
+    """ This function cuts out outliers. 
+        Inputs - data = data dictionary
+               - medwin = the window size used to compute the median
+               - threshold = the sigma-clipping factor (suggested, 3 or greater)
+        Outputs - the x data now only contains times that don't correspond to outliers. 
+    """
+    
+    dout = {}
+    # cycling through portions
+    #for portion in data.keys():
+        #data[portion]['x'].mask = data[portion]['UnMasked']
+        #data[portion]['y'].mask = data[portion]['UnMasked']
+        #data[portion]['yerr'].mask = data[portion]['UnMasked']
+    npts = len(data['x'])
+    
+    # defining the window
+    medflux = []
+    medhalf = (medwin-1)/2
+
+    # placing the window and computing the median
+    for i in range(npts):
+        i1 = max(0,i-medhalf)
+        i2 = min(npts, i + medhalf)
+        medflux.append(num.median(data['y'][i1:i2]))
+    
+    # finding outliers
+    medflux = num.array(medflux)
+    outliers = data['y'] - medflux
+    
+    outliers.sort()
+    sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
+    outliers = data['y'] - medflux
+    
+    # tagging outliers
+    idx=num.where( (abs(num.array(outliers))<threshold*sigma) )
+    
+    xnew=data['x'][idx]
+    ynew=data['y'][idx]
+
+
+    data['x']=xnew
+    data['y']=ynew
+    
+    #creating the outlier mask
+    #data[portion]['x'].mask = data[portion]['UnMasked']
+    #data[portion]['x'][idx[0]] = num.ma.masked
+    
+    #mask2 = num.ma.copy(data[portion]['x'].mask)
+    
+    #data[portion]['OutlierMask']=mask2
+    
+    # creating the outlier + transit mask
+    #mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
+    
+    dout= {'kid':data['kid'],'x':data['x'],'y':data['y'],'yerr':data['yerr']}
         
+    return dout
+
+def cutTransits(pd):
+    	""" This function cuts out points within a tranit.
+         
+         Input = data dictionary
+         Output = data dictionary without points in transits.
+        """
+
+        # reading planetary data from database
+        db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+        cursor = db.cursor()
+        foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
+        cursor.execute(foo1)
+        results = cursor.fetchall()
+        period, t0, dur = results[0][0], results[0][1], results[0][2]
+        dur = (1.2*dur/24e0)
+        t0 = t0 + 54900e0
+        # defining start and end time lists
+        width = dur/period
+        maxphase=1-width/2
+        minphase=width/2
+        phase= (pd['x']-t0)/period-(pd['x']-t0)//period
+        idx=num.where((phase<maxphase)&(phase>minphase))
+        #import pdb; pdb.set_trace()
+        #mask0=num.ma.getmaskarray(pd['x'])
+        
+        xnew=pd['x'][idx]
+        ynew=pd['y'][idx]
+        
+        pd['x']=xnew
+        pd['y']=ynew
+        #mask1=num.ma.copy(pd['x'].mask)
+        #pd['TransitMask']=mask1
+        #pd['UnMasked']=mask0
+
+        return pd
+
+def cutAll(data,medwin,threshold):
+    """This function cuts out any points that are outliers or in a known transit."""
+    dout = {}
+    # cycling through portions
+    for portion in data.keys():
+        data[portion]['x'].mask = data[portion]['TransitMask']
+        data[portion]['y'].mask = data[portion]['TransitMask']
+        data[portion]['yerr'].mask = data[portion]['TransitMask']
+        npts = len(data[portion]['x'])
+        
+        # defining the window
+        medflux = []
+        medhalf = (medwin-1)/2
+
+        # placing the window and computing the median
+        for i in range(npts):
+            i1 = max(0,i-medhalf)
+            i2 = min(npts, i + medhalf)
+            medflux.append(num.median(data[portion]['y'][i1:i2]))
+        
+        # finding outliers
+        medflux = num.array(medflux)
+        outliers = data[portion]['y'] - medflux
+        
+        outliers.sort()
+        sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
+        outliers = data[portion]['y'] - medflux
+        
+        # tagging outliers (which are not part of the transit)
+        idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
+
+        # creating the outlier mask
+        #data[portion]['x'].mask = data[portion]['UnMasked']
+        #data[portion]['x'][idx[0]] = num.ma.masked
+        
+        #mask2 = num.ma.copy(data[portion]['x'].mask)
+        
+        #data[portion]['OutlierMask']=mask2
+        
+        # creating the outlier + transit mask
+        #mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
+        
+        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
+        
+    return dout
+
+def stackPortions(data):
+    """rejoins/stacks all portions in the dictionary into one."""
+    print 'data length', len(data)
+    xarr=num.ma.hstack([(data[portion]['x'], data[portion+1]['x']) for i in range(len(data)-1)])
+    print len(data[portion]['x']), portion
+    print 'here', len(xarr), xarr
+       
