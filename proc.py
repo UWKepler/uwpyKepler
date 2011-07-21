@@ -3,6 +3,7 @@ import MySQLdb
 import numpy as num
 import scipy
 import pylab
+import uwpyKepler as kep
 #num.warning.warn(action = 'ignore')
 import warnings
 warnings.simplefilter('ignore', num.RankWarning)
@@ -153,51 +154,10 @@ def cutTransits(pd):
 
         return pd
 
-def cutAll(data,medwin,threshold):
-    """This function cuts out any points that are outliers or in a known transit."""
-    dout = {}
-    # cycling through portions
-    for portion in data.keys():
-        data[portion]['x'].mask = data[portion]['TransitMask']
-        data[portion]['y'].mask = data[portion]['TransitMask']
-        data[portion]['yerr'].mask = data[portion]['TransitMask']
-        npts = len(data[portion]['x'])
-        
-        # defining the window
-        medflux = []
-        medhalf = (medwin-1)/2
-
-        # placing the window and computing the median
-        for i in range(npts):
-            i1 = max(0,i-medhalf)
-            i2 = min(npts, i + medhalf)
-            medflux.append(num.median(data[portion]['y'][i1:i2]))
-        
-        # finding outliers
-        medflux = num.array(medflux)
-        outliers = data[portion]['y'] - medflux
-        
-        outliers.sort()
-        sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
-        outliers = data[portion]['y'] - medflux
-        
-        # tagging outliers (which are not part of the transit)
-        idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
-
-        # creating the outlier mask
-        #data[portion]['x'].mask = data[portion]['UnMasked']
-        #data[portion]['x'][idx[0]] = num.ma.masked
-        
-        #mask2 = num.ma.copy(data[portion]['x'].mask)
-        
-        #data[portion]['OutlierMask']=mask2
-        
-        # creating the outlier + transit mask
-        #mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
-        
-        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
-        
-    return dout
+def cutAll(data):
+    d2=kep.proc.cutTransits(data)
+    d3=kep.proc.cutOutliers(d2,10,4)
+    return d3
 
 def stackPortions(data):
     """rejoins/stacks all portions in the dictionary into one."""

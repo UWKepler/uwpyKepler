@@ -12,7 +12,9 @@ print 'Using', keplerId
 d1 = kep.io.ReadLightCurve(keplerId)
 print d1.keys(), len(d1['x'])
 
-d2 = kep.io.FlagTransits(d1)
+dread=kep.io.db(d1)
+
+d2 = kep.io.FlagTransits(d1,dread)
 #print d2.keys()
 
 pd = kep.io.SplitGap(d2,.1)

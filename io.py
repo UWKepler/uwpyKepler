@@ -34,7 +34,16 @@ def ReadLightCurve(KeplerID):
     
     return {'kid':KeplerID,'x':time,'y':corflux,'yerr':corerr}
 
-def FlagTransits(pd):
+def db(pd):
+    """queries the database for various stuff"""
+    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    cursor = db.cursor()
+    foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
+    cursor.execute(foo1)
+    results = cursor.fetchall()
+    return results
+
+def FlagTransits(pd,results):
     	""" This function flags points within a tranit and
         applies a mask.
          
@@ -44,11 +53,11 @@ def FlagTransits(pd):
         """
 
         # reading planetary data from database
-        db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
-        cursor = db.cursor()
-        foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
-        cursor.execute(foo1)
-        results = cursor.fetchall()
+        #db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+        #cursor = db.cursor()
+        #foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
+        #cursor.execute(foo1)
+        #results = cursor.fetchall()
         period, t0, dur = results[0][0], results[0][1], results[0][2]
         dur = (1.2*dur/24e0)
         t0 = t0 + 54900e0
