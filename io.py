@@ -165,7 +165,6 @@ def FlagOutliers(data,medwin,threshold):
         
     return dout
 
-
 def ApplyMask(data,mask):
 	""" This function applies a given mask """
 	

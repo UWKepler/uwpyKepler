@@ -161,8 +161,17 @@ def cutAll(data):
 
 def stackPortions(data):
     """rejoins/stacks all portions in the dictionary into one."""
-    print 'data length', len(data)
-    xarr=num.ma.hstack([(data[portion]['x'], data[portion+1]['x']) for i in range(len(data)-1)])
-    print len(data[portion]['x']), portion
-    print 'here', len(xarr), xarr
-       
+    xarr=num.ma.array([])
+    yarr=num.ma.array([])
+    yerrarr=num.ma.array([])
+    for portion in data.keys():
+        xarr=num.ma.hstack((xarr,data[portion]['x']))
+        yarr=num.ma.hstack((yarr,data[portion]['y']))
+        yerrarr=num.ma.hstack((yerrarr,data[portion]['yerr']))
+        #print len(data[portion]['x']), len(xarr), portion
+    
+    #xarr=num.ma.hstack([(data[portion]['x'], data[portion+1]['x']) for i in range(len(data)-1)])
+    #print len(data[portion]['x']), portion
+    #print 'here', len(xarr)
+    pd={'x':xarr,'y':yarr,'yerr':yerrarr}
+    return pd
