@@ -13,8 +13,9 @@ def detrendData(data, window, polyorder):
     """Detrends the data"""
     dout = {}
     # loop through portions
-    data = ApplyMask(data,'OTMask')
+    
     for portion in data.keys():
+	data = ApplyMask(data,'OTMask')
         nsize = len(data[portion]['x'])
         nfullwindows = int(num.floor(nsize/window))
         leftover = nsize - nfullwindows*window

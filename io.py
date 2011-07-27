@@ -36,12 +36,24 @@ def ReadLightCurve(KeplerID):
 
 def db(pd):
     """queries the database for various stuff"""
+    period = []
+    epoch = []
+    duration = []
     db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
     cursor = db.cursor()
-    foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
+    foo1 = 'select Period, Dur, Epoch from KEPPC where (KID = %s)' % (pd['kid'])
     cursor.execute(foo1)
     results = cursor.fetchall()
+    if len(results) == 0:
+	    foo1 = 'select Period, Duration, Epoch from KEPFP where (KID = %s)' % (pd['kid'])
+	    cursor.execute(foo1)
+	    results = cursor.fetchall()
+    	    if len(results) == 0:
+		    results = ()
+    print len(results)
     return results
+   
+    
 
 def FlagTransits(pd,results):
     	""" This function flags points within a tranit and
@@ -51,28 +63,26 @@ def FlagTransits(pd,results):
          Output = data dictionary with addition of the keys
          'TransitMask' and 'UnMasked'
         """
-
-        # reading planetary data from database
-        #db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
-        #cursor = db.cursor()
-        #foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
-        #cursor.execute(foo1)
-        #results = cursor.fetchall()
-        period, t0, dur = results[0][0], results[0][1], results[0][2]
-        dur = (1.2*dur/24e0)
-        t0 = t0 + 54900e0
-        # defining start and end time lists
-        width = dur/period
-        maxphase=1-width/2
-        minphase=width/2
-        phase= (pd['x']-t0)/period-(pd['x']-t0)//period
-        idx=num.where((phase>maxphase)|(phase<minphase))
-        #import pdb; pdb.set_trace()
         mask0=num.ma.getmaskarray(pd['x'])
-        pd['x'][idx]= num.ma.masked
-        mask1=num.ma.copy(pd['x'].mask)
-        pd['TransitMask']=mask1
-        pd['UnMasked']=mask0
+	pd['UnMasked']=mask0
+	for i in range(len(results)):
+		period = results[i][0]
+		t0 = results[i][2]
+		dur = results[i][1]
+		dur = (1.2*dur/24e0)
+		t0 = t0 + 54900e0
+        # defining start and end time lists
+		width = dur/period
+		maxphase=1-width/2
+		minphase=width/2
+		phase= (pd['x']-t0)/period-(pd['x']-t0)//period
+		idx=num.where((phase>maxphase)|(phase<minphase))
+		pd['x'][idx]= num.ma.masked
+		mask1=num.ma.copy(pd['x'].mask)
+		if i == 0:
+			pd['TransitMask']=mask1
+		else:
+			pd['TransitMask']=num.ma.mask_or(mask1,pd['TransitMask'])
 
         return pd
 
