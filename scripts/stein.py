@@ -12,25 +12,35 @@ print 'Using', keplerId
 d1 = kep.io.ReadLightCurve(keplerId)
 print d1.keys(), len(d1['x'])
 
-#dread=kep.io.db(d1)
+dread=kep.io.db(d1)
 
-#d2 = kep.io.FlagTransits(d1,dread)
+d2 = kep.io.FlagTransits(d1,dread)
 
-#pd = kep.io.SplitGap(d2,.1)
+pd = kep.io.SplitGap(d2,.1)
 
-#d3 = kep.io.FlagOutliers(pd,10,4)
-#d4 = kep.proc.detrendData(d3,50,7)
+d3 = kep.io.FlagOutliers(pd,10,4)
+d4 = kep.proc.detrendData(d3,50,7)
 
-#print len(d4.keys()), ' portions'
+print len(d4.keys()), ' portions'
 
-array = []
-for i in range(len(d1['x'])-1):
-	array.append(d1['y'][i+1]-d1['y'][i])
-	
-pylab.plot(d1['x'][:-1],array,'b.')
-pylab.show()
+#array = []
+#arraydt =[]
+#a3=[]
+#for i in range(len(d1['x'])-1):
+	#array.append(d1['y'][i+1]-d1['y'][i])
+	#arraydt.append(d1['x'][i+1]-d1['x'][i])
+        
+#array= num.array(array)
+#arraydt=num.array(arraydt)
+#for i in range(len(array)-1):
+    #a3.append(array[i+1]-array[i])
+    
+#a3=num.array(a3)
 
-sys.exit()
+#pylab.plot(d1['x'][:-2],abs(a3),'b.')
+#pylab.show()
+
+#sys.exit()
 	
 
 for portion in d4.keys():

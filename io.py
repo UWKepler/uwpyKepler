@@ -115,8 +115,6 @@ def db(pd):
 		    results = ()
     print len(results)
     return results
-   
-    
 
 def FlagTransits(pd,results):
     	""" This function flags points within a tranit and

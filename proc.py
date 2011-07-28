@@ -155,24 +155,38 @@ def cutTransits(pd):
 
         return pd
 
-def cutAll(data):
+def cutOT(data):
     d2=kep.proc.cutTransits(data)
     d3=kep.proc.cutOutliers(d2,10,4)
     return d3
 
 def stackPortions(data):
     """rejoins/stacks all portions in the dictionary into one."""
-    xarr=num.ma.array([])
-    yarr=num.ma.array([])
-    yerrarr=num.ma.array([])
+    xarr=num.array([])
+    yarr=num.array([])
+    yerrarr=num.array([])
+    dummy=num.ma.array([])
+    TransitMask=num.ma.copy(dummy.mask)
+    OutlierMask=num.ma.copy(dummy.mask)
+    OTMask=num.ma.copy(dummy.mask)
+    UnMasked=num.ma.copy(dummy.mask)
+    
+    
     for portion in data.keys():
-        xarr=num.ma.hstack((xarr,data[portion]['x']))
-        yarr=num.ma.hstack((yarr,data[portion]['y']))
-        yerrarr=num.ma.hstack((yerrarr,data[portion]['yerr']))
+        xarr=num.hstack((xarr,data[portion]['x']))
+        yarr=num.hstack((yarr,data[portion]['y']))
+        yerrarr=num.hstack((yerrarr,data[portion]['yerr']))
+        print type(data[portion]['TransitMask'])
+        TransitMask=num.hstack((TransitMask,data[portion]['TransitMask']))
+        OutlierMask=num.hstack((OutlierMask,data[portion]['OutlierMask']))
+        OTMask=num.hstack((OTMask,data[portion]['OTMask']))
+        UnMasked=num.hstack((UnMasked,data[portion]['UnMasked']))
+        
         #print len(data[portion]['x']), len(xarr), portion
+    kid=data[portion]['kid']
     
     #xarr=num.ma.hstack([(data[portion]['x'], data[portion+1]['x']) for i in range(len(data)-1)])
     #print len(data[portion]['x']), portion
     #print 'here', len(xarr)
-    pd={'x':xarr,'y':yarr,'yerr':yerrarr}
+    pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
     return pd
