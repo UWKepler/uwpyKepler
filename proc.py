@@ -21,7 +21,6 @@ def detrendData(data, window, polyorder):
         leftover = nsize - nfullwindows*window
         i1 = 0
         i2 = window+1
-        #print portion, nsize, nfullwindows
         newarr = num.ma.masked_array([])
         newx = num.ma.masked_array([])
         newerr = num.ma.masked_array([])
@@ -35,6 +34,7 @@ def detrendData(data, window, polyorder):
                 i2 = i2 + leftover
             xdata = data[portion]['x'][i1:i2][num.where(data[portion]['x'][i1:i2].mask == False)]
             ydata = data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == False)]
+            
             # find the fit
             coeff = scipy.polyfit(xdata,ydata, polyorder)
 
@@ -43,15 +43,15 @@ def detrendData(data, window, polyorder):
             data[portion]['y'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             data[portion]['yerr'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
             
-            outx = scipy.polyval(coeff,data[portion]['x'][i1:i2])
-         
-            d1 = data[portion]['y'][i1:i2]/outx
-            d2 = data[portion]['yerr'][i1:i2]/outx
-            print num.ma.count(xdata), num.ma.count(ydata), num.ma.count(d1), num.ma.count(d2)
+            outy = scipy.polyval(coeff,data[portion]['x'][i1:i2])
+            
+            # apply correction
+            d1 = data[portion]['y'][i1:i2]/outy
+            d2 = data[portion]['yerr'][i1:i2]/outy
             
             newarr = num.ma.hstack( (newarr,d1))
             newerr = num.ma.hstack( (newerr,d2))
-	    correction = num.hstack((correction,outx))
+	    correction = num.hstack((correction,outy))
             i1 = i2
             i2 = i2+window
         

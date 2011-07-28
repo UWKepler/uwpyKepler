@@ -2,7 +2,70 @@ import MySQLdb
 import sys
 import numpy as num
 import scipy
+
+
+def inSource(KeplerID):
+    """ Checks if a certain KID exists in the source database. """
     
+    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    cursor = db.cursor()
+    foo    = 'select * from source where (KEPLERID = %s)' % (KeplerID)
+    cursor.execute(foo)
+    results = cursor.fetchall()
+    Exist = False
+    if len(results) > 0:
+        Exist = True
+    
+    return Exist
+        
+def inKEPPC(KeplerID):
+    """ Checks if a certain KID exists in the KEPPC database. """
+    
+    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    cursor = db.cursor()
+    foo1 = 'select Period, Dur, Epoch from KEPPC where (KID = %s)' % (KeplerID)
+    cursor.execute(foo1)
+    results = cursor.fetchall()
+    Exist = False
+    if len(results) > 0:
+        Exist = True
+    
+    return Exist
+    
+def inKEPFP(KeplerID):
+    """ Checks if a certain KID exists in the KEPFP database. """
+    
+    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    cursor = db.cursor()
+    foo1 = 'select Period, Duration, Epoch from KEPFP where (KID = %s)' % (KeplerID)
+    cursor.execute(foo1)
+    results = cursor.fetchall()
+    Exist = False
+    if len(results) > 0:
+        Exist = True
+    
+    return Exist
+
+def getKOI(KeplerID):
+    """ returns all KOI IDs (Kepler Object of Interest IDs) """
+    
+    if inKEPPC(KeplerID):
+        db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+        cursor = db.cursor()
+        foo1 = 'select KOI from KEPPC where (KID = %s)' % (KeplerID)
+        cursor.execute(foo1)
+        results = cursor.fetchall()
+    elif inKEPFP(KeplerID):
+        db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+        cursor = db.cursor()
+        foo1 = 'select KOI from KEPFP where (KID = %s)' % (KeplerID)
+        cursor.execute(foo1)
+        results = cursor.fetchall()
+    else:
+        results = None
+    
+    return results
+
 def ReadLightCurve(KeplerID):
     """ This function reads the Kepler database and returns the 
     corrected lightcurve in a dictionary
