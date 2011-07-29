@@ -19,6 +19,11 @@ d2 = kep.io.FlagTransits(d1,dread)
 pd = kep.io.SplitGap(d2,.1)
 
 d3 = kep.io.FlagOutliers(pd,10,4)
+
+#for portion in d3.keys():
+    #print num.where(d3[portion]['OutlierMask']==True)
+
+
 d4 = kep.proc.detrendData(d3,50,7)
 
 print len(d4.keys()), ' portions'

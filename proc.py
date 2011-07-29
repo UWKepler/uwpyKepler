@@ -60,62 +60,34 @@ def detrendData(data, window, polyorder):
         
     return dout
 
-def cutOutliers(data,medwin,threshold):
+def cutOutliers(data):
     """ This function cuts out outliers. 
         Inputs - data = data dictionary
                - medwin = the window size used to compute the median
                - threshold = the sigma-clipping factor (suggested, 3 or greater)
         Outputs - the x data now only contains times that don't correspond to outliers. 
     """
-    
-    dout = {}
-    # cycling through portions
-    #for portion in data.keys():
-        #data[portion]['x'].mask = data[portion]['UnMasked']
-        #data[portion]['y'].mask = data[portion]['UnMasked']
-        #data[portion]['yerr'].mask = data[portion]['UnMasked']
-    npts = len(data['x'])
-    
-    # defining the window
-    medflux = []
-    medhalf = (medwin-1)/2
 
-    # placing the window and computing the median
-    for i in range(npts):
-        i1 = max(0,i-medhalf)
-        i2 = min(npts, i + medhalf)
-        medflux.append(num.median(data['y'][i1:i2]))
-    
-    # finding outliers
-    medflux = num.array(medflux)
-    outliers = data['y'] - medflux
-    
-    outliers.sort()
-    sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
-    outliers = data['y'] - medflux
-    
     # tagging outliers
-    idx=num.where( (abs(num.array(outliers))<threshold*sigma) )
-    
-    xnew=data['x'][idx]
-    ynew=data['y'][idx]
 
+    
+    
+    idx=num.where(data['OutlierMask']==False)
+    
+    print len(data['x']), len(data['OutlierMask']), len(data['TransitMask']),len(data['UnMasked']), len(data['OTMask'])
+    
+    xnew = []
+    ynew = []
+    yerrnew = []
 
-    data['x']=xnew
-    data['y']=ynew
+    for el in idx:
+        xnew.append(data['x'][el])
+        ynew.append(data['y'][el])
+        yerrnew.append(data['yerr'][el])
+
+    print num.shape(num.array(xnew).ravel())
     
-    #creating the outlier mask
-    #data[portion]['x'].mask = data[portion]['UnMasked']
-    #data[portion]['x'][idx[0]] = num.ma.masked
-    
-    #mask2 = num.ma.copy(data[portion]['x'].mask)
-    
-    #data[portion]['OutlierMask']=mask2
-    
-    # creating the outlier + transit mask
-    #mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
-    
-    dout= {'kid':data['kid'],'x':data['x'],'y':data['y'],'yerr':data['yerr']}
+    dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
         
     return dout
 
@@ -165,11 +137,10 @@ def stackPortions(data):
     xarr=num.array([])
     yarr=num.array([])
     yerrarr=num.array([])
-    dummy=num.ma.array([])
-    TransitMask=num.ma.copy(dummy.mask)
-    OutlierMask=num.ma.copy(dummy.mask)
-    OTMask=num.ma.copy(dummy.mask)
-    UnMasked=num.ma.copy(dummy.mask)
+    TransitMask=num.array([])
+    OutlierMask=num.array([])
+    OTMask=num.array([])
+    UnMasked=num.array([])
     
     
     for portion in data.keys():
@@ -185,8 +156,6 @@ def stackPortions(data):
         #print len(data[portion]['x']), len(xarr), portion
     kid=data[portion]['kid']
     
-    #xarr=num.ma.hstack([(data[portion]['x'], data[portion+1]['x']) for i in range(len(data)-1)])
-    #print len(data[portion]['x']), portion
-    #print 'here', len(xarr)
+    
     pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
     return pd
