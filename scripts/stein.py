@@ -88,5 +88,12 @@ for portion in d4.keys():
 
 pylab.show()
 
+dTransit = kep.io.ApplyMask(d3, 'UnMasked')
 
-kep.proc.stackPortions(d3)
+d10 = kep.proc.stackPortions(dTransit)
+
+d11 = kep.proc.cutTransits(d10)
+
+pylab.plot(d10['x'], d10['y'], 'b.')
+pylab.plot(d11['x'],d11['y'],'r.')
+pylab.show()
