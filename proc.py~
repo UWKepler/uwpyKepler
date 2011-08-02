@@ -35,7 +35,7 @@ def detrendData(data, window, polyorder):
                 i1  = long(max(0,points[i]-window/2))
             else:
                 i1 = long(points[i-2]+window/2)
-            i2 = long(min(points[i]+window/2,points[-1]))
+            i2 = long(min(points[i]+window/2,points[-1])
             
             b = num.where(data[portion]['x'][i1:i2].mask == False)[0].tolist()
             xdata = num.array(data[portion]['x'][i1:i2][b])

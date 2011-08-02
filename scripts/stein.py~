@@ -12,7 +12,7 @@ print 'Using', keplerId
 d1 = kep.io.ReadLightCurve(keplerId)
 print d1.keys(), len(d1['x'])
 
-eData=kep.io.getEclipseData(d1)
+eData=kep.io.db(d1)
 
 d2 = kep.io.FlagTransits(d1,eData)
 

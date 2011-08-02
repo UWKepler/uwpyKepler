@@ -180,7 +180,6 @@ def SplitGap(data,gapsize):
         
     i1 = i+1
     istamps.append([i0,i1])
-    
     # Applying slices
     for j in range(len(istamps)):
         outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
