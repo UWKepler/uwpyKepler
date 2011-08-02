@@ -18,7 +18,6 @@ def detrendData(data, window, polyorder):
     for portion in data.keys():
         
 	data = ApplyMask(data,'OTMask')
-        print ' yo ', num.ma.count_masked(data[portion]['x']), num.shape(num.where(data[portion]['OTMask']))
         
         nsize = len(data[portion]['x'])
         points = num.arange(0,nsize,0.5*window)
@@ -37,51 +36,36 @@ def detrendData(data, window, polyorder):
                 i1 = long(points[i-2]+window/2)
             i2 = long(min(points[i]+window/2,points[-1]))
             
-            b = num.where(data[portion]['x'][i1:i2].mask == False)[0].tolist()
-            xdata = num.array(data[portion]['x'][i1:i2][b])
-            ydata = num.array(data[portion]['y'][i1:i2][b])
-            print b[-1], len(b), num.shape(xdata), num.ma.count_masked(data[portion]['x'][i1:i2])
-            print num.where(data[portion]['y'][i1:i2].mask)[0].tolist()
+            unmasked = num.where(data[portion]['x'][i1:i2].mask == False)[0].tolist()
+            xdata = num.array(data[portion]['x'][i1:i2][unmasked])
+            ydata = num.array(data[portion]['y'][i1:i2][unmasked])
             
             # find the fit
-            pylab.plot(xdata,ydata,'ro')
             coeff = scipy.polyfit(xdata, ydata, polyorder)
 
             # unmask data and apply the polynomial
-            data[portion]['x'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
-            data[portion]['y'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
-            data[portion]['yerr'][i1:i2].mask = data[portion]['UnMasked'][i1:i2]
+            all_data_x = num.ma.getdata(data[portion]['x'][i1:i2])
             
-            #print num.ma.count_masked(xdata), num.ma.count_masked(ydata), num.ma.count_masked(data[portion]['x'][i1:i2])
-            outy = scipy.polyval(coeff,data[portion]['x'][i1:i2])
-            pylab.plot(data[portion]['x'][i1:i2],data[portion]['x'][i1:i2],'b.')
+            outy = scipy.polyval(coeff,all_data_x)
 
             if i%2 == 0:
                 set1.append( (i1,i2) )
                 dtfunc1 = num.hstack((dtfunc1,outy))
-                pylab.plot(data[portion]['x'][i1:i2],outy,'y-',linewidth=3)
+                #pylab.plot(all_data_x,outy,'y-',linewidth=3)
             else:
                 set2.append( (i1,i2) )
                 dtfunc2 = num.hstack((dtfunc2,outy))
-                pylab.plot(data[portion]['x'][i1:i2],outy,'c-',linewidth=3)
-            
-        #print set1
-        #print set2
-        #print len(data[portion]['x']), len(dtfunc1), len(dtfunc2), len(outy)
+                #pylab.plot(all_data_x,outy,'c-',linewidth=3)
             
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
 
         # apply correction
-        newarr = data[portion]['y']/mergedy
-        newerr = data[portion]['yerr']/mergedy
-        #pylab.plot(data[portion]['x'],data[portion]['y'],'b.')
-        #pylab.plot(data[portion]['x'],mergedy,'k-',linewidth=3)
-        #pylab.plot(data[portion]['x'],dtfunc1,'y-',linewidth=3)
-        #pylab.plot(data[portion]['x'],dtfunc2,'c-',linewidth=3)
+        newarr = num.ma.getdata(data[portion]['y'])/mergedy
+        newerr = num.ma.getdata(data[portion]['yerr'])/mergedy
         
         data = ApplyMask(data,'UnMasked')
         dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
-    pylab.show()    
+    
     return dout
 
 def cutOutliers(data):
