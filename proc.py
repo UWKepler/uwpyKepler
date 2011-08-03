@@ -118,11 +118,77 @@ def cutTransits(dTransit):
 
         return dout
 
-
 def cutOT(data):
     d2=kep.proc.cutTransits(data)
     d3=kep.proc.cutOutliers(d2,10,4)
     return d3
+
+def onlyOutliers(data):
+    """ This function singles out outliers.
+        Inputs - data = data dictionary
+               - medwin = the window size used to compute the median
+               - threshold = the sigma-clipping factor (suggested, 3 or greater)
+        Outputs - the x data now only contains times that correspond to outliers.
+    """
+
+    # tagging outliers
+
+   
+   
+    idx=num.where(data['OutlierMask']==True)
+   
+    print len(data['x']), len(data['OutlierMask']), len(data['TransitMask']),len(data['UnMasked']), len(data['OTMask'])
+   
+    xnew = []
+    ynew = []
+    yerrnew = []
+
+    for el in idx:
+        xnew.append(data['x'][el])
+        ynew.append(data['y'][el])
+        yerrnew.append(data['yerr'][el])
+
+    print num.shape(num.array(xnew).ravel())
+   
+    dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
+       
+    return dout
+
+def onlyTransits(pd):
+        """ This function singles out points within a tranit.
+        
+         Input = data dictionary
+         Output = data dictionary without points in transits.
+        """
+
+        # reading planetary data from database
+        db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+        cursor = db.cursor()
+        foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
+        cursor.execute(foo1)
+        results = cursor.fetchall()
+        period, t0, dur = results[0][0], results[0][1], results[0][2]
+        dur = (1.2*dur/24e0)
+        t0 = t0 + 54900e0
+        # defining start and end time lists
+        width = dur/period
+        maxphase=1-width/2
+        minphase=width/2
+        phase= (pd['x']-t0)/period-(pd['x']-t0)//period
+        idx=num.where((phase>maxphase)|(phase<minphase))
+        #import pdb; pdb.set_trace()
+        #mask0=num.ma.getmaskarray(pd['x'])
+       
+        xnew=pd['x'][idx]
+        ynew=pd['y'][idx]
+       
+        pd['x']=xnew
+        pd['y']=ynew
+        #mask1=num.ma.copy(pd['x'].mask)
+        #pd['TransitMask']=mask1
+        #pd['UnMasked']=mask0
+
+        return pd
 
 def stackPortions(data):
     """rejoins/stacks all portions in the dictionary into one."""

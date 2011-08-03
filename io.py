@@ -217,6 +217,7 @@ def FlagOutliers(data,medwin,threshold):
         
         # finding outliers
         medflux = num.array(medflux)
+        
         outliers = data[portion]['y'] - medflux
         
         outliers.sort()
