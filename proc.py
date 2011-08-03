@@ -64,7 +64,7 @@ def detrendData(data, window, polyorder):
         newerr = num.ma.getdata(data[portion]['yerr'])/mergedy
         
         data = ApplyMask(data,'UnMasked')
-        dout[portion] = {'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
+        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
     
     return dout
 
@@ -79,8 +79,6 @@ def cutOutliers(data):
     # tagging outliers
     idx=num.where(data['OutlierMask']==False)
     
-    print len(data['x']), len(data['OutlierMask']), len(data['TransitMask']),len(data['UnMasked']), len(data['OTMask'])
-    
     xnew = []
     ynew = []
     yerrnew = []
@@ -89,8 +87,6 @@ def cutOutliers(data):
         xnew.append(data['x'][el])
         ynew.append(data['y'][el])
         yerrnew.append(data['yerr'][el])
-
-    print num.shape(num.array(xnew).ravel())
     
     dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
         
@@ -119,9 +115,25 @@ def cutTransits(dTransit):
         return dout
 
 def cutOT(data):
-    d2=kep.proc.cutTransits(data)
-    d3=kep.proc.cutOutliers(d2,10,4)
-    return d3
+	""" This function cuts outliers and transits from the data and returns x, y and yerr"""
+
+	idx = num.where((data['OutlierMask']==False) & (data['TransitMask'] == False))
+	
+	print num.shape(idx)
+	
+	xnew = []
+	ynew = []
+	yerrnew = []
+	
+	for el in idx[0]:
+		xnew.append(data['x'][el])
+		ynew.append(data['y'][el])
+		yerrnew.append(data['yerr'][el])
+	
+	dout= {'kid':data['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
+	
+	return dout
+
 
 def onlyOutliers(data):
     """ This function singles out outliers.
@@ -154,41 +166,30 @@ def onlyOutliers(data):
        
     return dout
 
-def onlyTransits(pd):
+
+def onlyTransits(dTransit):
         """ This function singles out points within a tranit.
         
          Input = data dictionary
          Output = data dictionary without points in transits.
         """
 
-        # reading planetary data from database
-        db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
-        cursor = db.cursor()
-        foo1    = 'select Period, Epoch, Dur from KEPPC where (KID = %s)' % (pd['kid'])
-        cursor.execute(foo1)
-        results = cursor.fetchall()
-        period, t0, dur = results[0][0], results[0][1], results[0][2]
-        dur = (1.2*dur/24e0)
-        t0 = t0 + 54900e0
-        # defining start and end time lists
-        width = dur/period
-        maxphase=1-width/2
-        minphase=width/2
-        phase= (pd['x']-t0)/period-(pd['x']-t0)//period
-        idx=num.where((phase>maxphase)|(phase<minphase))
-        #import pdb; pdb.set_trace()
-        #mask0=num.ma.getmaskarray(pd['x'])
-       
-        xnew=pd['x'][idx]
-        ynew=pd['y'][idx]
-       
-        pd['x']=xnew
-        pd['y']=ynew
-        #mask1=num.ma.copy(pd['x'].mask)
-        #pd['TransitMask']=mask1
-        #pd['UnMasked']=mask0
+	xnew = []
+	ynew = []
+	yerrnew = []
+	
+	idx=num.where(dTransit['TransitMask'] == True)
+        for element in idx:
+		xnew.append(dTransit['x'][element])
+		ynew.append(dTransit['y'][element])
+		yerrnew.append(dTransit['yerr'][element])
+		
+		
+	dout= {'kid':dTransit['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
 
-        return pd
+        return dout
+	
+
 
 def stackPortions(data):
     """rejoins/stacks all portions in the dictionary into one."""
