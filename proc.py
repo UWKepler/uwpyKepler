@@ -26,8 +26,8 @@ def detrendData(data, window, polyorder):
         dtfunc2 = num.array([])
         set1 = []
         set2 = []
-        weight1 = (num.cos(2.0e0*num.pi*num.arange(nsize)/window))**2
-        weight2 = (num.sin(2.0e0*num.pi*num.arange(nsize)/window))**2
+        weight1 = (num.cos(num.pi*num.arange(nsize)/window))**2
+        weight2 = (num.sin(num.pi*num.arange(nsize)/window))**2
         
         for i in range(len(points)):
             if i < len(points)-1:
@@ -109,7 +109,6 @@ def cutTransits(dTransit):
 		ynew.append(dTransit['y'][element])
 		yerrnew.append(dTransit['yerr'][element])
 		
-		
 	dout= {'kid':dTransit['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
 
         return dout
@@ -117,7 +116,7 @@ def cutTransits(dTransit):
 def cutOT(data):
 	""" This function cuts outliers and transits from the data and returns x, y and yerr"""
 
-	idx = num.where((data['OutlierMask']==False) & (data['TransitMask'] == False))
+	idx = num.where(data['OTMask']==False)
 	
 	print num.shape(idx)
 	

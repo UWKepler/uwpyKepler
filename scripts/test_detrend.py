@@ -4,7 +4,7 @@ import numpy as num
 import pylab
 
 kid = sys.argv[1]
-
+kid = 
 d1 = kep.io.ReadLightCurve(kid)
 eData = kep.io.getEclipseData(d1)
 d2 = kep.io.FlagTransits(d1,eData)
