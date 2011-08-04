@@ -17,9 +17,4 @@ class keplerlc:
         return data1
     def eData(self):
         eData = io
-        
-d1 = kep.io.ReadLightCurve(kid)
-eData = kep.io.getEclipseData(d1)
-d2 = kep.io.FlagTransits(d1,eData)
-pd = kep.io.SplitGap(d2,0.1)
-d3 = kep.io.FlagOutliers(pd,10,4)
+
