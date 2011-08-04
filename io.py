@@ -211,8 +211,17 @@ def FlagOutliers(data,medwin,threshold):
         for i in range(npts):
             i1 = max(0,i-medhalf)
             i2 = min(npts, i + medhalf)
-            medflux.append(num.median(data[portion]['y'][i1:i2]))
-        
+            try:
+                if num.ma.median(data[portion]['y'][i1:i2]).mask:
+                    medflux.append(medflux[-1])
+            except:
+                medflux.append(num.ma.median(data[portion]['y'][i1:i2]))
+            
+            if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
+                print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
+                print type(medflux[-1])
+            
+        print 'here'
         # finding outliers
         medflux = num.array(medflux)
         outliers = data[portion]['y'] - medflux
