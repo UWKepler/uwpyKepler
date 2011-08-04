@@ -217,19 +217,20 @@ def FlagOutliers(data,medwin,threshold):
             except:
                 medflux.append(num.ma.median(data[portion]['y'][i1:i2]))
             
-            if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
-                print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
-                print type(medflux[-1])
+            #if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
+                #print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
+                #print type(medflux[-1])
             
         print 'here'
         # finding outliers
         medflux = num.array(medflux)
-        outliers = data[portion]['y'] - medflux
+        outliers = num.ma.getdata(data[portion]['y']) - medflux
         
         outliers.sort()
         sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
         outliers = data[portion]['y'] - medflux
         
+	print sigma
         # tagging outliers (which are not part of the transit)
         idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
 
