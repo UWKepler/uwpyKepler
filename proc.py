@@ -58,6 +58,7 @@ def detrendData(data, window, polyorder):
                 #pylab.plot(all_data_x,outy,'c-',linewidth=3)
             
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
+        #pylab.plot(data[portion]['x'],mergedy,'k-')
 
         # apply correction
         newarr = num.ma.getdata(data[portion]['y'])/mergedy
@@ -117,9 +118,7 @@ def cutOT(data):
 	""" This function cuts outliers and transits from the data and returns x, y and yerr"""
 
 	idx = num.where(data['OTMask']==False)
-	
-	print num.shape(idx)
-	
+		
 	xnew = []
 	ynew = []
 	yerrnew = []
@@ -144,12 +143,8 @@ def onlyOutliers(data):
 
     # tagging outliers
 
-   
-   
     idx=num.where(data['OutlierMask']==True)
-   
-    print len(data['x']), len(data['OutlierMask']), len(data['TransitMask']),len(data['UnMasked']), len(data['OTMask'])
-   
+      
     xnew = []
     ynew = []
     yerrnew = []
@@ -158,8 +153,6 @@ def onlyOutliers(data):
         xnew.append(data['x'][el])
         ynew.append(data['y'][el])
         yerrnew.append(data['yerr'][el])
-
-    print num.shape(num.array(xnew).ravel())
    
     dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
        
@@ -205,7 +198,6 @@ def stackPortions(data):
         xarr=num.hstack((xarr,data[portion]['x']))
         yarr=num.hstack((yarr,data[portion]['y']))
         yerrarr=num.hstack((yerrarr,data[portion]['yerr']))
-        print type(data[portion]['TransitMask'])
         TransitMask=num.hstack((TransitMask,data[portion]['TransitMask']))
         OutlierMask=num.hstack((OutlierMask,data[portion]['OutlierMask']))
         OTMask=num.hstack((OTMask,data[portion]['OTMask']))
