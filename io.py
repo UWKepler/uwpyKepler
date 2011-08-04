@@ -101,20 +101,28 @@ def getEclipseData(data):
     
     db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
     cursor = db.cursor()
-    results = ()
+    r1 = ()
+    d1 = {}
     if inKEPPC(data['kid']):
-        foo1 = 'select Period, Dur, Epoch from KEPPC where (KID = %s)' % (data['kid'])
+        foo1 = 'select KOI, Period, Dur, Epoch from KEPPC where (KID = %s)' % (data['kid'])
         cursor.execute(foo1)
-        results = cursor.fetchall()
+        r1 = cursor.fetchall()
+	for i in range(len(r1)):
+		d1[format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
+	
     elif inKEPFP(data['kid']):
-        foo1 = 'select Period, Duration, Epoch from KEPFP where (KID = %s)' % (data['kid'])
+        foo1 = 'select KOI, Period, Duration, Epoch from KEPFP where (KID = %s)' % (data['kid'])
         cursor.execute(foo1)
-        results = cursor.fetchall()
+        r1 = cursor.fetchall()
+	for i in range(len(r1)):
+		d1[format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
+	
     else:
         print 'Kepler ID %s not found in Kepler.KEPPC or Kepler.KEPFP' % (KeplerID)
         
-    return results
-    	
+    return d1
+	
+	
 def FlagTransits(data,eclipseData):
     """ This function flags points within a tranit and
     applies a mask.
@@ -127,13 +135,13 @@ def FlagTransits(data,eclipseData):
     
     mask0=num.ma.getmaskarray(data['x'])
     data['UnMasked']=mask0
-    for i in range(len(eclipseData)):
-        period = eclipseData[i][0]
-        t0 = eclipseData[i][2]
-        dur = eclipseData[i][1]
+    i = 0
+    for koi in eclipseData.keys():
+	period = eclipseData[koi]['period']
+	t0 = eclipseData[koi]['t0']
+        dur = eclipseData[koi]['duration']
         dur = (1.2*dur/24e0)
         t0 = t0 + 54900e0
-        # defining start and end time lists
         width = dur/period
         maxphase=1-width/2
         minphase=width/2
@@ -145,6 +153,7 @@ def FlagTransits(data,eclipseData):
             data['TransitMask']=mask1
         else:
             data['TransitMask']=num.ma.mask_or(mask1,data['TransitMask'])
+	i +=1
 
     return data
 
@@ -217,11 +226,10 @@ def FlagOutliers(data,medwin,threshold):
             except:
                 medflux.append(num.ma.median(data[portion]['y'][i1:i2]))
             
-            if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
-                print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
-                print type(medflux[-1])
+            #if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
+                #print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
+                #print type(medflux[-1])
             
-        print 'here'
         # finding outliers
         medflux = num.array(medflux)
         outliers = data[portion]['y'] - medflux
