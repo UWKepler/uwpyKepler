@@ -3,7 +3,6 @@ import sys
 import numpy as num
 import scipy
 
-
 def inSource(KeplerID):
     """ Checks if a certain KID exists in the source database. """
     
@@ -199,7 +198,6 @@ def FlagOutliers(data,medwin,threshold):
     dout = {}
     # cycling through portions
     for portion in data.keys():
-        print portion
         data[portion]['x'].mask = data[portion]['TransitMask']
         data[portion]['y'].mask = data[portion]['TransitMask']
         data[portion]['yerr'].mask = data[portion]['TransitMask']
@@ -217,7 +215,6 @@ def FlagOutliers(data,medwin,threshold):
         
         # finding outliers
         medflux = num.array(medflux)
-        
         outliers = data[portion]['y'] - medflux
         
         outliers.sort()
