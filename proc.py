@@ -132,7 +132,6 @@ def cutOT(data):
 	
 	return dout
 
-
 def onlyOutliers(data):
     """ This function singles out outliers.
         Inputs - data = data dictionary
@@ -158,7 +157,6 @@ def onlyOutliers(data):
        
     return dout
 
-
 def onlyTransits(dTransit):
         """ This function singles out points within a tranit.
         
@@ -181,8 +179,6 @@ def onlyTransits(dTransit):
 
         return dout
 	
-
-
 def stackPortions(data):
     """rejoins/stacks all portions in the dictionary into one."""
     xarr=num.array([])
@@ -209,3 +205,29 @@ def stackPortions(data):
     
     pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
     return pd
+
+def bin(data):
+    """bins data, doesn't return anything, just graphs"""
+    npts = len(data['x'])
+    for nperbin in [1, 5, 10, 20, 50, 100]:
+    
+        binX    = []
+        binY    = []
+        for i in range(npts-nperbin):
+            binX.append( data['x'][i:i+nperbin].mean() )
+            binY.append( data['y'][i:i+nperbin].mean() )
+        binX    = num.array(binX)
+        binY    = num.array(binY)
+        binY   /= binY.mean()
+    
+        if nperbin == 1: symb='ro'
+        if nperbin == 5: symb='mo'
+        if nperbin == 10: symb='yo'
+        if nperbin == 20: symb='go'
+        if nperbin == 50: symb='co'
+        if nperbin == 100: symb='bo'
+        pylab.errorbar(binX, binY, fmt=symb)
+        pylab.ylim()
+        pylab.title('binsize = %d' % (nperbin))
+        
+    pylab.show()

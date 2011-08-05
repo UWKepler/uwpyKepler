@@ -2,6 +2,7 @@ import MySQLdb
 import sys
 import numpy as num
 import scipy
+import pylab
 
 def inSource(KeplerID):
     """ Checks if a certain KID exists in the source database. """
@@ -121,8 +122,7 @@ def getEclipseData(data):
         print 'Kepler ID %s not found in Kepler.KEPPC or Kepler.KEPFP' % (KeplerID)
         
     return d1
-	
-	
+
 def FlagTransits(data,eclipseData):
     """ This function flags points within a tranit and
     applies a mask.
@@ -157,7 +157,7 @@ def FlagTransits(data,eclipseData):
 
     return data
 
-def SplitGap(data,gapsize):
+def SplitGap(data,gapsize,medwin,fluxdiff):
     """
     This function finds gaps and splits data into portions.
     
@@ -175,26 +175,54 @@ def SplitGap(data,gapsize):
     # minimum sized gap that we are flagging, 2.4 hours
     # The grand master loop >=}
     # to make portion slices
+    data['x'].mask = data['UnMasked']
+    data['y'].mask = data['UnMasked']
+    data['yerr'].mask = data['UnMasked']
+    
+    dyarr = []
+    
+    #pylab.plot(data['x'][2:],1.87e7+num.diff(num.diff(data['y'])), 'g.')
+    #pylab.show()
+    
     for i in range(len(data['x'])-1):
         dt =  data['x'][i+1]- data['x'][i]
+        j1 = max(0,i-medwin)
+        j2 = i + medwin
+        med1 = num.ma.median(data['y'][j1:i])
+        med2 = num.ma.median(data['y'][i:j2])
+        dy = abs( med1 - med2 )
+        dy2 = dy/data['y'][i]
+        #print dy2
+        dyarr.append(dy)
+        if dy2 > fluxdiff:
+            data['y'][i+1:] = data['y'][i+1:]*(med1/med2)
+ 
         if pcount == 0:
             i0 = 0
         if pcount > 0:
             i0 = i1+1
         if dt > gapsize:
+            print i, j1, j2
             i1 = i
             istamps.append([i0,i1])
             pcount += 1
-        
+    
     i1 = i+1
     istamps.append([i0,i1])
-    
+    #pylab.plot(data['x'],data['y'],'r.')
+    #pylab.plot(data['x'][1:],ndum.array(dyarr),'b.')
+    #pylab.show()
+        
     # Applying slices
     for j in range(len(istamps)):
         outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
-            
+        
+        
+    print j,' portions'
+
+
     return outData
-            
+
 def FlagOutliers(data,medwin,threshold):
     """ This function flags outliers. 
         Inputs - data = data dictionary
@@ -238,7 +266,6 @@ def FlagOutliers(data,medwin,threshold):
         sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
         outliers = data[portion]['y'] - medflux
         
-	print sigma
         # tagging outliers (which are not part of the transit)
         idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
 

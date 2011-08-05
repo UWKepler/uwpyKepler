@@ -4,12 +4,16 @@ import numpy as num
 import pylab
 
 kid = sys.argv[1]
+#kid = '10341831'
+#kid = ''
 d1 = kep.io.ReadLightCurve(kid)
 eData = kep.io.getEclipseData(d1)
 d2 = kep.io.FlagTransits(d1,eData)
-pd = kep.io.SplitGap(d2,0.1)
+pd = kep.io.SplitGap(d2,0.05,2,0.05)
 d3 = kep.io.FlagOutliers(pd,10,4)
 d4 = kep.proc.detrendData(d3,120,3)
+
+
 
 pylab.plot(d1['x'],d1['y'],'b.')
 
