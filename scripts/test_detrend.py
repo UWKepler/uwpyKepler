@@ -11,7 +11,7 @@ eData = kep.io.getEclipseData(d1)
 d2 = kep.io.FlagTransits(d1,eData)
 pd = kep.io.SplitGap(d2,0.05,2,0.05)
 d3 = kep.io.FlagOutliers(pd,10,4)
-d4 = kep.proc.detrendData(d3,120,3)
+d4 = kep.proc.detrendData(d3,50,3)
 
 
 
@@ -24,7 +24,7 @@ for portion in d4.keys():
 pylab.title('Object ' + kid)
 pylab.xlabel('Time in BJD')
 pylab.ylabel('Flux')
-pylab.legend(('Data', 'Correction Function'),'upper right', shadow=True)
+#pylab.legend(('Data', 'Correction Function'),'upper right', shadow=True)
 pylab.show()
 
 

@@ -51,14 +51,14 @@ def detrendData(data, window, polyorder):
             if i%2 == 0:
                 set1.append( (i1,i2) )
                 dtfunc1 = num.hstack((dtfunc1,outy))
-                #pylab.plot(all_data_x,outy,'y-',linewidth=3)
+                pylab.plot(all_data_x,outy,'r-',linewidth=3)
             else:
                 set2.append( (i1,i2) )
                 dtfunc2 = num.hstack((dtfunc2,outy))
-                #pylab.plot(all_data_x,outy,'c-',linewidth=3)
+                pylab.plot(all_data_x,outy,'c-',linewidth=3)
             
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
-        #pylab.plot(data[portion]['x'],mergedy,'k-')
+        pylab.plot(data[portion]['x'],mergedy,'k-')
 
         # apply correction
         newarr = num.ma.getdata(data[portion]['y'])/mergedy
@@ -66,7 +66,9 @@ def detrendData(data, window, polyorder):
         
         data = ApplyMask(data,'UnMasked')
         dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
-    
+        
+        pylab.plot(data[portion]['x'],(weight1*1.6e4) + num.median(mergedy) + 20000,'r-')
+        pylab.plot(data[portion]['x'],(weight2*1.6e4) + num.median(mergedy) + 20000,'c-')
     return dout
 
 def cutOutliers(data):

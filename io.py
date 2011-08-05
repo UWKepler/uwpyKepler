@@ -206,7 +206,8 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
             i1 = i
             istamps.append([i0,i1])
             pcount += 1
-    
+        if dy2 > fluxdiff:
+            print j1, j2
     i1 = i+1
     istamps.append([i0,i1])
     #pylab.plot(data['x'],data['y'],'r.')
