@@ -48,31 +48,46 @@ def inKEPFP(KeplerID):
     return Exist
 
 def getKIDsFP():
-    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
-    cursor = db.cursor()
-    foo1 = 'select KID from KEPFP'
-    cursor.execute(foo1)
-    results = cursor.fetchall()
-    r1 = ([el[0] for el in results])
-    print len(r1)
-    results=set(r1)
-    print len(results)
-    #print results
+	"""
+	 Gets a list of unique KID from False positive table
+	"""
+	db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+	cursor = db.cursor()
+	foo1 = 'select KID from KEPFP'
+	cursor.execute(foo1)
+	results = cursor.fetchall()
+	r1 = ([el[0] for el in results])
+	results=set(r1)
     
-    return results
+	return results
 
 def getKIDsPC():
-    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
-    cursor = db.cursor()
-    foo1 = 'select KID from KEPPC'
-    cursor.execute(foo1)
-    results = cursor.fetchall()
-    r1 = ([el[0] for el in results])
-    print len(r1)
-    results=set(r1)
-    print len(results)
+	"""
+	Gets a list of unique KID from Planet Candidates table
+	"""
+	db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+	cursor = db.cursor()
+	foo1 = 'select KID from KEPPC'
+	cursor.execute(foo1)
+	results = cursor.fetchall()
+	r1 = ([el[0] for el in results])
+	results=set(r1)
 
-    return results
+	return results
+
+def getKIDsSource():
+	"""
+	Gets a list of unique KID from source table
+	"""
+	
+	db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    	cursor = db.cursor()
+    	foo1 = 'select distinct KEPLERID from source'
+    	cursor.execute(foo1)
+    	results = cursor.fetchall()
+    	r1 = ["%s" % el[0] for el in results]
+	
+	return r1
 
 def getKOI(KeplerID):
     """ returns all KOI IDs (Kepler Object of Interest IDs) """
