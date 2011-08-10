@@ -263,8 +263,8 @@ def FlagOutliers(data,medwin,threshold):
         medflux = num.array(medflux)
         outliers = num.ma.getdata(data[portion]['y']) - medflux
         
-        outliers.sort()
-        sigma = (outliers[.8415*npts]-outliers[.1585*npts])/2
+        sigma = compute1Sigma(outliers)
+        
         outliers = data[portion]['y'] - medflux
         
         # tagging outliers (which are not part of the transit)
@@ -285,6 +285,16 @@ def FlagOutliers(data,medwin,threshold):
         
     return dout
 
+def compute1Sigma(data):
+    """
+    
+    """
+    
+    dsort = num.sort(data)
+    npts = len(dsort)
+    sigma = (dsort[.8415*npts]-dsort[.1585*npts])/2
+    return sigma
+                   
 def ApplyMask(data,mask):
     """ This function applies a given mask """
     
