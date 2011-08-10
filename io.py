@@ -61,6 +61,19 @@ def getKIDsFP():
     
     return results
 
+def getKIDsPC():
+    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    cursor = db.cursor()
+    foo1 = 'select KID from KEPPC'
+    cursor.execute(foo1)
+    results = cursor.fetchall()
+    r1 = ([el[0] for el in results])
+    print len(r1)
+    results=set(r1)
+    print len(results)
+
+    return results
+
 def getKOI(KeplerID):
     """ returns all KOI IDs (Kepler Object of Interest IDs) """
     

@@ -7,7 +7,9 @@ import MySQLdb
 #KeplerID = sys.argv[1]
 KeplerID = 8478994
 #KeplerID = 11295426
-KeplerID = 10341831
+#KeplerID = 10341831
+
+
 
 db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
 cursor = db.cursor()
