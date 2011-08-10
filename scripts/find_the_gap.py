@@ -72,7 +72,7 @@ def smoothing(data,window):
 
 kid = sys.argv[1]
 #kid = '9663113'
-kid = '10341831'
+#kid = '10341831'
 #kid = ''
 
 d1 = kep.io.ReadLightCurve(kid)

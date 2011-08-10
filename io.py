@@ -3,6 +3,7 @@ import sys
 import numpy as num
 import scipy
 import pylab
+import uwpyKepler as kep
 
 def inSource(KeplerID):
     """ Checks if a certain KID exists in the source database. """
@@ -45,6 +46,20 @@ def inKEPFP(KeplerID):
         Exist = True
     
     return Exist
+
+def getKIDsFP():
+    db     = MySQLdb.connect(host='tddb.astro.washington.edu', user='tddb', passwd='tddb', db='Kepler')
+    cursor = db.cursor()
+    foo1 = 'select KID from KEPFP'
+    cursor.execute(foo1)
+    results = cursor.fetchall()
+    r1 = ([el[0] for el in results])
+    print len(r1)
+    results=set(r1)
+    print len(results)
+    #print results
+    
+    return results
 
 def getKOI(KeplerID):
     """ returns all KOI IDs (Kepler Object of Interest IDs) """
