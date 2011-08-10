@@ -223,7 +223,7 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
     # median smoothing the lightcurve
     mvavg1 = movingMedian(data['y'],medwin)
     mvavg1 = num.append(mvavg1,mvavg1[-1])
-    
+    mvavg1 = data['y']
     # first derivative of smoothed lightcurve
     diff1 = num.diff(mvavg1)
     diff1 = num.hstack((diff1,diff1[-1]))
@@ -233,7 +233,13 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
     diff2 = num.hstack((diff2[-1],diff2))
 
     # compute ourlier resistant sigma
-    sig = compute1Sigma(diff2)
+    sig = compute1Sigma(diff1)
+    
+    pylab.plot(diff1,'g.')
+    pylab.plot([0,6000],[5*sig,5*sig],'k-')
+    pylab.plot([0,6000],[3*sig,3*sig],'k-')
+    pylab.plot([0,6000],[1*sig,1*sig],'k-')
+    pylab.show()
 
     # The grand master loop >=}
     # to make portion slices
@@ -245,10 +251,16 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
             i0 = 0
         if pcount > 0:
             i0 = i1+1
-        if dt > gapsize or (diff1[i]/data['y'][i]) > fluxdiff:
+        if dt > gapsize:
             i1 = i
             istamps.append([i0,i1])
             pcount += 1
+        if num.abs(diff1[i]) > 5*sig:
+            i1 = i
+            istamps.append([i0,i1])
+            pcount += 1
+            #print num.abs(diff1[i]/data['y'][i]), diff1[i], data['y'][i], diff1[i+1], data['y'][i+1]
+            #print i, ' test flux gap'
     i1 = i+1
     istamps.append([i0,i1])
         
