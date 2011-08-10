@@ -199,6 +199,7 @@ def FlagTransits(data,eclipseData):
 	i +=1
 
     return data
+        
 
 def SplitGap(data,gapsize,medwin,fluxdiff):
     """
@@ -215,58 +216,49 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
     istamps=[]
     outData={}
     
-    # minimum sized gap that we are flagging, 2.4 hours
-    # The grand master loop >=}
-    # to make portion slices
     data['x'].mask = data['UnMasked']
     data['y'].mask = data['UnMasked']
     data['yerr'].mask = data['UnMasked']
     
-    dyarr = []
+    # median smoothing the lightcurve
+    mvavg1 = movingMedian(data['y'],medwin)
+    mvavg1 = num.append(mvavg1,mvavg1[-1])
     
-    #pylab.plot(data['x'][2:],1.87e7+num.diff(num.diff(data['y'])), 'g.')
-    #pylab.show()
+    # first derivative of smoothed lightcurve
+    diff1 = num.diff(mvavg1)
+    diff1 = num.hstack((diff1,diff1[-1]))
     
+    # second derivative of smoothed lightcurve
+    diff2 = num.diff(diff1)
+    diff2 = num.hstack((diff2[-1],diff2))
+
+    # compute ourlier resistant sigma
+    sig = compute1Sigma(diff2)
+
+    # The grand master loop >=}
+    # to make portion slices
     for i in range(len(data['x'])-1):
         dt =  data['x'][i+1]- data['x'][i]
         j1 = max(0,i-medwin)
         j2 = i + medwin
-        med1 = num.ma.median(data['y'][j1:i])
-        med2 = num.ma.median(data['y'][i:j2])
-        dy = abs( med1 - med2 )
-        dy2 = dy/data['y'][i]
-        #print dy2
-        dyarr.append(dy)
-        if dy2 > fluxdiff:
-            data['y'][i+1:] = data['y'][i+1:]*(med1/med2)
- 
         if pcount == 0:
             i0 = 0
         if pcount > 0:
             i0 = i1+1
-        if dt > gapsize:
-            print i, j1, j2
+        if dt > gapsize or (diff1[i]/data['y'][i]) > fluxdiff:
             i1 = i
             istamps.append([i0,i1])
             pcount += 1
-        if dy2 > fluxdiff:
-            print j1, j2
     i1 = i+1
     istamps.append([i0,i1])
-    #pylab.plot(data['x'],data['y'],'r.')
-    #pylab.plot(data['x'][1:],ndum.array(dyarr),'b.')
-    #pylab.show()
         
     # Applying slices
     for j in range(len(istamps)):
+        print istamps[j][0], istamps[j][1]
         outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
         
-        
-    print j,' portions'
-
-
     return outData
-
+    
 def FlagOutliers(data,medwin,threshold):
     """ This function flags outliers. 
         Inputs - data = data dictionary
@@ -327,6 +319,21 @@ def FlagOutliers(data,medwin,threshold):
         dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
         
     return dout
+                    
+def movingMedian(data,window):
+    """
+    Returns the median smoothed version of a given function.
+    """
+    
+    mvavg = []
+    npoints = len(data)
+    for i in range(npoints-1):
+        j1  = max(0,i-window)
+        j2 = min(i+window,npoints-1)
+        mvavg.append(num.median(data[j1:j2]))
+        
+    return num.array(mvavg)
+    
 
 def compute1Sigma(data):
     """
