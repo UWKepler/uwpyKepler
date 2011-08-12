@@ -162,7 +162,7 @@ def getEclipseData(data):
 		d1[format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
 	
     else:
-        print 'Kepler ID %s not found in Kepler.KEPPC or Kepler.KEPFP' % (KeplerID)
+        print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
         
     return d1
 
@@ -235,11 +235,11 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
     # compute ourlier resistant sigma
     sig = compute1Sigma(diff1)
     
-    pylab.plot(diff1,'g.')
-    pylab.plot([0,6000],[5*sig,5*sig],'k-')
-    pylab.plot([0,6000],[3*sig,3*sig],'k-')
-    pylab.plot([0,6000],[1*sig,1*sig],'k-')
-    pylab.show()
+    #pylab.plot(diff1,'g.')
+    #pylab.plot([0,6000],[5*sig,5*sig],'k-')
+    #pylab.plot([0,6000],[3*sig,3*sig],'k-')
+    #pylab.plot([0,6000],[1*sig,1*sig],'k-')
+    #pylab.show()
 
     # The grand master loop >=}
     # to make portion slices
@@ -255,10 +255,10 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
             i1 = i
             istamps.append([i0,i1])
             pcount += 1
-        if num.abs(diff1[i]) > 5*sig:
-            i1 = i
-            istamps.append([i0,i1])
-            pcount += 1
+        #if num.abs(diff1[i]) > 5*sig:
+            #i1 = i
+            #istamps.append([i0,i1])
+            #pcount += 1
             #print num.abs(diff1[i]/data['y'][i]), diff1[i], data['y'][i], diff1[i+1], data['y'][i+1]
             #print i, ' test flux gap'
     i1 = i+1
@@ -266,7 +266,7 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
         
     # Applying slices
     for j in range(len(istamps)):
-        print istamps[j][0], istamps[j][1]
+        #print istamps[j][0], istamps[j][1]
         outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
         
     return outData
