@@ -51,14 +51,14 @@ def detrendData(data, window, polyorder):
             if i%2 == 0:
                 set1.append( (i1,i2) )
                 dtfunc1 = num.hstack((dtfunc1,outy))
-                pylab.plot(all_data_x,outy,'r-',linewidth=3)
+                #pylab.plot(all_data_x,outy,'r-',linewidth=3)
             else:
                 set2.append( (i1,i2) )
                 dtfunc2 = num.hstack((dtfunc2,outy))
-                pylab.plot(all_data_x,outy,'c-',linewidth=3)
+                #pylab.plot(all_data_x,outy,'c-',linewidth=3)
             
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
-        pylab.plot(data[portion]['x'],mergedy,'k-')
+        #pylab.plot(data[portion]['x'],mergedy,'k-')
 
         # apply correction
         newarr = num.ma.getdata(data[portion]['y'])/mergedy
@@ -67,8 +67,8 @@ def detrendData(data, window, polyorder):
         data = ApplyMask(data,'UnMasked')
         dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
         
-        pylab.plot(data[portion]['x'],(weight1*1.6e4) + num.median(mergedy) + 20000,'r-')
-        pylab.plot(data[portion]['x'],(weight2*1.6e4) + num.median(mergedy) + 20000,'c-')
+        #pylab.plot(data[portion]['x'],(weight1*1.6e4) + num.median(mergedy) + 20000,'r-')
+        #pylab.plot(data[portion]['x'],(weight2*1.6e4) + num.median(mergedy) + 20000,'c-')
     return dout
 
 def cutOutliers(data):
@@ -112,14 +112,21 @@ def cutTransits(dTransit):
 		ynew.append(dTransit['y'][element])
 		yerrnew.append(dTransit['yerr'][element])
 		
-	dout= {'kid':dTransit['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
+	dout= {'kid':dTransit['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
 
         return dout
 
 def cutOT(data):
 	""" This function cuts outliers and transits from the data and returns x, y and yerr"""
 
-	idx = num.where(data['OTMask']==False)
+	idx = num.where((data['OutlierMask']==False) & (data['TransitMask']==False))
+	
+	idx2 = num.where(data['TransitMask'] != False)
+	idx3 = num.where(data['OutlierMask'] != False)
+	
+	#print len(idx2[0])
+	#print len(idx3[0])
+	#print len(idx[0])
 		
 	xnew = []
 	ynew = []
@@ -129,8 +136,9 @@ def cutOT(data):
 		xnew.append(data['x'][el])
 		ynew.append(data['y'][el])
 		yerrnew.append(data['yerr'][el])
+		#print el
 	
-	dout= {'kid':data['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
+	dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
 	
 	return dout
 
@@ -233,3 +241,32 @@ def bin(data):
         pylab.title('binsize = %d' % (nperbin))
         
     pylab.show()
+
+def bin2(data,binlist):
+	""" bins data and returns dictionary with an x and y list
+	    for every binsize """
+	
+	npts = len(data['x'])
+	#lst = [(bininc*i) for i in range(binnum)]
+	#lst[0] = lst[0] + 1
+	lst = binlist
+
+	bind = {}
+
+	for nbr in lst: 
+		
+		xlist = []
+		ylist = []
+		
+		for i in range(npts-nbr):
+			
+			xlist.append(data['x'][i:i+nbr].mean() )
+			ylist.append(data['y'][i:i+nbr].mean() )
+		
+		xlist = num.array(xlist)
+        	ylist = num.array(ylist)
+        	ylist /= ylist.mean()
+	
+		bind['binsize' + str(nbr)] = {'x':xlist,'y':ylist}
+	
+	return bind
