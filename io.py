@@ -147,24 +147,25 @@ def getEclipseData(data):
     cursor = db.cursor()
     r1 = ()
     d1 = {}
+    d1={'transit':{}}
     if inKEPPC(data['kid']):
         foo1 = 'select KOI, Period, Dur, Epoch from KEPPC where (KID = %s)' % (data['kid'])
         cursor.execute(foo1)
         r1 = cursor.fetchall()
 	for i in range(len(r1)):
-		d1[format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
-	
+		d1['transit'][format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
+	d1['bool']=True
     elif inKEPFP(data['kid']):
         foo1 = 'select KOI, Period, Duration, Epoch from KEPFP where (KID = %s)' % (data['kid'])
         cursor.execute(foo1)
         r1 = cursor.fetchall()
 	for i in range(len(r1)):
-		d1[format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
-	
+		d1['transit'][format(r1[i][0],'.2f')] = {'period':r1[i][1],'duration':r1[i][2],'t0':r1[i][3]}
+	d1['bool']=True
     else:
         print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
         d1['bool']=False
-        
+    print d1['transit'].keys()
     return d1
 
 def FlagTransits(data,eclipseData):
@@ -180,15 +181,15 @@ def FlagTransits(data,eclipseData):
     mask0=num.ma.getmaskarray(data['x'])
     data['UnMasked']=mask0
     i = 0
-    
+    print eclipseData.keys()
     if eclipseData['bool']==False:
         mask1=num.ma.copy(data['x'].mask)
         data['TransitMask']=[]
     else:
-        for koi in eclipseData.keys():
-            period = eclipseData[koi]['period']
-            t0 = eclipseData[koi]['t0']
-            dur = eclipseData[koi]['duration']
+        for koi in eclipseData['transit'].keys():
+            period = eclipseData['transit'][koi]['period']
+            t0 = eclipseData['transit'][koi]['t0']
+            dur = eclipseData['transit'][koi]['duration']
             dur = (1.2*dur/24e0)
             t0 = t0 + 54900e0
             width = dur/period
@@ -447,3 +448,9 @@ def ApplyMask(data,mask):
                 data[portion][key].mask = data[portion][mask]
 	
     return data
+
+def periodCheck(data):
+    """ This function checks for periodicity in outliers """
+    
+    
+

@@ -12,10 +12,10 @@ pylab.plot(d1['x'],d1['y'],'ro')
 eData = kep.io.getEclipseData(d1)
 d2 = kep.io.FlagTransits(d1,eData)
 pylab.plot(d2['x'],d2['y'],'b.')
-d3 = kep.io.SplitGap(d2,0.05,2,0.05)
+d3 = kep.io.SplitGap(d2,eData,0.05,2,0.05)
 
 d4 = kep.io.FlagOutliers(d3,eData,10,4)
 
-d5 = kep.proc.detrendData(d4,100,7)
+d5 = kep.proc.detrendData(d4,eData,100,7)
 
 pylab.show()

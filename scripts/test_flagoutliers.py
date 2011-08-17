@@ -10,5 +10,5 @@ kid = '6056992'
 d1 = kep.io.ReadLightCurve(kid)
 eData = kep.io.getEclipseData(d1)
 d2 = kep.io.FlagTransits(d1,eData)
-pd = kep.io.SplitGap(d2,0.1)
-d3 = kep.io.FlagOutliers(pd,10,4)
+pd = kep.io.SplitGap(d2,eData,0.1)
+d3 = kep.io.FlagOutliers(pd,eData,10,4)
