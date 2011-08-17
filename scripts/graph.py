@@ -14,7 +14,7 @@ d2 = kep.io.FlagTransits(d1,eData)
 pylab.plot(d2['x'],d2['y'],'b.')
 d3 = kep.io.SplitGap(d2,0.05,2,0.05)
 
-d4 = kep.io.FlagOutliers(d3,10,4)
+d4 = kep.io.FlagOutliers(d3,eData,10,4)
 
 d5 = kep.proc.detrendData(d4,100,7)
 

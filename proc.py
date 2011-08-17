@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter('ignore', num.RankWarning)
 from uwpyKepler.io import ApplyMask
  
-def detrendData(data, window, polyorder):
+def detrendData(data, eData, window, polyorder):
     """Detrends the data"""
     
     dout = {}
@@ -65,7 +65,10 @@ def detrendData(data, window, polyorder):
         newerr = num.ma.getdata(data[portion]['yerr'])/mergedy
         
         data = ApplyMask(data,'UnMasked')
-        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
+        if eData['bool']==False:
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
+        else:
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
         
         #pylab.plot(data[portion]['x'],(weight1*1.6e4) + num.median(mergedy) + 20000,'r-')
         #pylab.plot(data[portion]['x'],(weight2*1.6e4) + num.median(mergedy) + 20000,'c-')
@@ -189,31 +192,56 @@ def onlyTransits(dTransit):
 
         return dout
 	
-def stackPortions(data):
-    """rejoins/stacks all portions in the dictionary into one."""
-    xarr=num.array([])
-    yarr=num.array([])
-    yerrarr=num.array([])
-    TransitMask=num.array([])
-    OutlierMask=num.array([])
-    OTMask=num.array([])
-    UnMasked=num.array([])
+def stackPortions(data, eData):
     
-    
-    for portion in data.keys():
-        xarr=num.hstack((xarr,data[portion]['x']))
-        yarr=num.hstack((yarr,data[portion]['y']))
-        yerrarr=num.hstack((yerrarr,data[portion]['yerr']))
-        TransitMask=num.hstack((TransitMask,data[portion]['TransitMask']))
-        OutlierMask=num.hstack((OutlierMask,data[portion]['OutlierMask']))
-        OTMask=num.hstack((OTMask,data[portion]['OTMask']))
-        UnMasked=num.hstack((UnMasked,data[portion]['UnMasked']))
+    if eData['bool']==False:
+        """rejoins/stacks all portions in the dictionary into one."""
+        xarr=num.array([])
+        yarr=num.array([])
+        yerrarr=num.array([])
+        TransitMask=num.array([])
+        OutlierMask=num.array([])
+        OTMask=num.array([])
+        UnMasked=num.array([])
+
         
-        #print len(data[portion]['x']), len(xarr), portion
-    kid=data[portion]['kid']
+        for portion in data.keys():
+            xarr=num.hstack((xarr,data[portion]['x']))
+            yarr=num.hstack((yarr,data[portion]['y']))
+            yerrarr=num.hstack((yerrarr,data[portion]['yerr']))
+            OutlierMask=num.hstack((OutlierMask,data[portion]['OutlierMask']))
+            OTMask=num.hstack((OTMask,data[portion]['OTMask']))
+            UnMasked=num.hstack((UnMasked,data[portion]['UnMasked']))
+            
+            #print len(data[portion]['x']), len(xarr), portion
+            kid=data[portion]['kid']
+        #kid=kid1
+        pd={'OTMask':OTMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
+    else:
+        """rejoins/stacks all portions in the dictionary into one."""
+        xarr=num.array([])
+        yarr=num.array([])
+        yerrarr=num.array([])
+        TransitMask=num.array([])
+        OutlierMask=num.array([])
+        OTMask=num.array([])
+        UnMasked=num.array([])
+        print data.keys()
+        
+        for portion in data.keys():
+            xarr=num.hstack((xarr,data[portion]['x']))
+            yarr=num.hstack((yarr,data[portion]['y']))
+            yerrarr=num.hstack((yerrarr,data[portion]['yerr']))
+            TransitMask=num.hstack((TransitMask,data[portion]['TransitMask']))
+            OutlierMask=num.hstack((OutlierMask,data[portion]['OutlierMask']))
+            OTMask=num.hstack((OTMask,data[portion]['OTMask']))
+            UnMasked=num.hstack((UnMasked,data[portion]['UnMasked']))
+            
+            #print len(data[portion]['x']), len(xarr), portion
+            kid=data[portion]['kid']
+        #kid=kid1
     
-    
-    pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
+        pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
     return pd
 
 def bin(data):

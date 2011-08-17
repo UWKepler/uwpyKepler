@@ -163,6 +163,7 @@ def getEclipseData(data):
 	
     else:
         print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
+        d1['bool']=False
         
     return d1
 
@@ -179,29 +180,34 @@ def FlagTransits(data,eclipseData):
     mask0=num.ma.getmaskarray(data['x'])
     data['UnMasked']=mask0
     i = 0
-    for koi in eclipseData.keys():
-	period = eclipseData[koi]['period']
-	t0 = eclipseData[koi]['t0']
-        dur = eclipseData[koi]['duration']
-        dur = (1.2*dur/24e0)
-        t0 = t0 + 54900e0
-        width = dur/period
-        maxphase=1-width/2
-        minphase=width/2
-        phase= (data['x']-t0)/period-(data['x']-t0)//period
-        idx=num.where((phase>maxphase)|(phase<minphase))
-        data['x'][idx]= num.ma.masked
+    
+    if eclipseData['bool']==False:
         mask1=num.ma.copy(data['x'].mask)
-        if i == 0:
-            data['TransitMask']=mask1
-        else:
-            data['TransitMask']=num.ma.mask_or(mask1,data['TransitMask'])
-	i +=1
+        data['TransitMask']=[]
+    else:
+        for koi in eclipseData.keys():
+            period = eclipseData[koi]['period']
+            t0 = eclipseData[koi]['t0']
+            dur = eclipseData[koi]['duration']
+            dur = (1.2*dur/24e0)
+            t0 = t0 + 54900e0
+            width = dur/period
+            maxphase=1-width/2
+            minphase=width/2
+            phase= (data['x']-t0)/period-(data['x']-t0)//period
+            idx=num.where((phase>maxphase)|(phase<minphase))
+            data['x'][idx]= num.ma.masked
+            mask1=num.ma.copy(data['x'].mask)
+            if i == 0:
+                data['TransitMask']=mask1
+            else:
+                data['TransitMask']=num.ma.mask_or(mask1,data['TransitMask'])
+            i +=1
 
     return data
         
 
-def SplitGap(data,gapsize,medwin,fluxdiff):
+def SplitGap(data,eData,gapsize,medwin,fluxdiff):
     """
     This function finds gaps and splits data into portions.
     
@@ -263,14 +269,22 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
     i1 = i+1
     istamps.append([i0,i1])
         
-    # Applying slices
-    for j in range(len(istamps)):
-        #print istamps[j][0], istamps[j][1]
-        outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
+        
+        
+    if eData['bool']==False:
+        # Applying slices
+        for j in range(len(istamps)):
+            #print istamps[j][0], istamps[j][1]
+            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
+    else:
+        # Applying slices
+        for j in range(len(istamps)):
+            #print istamps[j][0], istamps[j][1]
+            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
         
     return outData
     
-def FlagOutliers(data,medwin,threshold):
+def FlagOutliers(data,eData,medwin,threshold):
     """ This function flags outliers. 
         Inputs - data = data dictionary
                - medwin = the window size used to compute the median
@@ -280,55 +294,119 @@ def FlagOutliers(data,medwin,threshold):
     """
     
     dout = {}
-    # cycling through portions
-    for portion in data.keys():
-        data[portion]['x'].mask = data[portion]['TransitMask']
-        data[portion]['y'].mask = data[portion]['TransitMask']
-        data[portion]['yerr'].mask = data[portion]['TransitMask']
-        npts = len(data[portion]['x'])
-        
-        # defining the window
-        medflux = []
-        medhalf = (medwin-1)/2
-
-        # placing the window and computing the median
-        for i in range(npts):
-            i1 = max(0,i-medhalf)
-            i2 = min(npts, i + medhalf)
-            try:
-                if num.ma.median(data[portion]['y'][i1:i2]).mask:
-                    medflux.append(medflux[-1])
-            except:
-                medflux.append(num.ma.median(data[portion]['y'][i1:i2]))
+    
+    if eData['bool']==False:
+        for portion in data.keys():
+            npts = len(data[portion]['x'])
             
-            #if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
-                #print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
-                #print type(medflux[-1])
+            # defining the window
+            medflux = []
+            medhalf = (medwin-1)/2
+    
+            # placing the window and computing the median
+            for i in range(npts):
+                i1 = max(0,i-medhalf)
+                i2 = min(npts, i + medhalf)
+                try:
+                    if num.ma.median(data[portion]['y'][i1:i2]).mask:
+                        medflux.append(medflux[-1])
+                except:
+                    medflux.append(num.ma.median(data[portion]['y'][i1:i2]))
+            # finding outliers
+            medflux = num.array(medflux)
+            outliers = num.ma.getdata(data[portion]['y']) - medflux
             
-        # finding outliers
-        medflux = num.array(medflux)
-        outliers = num.ma.getdata(data[portion]['y']) - medflux
+            sigma = compute1Sigma(outliers)
+            
+            outliers = data[portion]['y'] - medflux
+                        
+            idx=num.where( (abs(num.array(outliers))>threshold*sigma))
+                        
+                        
+            
+            # creating the outlier mask
+            data[portion]['x'].mask = data[portion]['UnMasked']
+            data[portion]['x'][idx[0]] = num.ma.masked
         
-        sigma = compute1Sigma(outliers)
+            mask2 = num.ma.copy(data[portion]['x'].mask)
+            
+            data[portion]['OutlierMask']=mask2
+           
+            mask3 = num.ma.copy(mask2)
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
+    else:
+        # cycling through portions
+        for portion in data.keys():
+            data[portion]['x'].mask = data[portion]['TransitMask']
+            data[portion]['y'].mask = data[portion]['TransitMask']
+            data[portion]['yerr'].mask = data[portion]['TransitMask']
+            npts = len(data[portion]['x'])
+            
+            # defining the window
+            medflux = []
+            medhalf = (medwin-1)/2
+    
+            # placing the window and computing the median
+            for i in range(npts):
+                i1 = max(0,i-medhalf)
+                i2 = min(npts, i + medhalf)
+                try:
+                    if num.ma.median(data[portion]['y'][i1:i2]).mask:
+                        medflux.append(medflux[-1])
+                except:
+                    medflux.append(num.ma.median(data[portion]['y'][i1:i2]))
+            # finding outliers
+            medflux = num.array(medflux)
+            outliers = num.ma.getdata(data[portion]['y']) - medflux
+            
+            sigma = compute1Sigma(outliers)
+            
+            outliers = data[portion]['y'] - medflux
+            
+            idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
+                        
+                        
+            # creating the outlier mask
+            data[portion]['x'].mask = data[portion]['UnMasked']
+            data[portion]['x'][idx[0]] = num.ma.masked
+            
+            mask2 = num.ma.copy(data[portion]['x'].mask)
+            
+            data[portion]['OutlierMask']=mask2
+            
+            # creating the outlier + transit mask
+            mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
+            
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
+            
+        #if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
+            #print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
+            #print type(medflux[-1])
+    
+    # tagging outliers (which are not part of the transit)
         
-        outliers = data[portion]['y'] - medflux
-        
-        # tagging outliers (which are not part of the transit)
-        idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
 
-        # creating the outlier mask
-        data[portion]['x'].mask = data[portion]['UnMasked']
-        data[portion]['x'][idx[0]] = num.ma.masked
+    #if eData['bool']==False:
+        #idx=num.where( (abs(num.array(outliers))>threshold*sigma))
+    #else:
+        #idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (data[portion]['TransitMask'] == False) )
 
-        mask2 = num.ma.copy(data[portion]['x'].mask)
+    ## creating the outlier mask
+    #data[portion]['x'].mask = data[portion]['UnMasked']
+    #data[portion]['x'][idx[0]] = num.ma.masked
+
+    #mask2 = num.ma.copy(data[portion]['x'].mask)
+    
+    #data[portion]['OutlierMask']=mask2
+    
+    #if eData['bool']==False:
+        #mask3 = num.ma.copy(mask2)
+        #dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
+    #else:
+        ## creating the outlier + transit mask
+        #mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
         
-        data[portion]['OutlierMask']=mask2
-        
-        # creating the outlier + transit mask
-        mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
-        
-        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
-        
+        #dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
     return dout
                     
 def movingMedian(data,window):
