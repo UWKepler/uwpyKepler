@@ -165,7 +165,7 @@ def getEclipseData(data):
     else:
         print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
         d1['bool']=False
-    print d1['transit'].keys()
+    #print d1['transit'].keys()
     return d1
 
 def FlagTransits(data,eclipseData):
@@ -181,10 +181,11 @@ def FlagTransits(data,eclipseData):
     mask0=num.ma.getmaskarray(data['x'])
     data['UnMasked']=mask0
     i = 0
-    print eclipseData.keys()
+    #print eclipseData.keys()
     if eclipseData['bool']==False:
         mask1=num.ma.copy(data['x'].mask)
         data['TransitMask']=[]
+	data['bool']=False
     else:
         for koi in eclipseData['transit'].keys():
             period = eclipseData['transit'][koi]['period']
@@ -204,11 +205,12 @@ def FlagTransits(data,eclipseData):
             else:
                 data['TransitMask']=num.ma.mask_or(mask1,data['TransitMask'])
             i +=1
+	data['bool'] = True
 
     return data
         
 
-def SplitGap(data,eData,gapsize,medwin,fluxdiff):
+def SplitGap(data,gapsize,medwin,fluxdiff):
     """
     This function finds gaps and splits data into portions.
     
@@ -272,20 +274,20 @@ def SplitGap(data,eData,gapsize,medwin,fluxdiff):
         
         
         
-    if eData['bool']==False:
+    if data['bool']==False:
         # Applying slices
         for j in range(len(istamps)):
             #print istamps[j][0], istamps[j][1]
-            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
+            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1],'bool':False}
     else:
         # Applying slices
         for j in range(len(istamps)):
             #print istamps[j][0], istamps[j][1]
-            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1]}
+            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1],'bool':True}
         
     return outData
     
-def FlagOutliers(data,eData,medwin,threshold):
+def FlagOutliers(data,medwin,threshold):
     """ This function flags outliers. 
         Inputs - data = data dictionary
                - medwin = the window size used to compute the median
@@ -296,9 +298,11 @@ def FlagOutliers(data,eData,medwin,threshold):
     
     dout = {}
     
-    if eData['bool']==False:
-        for portion in data.keys():
-            npts = len(data[portion]['x'])
+    
+    for portion in data.keys():
+        if data[portion]['bool']==False:
+           
+	    npts = len(data[portion]['x'])
             
             # defining the window
             medflux = []
@@ -334,10 +338,9 @@ def FlagOutliers(data,eData,medwin,threshold):
             data[portion]['OutlierMask']=mask2
            
             mask3 = num.ma.copy(mask2)
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
-    else:
-        # cycling through portions
-        for portion in data.keys():
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3,'bool':data[portion]['bool']}
+        else:
+
             data[portion]['x'].mask = data[portion]['TransitMask']
             data[portion]['y'].mask = data[portion]['TransitMask']
             data[portion]['yerr'].mask = data[portion]['TransitMask']
@@ -378,7 +381,7 @@ def FlagOutliers(data,eData,medwin,threshold):
             # creating the outlier + transit mask
             mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
             
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3,'bool':data[portion]['bool']}
             
         #if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
             #print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]

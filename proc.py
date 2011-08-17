@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter('ignore', num.RankWarning)
 from uwpyKepler.io import ApplyMask
  
-def detrendData(data, eData, window, polyorder):
+def detrendData(data, window, polyorder):
     """Detrends the data"""
     
     dout = {}
@@ -65,10 +65,10 @@ def detrendData(data, eData, window, polyorder):
         newerr = num.ma.getdata(data[portion]['yerr'])/mergedy
         
         data = ApplyMask(data,'UnMasked')
-        if eData['bool']==False:
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
+        if data[portion]['bool']==False:
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy, 'bool':data[portion]['bool']}
         else:
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy}
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy,'bool':data[portion]['bool']}
         
         #pylab.plot(data[portion]['x'],(weight1*1.6e4) + num.median(mergedy) + 20000,'r-')
         #pylab.plot(data[portion]['x'],(weight2*1.6e4) + num.median(mergedy) + 20000,'c-')
@@ -192,9 +192,9 @@ def onlyTransits(dTransit):
 
         return dout
 	
-def stackPortions(data, eData):
+def stackPortions(data):
     
-    if eData['bool']==False:
+    if data['portion1']['bool']==False:
         """rejoins/stacks all portions in the dictionary into one."""
         xarr=num.array([])
         yarr=num.array([])
@@ -216,7 +216,7 @@ def stackPortions(data, eData):
             #print len(data[portion]['x']), len(xarr), portion
             kid=data[portion]['kid']
         #kid=kid1
-        pd={'OTMask':OTMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
+        pd={'OTMask':OTMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid, 'bool':False}
     else:
         """rejoins/stacks all portions in the dictionary into one."""
         xarr=num.array([])
@@ -241,7 +241,7 @@ def stackPortions(data, eData):
             kid=data[portion]['kid']
         #kid=kid1
     
-        pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
+        pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid,'bool':True}
     return pd
 
 def bin(data):
