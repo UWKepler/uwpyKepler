@@ -185,7 +185,6 @@ def FlagTransits(data,eclipseData):
     if eclipseData['bool']==False:
         mask1=num.ma.copy(data['x'].mask)
         data['TransitMask']=[]
-	data['bool']=False
     else:
         for koi in eclipseData['transit'].keys():
             period = eclipseData['transit'][koi]['period']
@@ -205,7 +204,6 @@ def FlagTransits(data,eclipseData):
             else:
                 data['TransitMask']=num.ma.mask_or(mask1,data['TransitMask'])
             i +=1
-	data['bool'] = True
 
     return data
         
@@ -274,16 +272,10 @@ def SplitGap(data,gapsize,medwin,fluxdiff):
         
         
         
-    if data['bool']==False:
-        # Applying slices
-        for j in range(len(istamps)):
+
+    for j in range(len(istamps)):
             #print istamps[j][0], istamps[j][1]
-            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1],'bool':False}
-    else:
-        # Applying slices
-        for j in range(len(istamps)):
-            #print istamps[j][0], istamps[j][1]
-            outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1],'bool':True}
+	    outData['portion' + str(j+1)] = {'kid':data['kid'],'x':data['x'][istamps[j][0]:istamps[j][1]+1], 'y':data['y'][istamps[j][0]:istamps[j][1]+1], 'yerr':data['yerr'][istamps[j][0]:istamps[j][1]+1], 'TransitMask':data['TransitMask'][istamps[j][0]:istamps[j][1]+1],'UnMasked':data['UnMasked'][istamps[j][0]:istamps[j][1]+1],}
         
     return outData
     
@@ -300,7 +292,7 @@ def FlagOutliers(data,medwin,threshold):
     
     
     for portion in data.keys():
-        if data[portion]['bool']==False:
+        if data[portion]['TransitMask']==[]:
            
 	    npts = len(data[portion]['x'])
             
@@ -338,7 +330,7 @@ def FlagOutliers(data,medwin,threshold):
             data[portion]['OutlierMask']=mask2
            
             mask3 = num.ma.copy(mask2)
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3,'bool':data[portion]['bool']}
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3,'TransitMask':data[portion]['TransitMask']}
         else:
 
             data[portion]['x'].mask = data[portion]['TransitMask']
@@ -381,7 +373,7 @@ def FlagOutliers(data,medwin,threshold):
             # creating the outlier + transit mask
             mask3 = num.ma.mask_or(data[portion]['TransitMask'],mask2)
             
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3,'bool':data[portion]['bool']}
+            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':data[portion]['y'],'yerr':data[portion]['yerr'],'TransitMask':data[portion]['TransitMask'],'UnMasked':data[portion]['UnMasked'],'OutlierMask':data[portion]['OutlierMask'],'OTMask':mask3}
             
         #if len(data[portion]['y'][i1:i2][num.where(data[portion]['y'][i1:i2].mask == True)]) > 0:
             #print i1, i2, npts, data[portion]['y'][i1:i2], medflux[-1]
