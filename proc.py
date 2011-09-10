@@ -65,11 +65,8 @@ def detrendData(data, window, polyorder):
         newerr = num.ma.getdata(data[portion]['yerr'])/mergedy
         
         data = ApplyMask(data,'UnMasked')
-        if data[portion]['bool']==False:
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy, 'bool':data[portion]['bool']}
-        else:
-            dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'TransitMask':data[portion]['TransitMask'],'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy,'bool':data[portion]['bool']}
-        
+        dout[portion] = {'kid':data[portion]['kid'],'x':data[portion]['x'],'y':newarr,'yerr':newerr,'OTMask':data[portion]['OTMask'],'OutlierMask':data[portion]['OutlierMask'],'UnMasked':data[portion]['UnMasked'],'Correction':mergedy, 'TransitMask':data[portion]['TransitMask']}
+       
         #pylab.plot(data[portion]['x'],(weight1*1.6e4) + num.median(mergedy) + 20000,'r-')
         #pylab.plot(data[portion]['x'],(weight2*1.6e4) + num.median(mergedy) + 20000,'c-')
     return dout
@@ -104,44 +101,50 @@ def cutTransits(dTransit):
          Input = data dictionary
          Output = data dictionary without points in transits.
         """
-    	
-	xnew = []
-	ynew = []
-	yerrnew = []
-	
-	idx=num.where(dTransit['TransitMask'] == False)
-        for element in idx:
-		xnew.append(dTransit['x'][element])
-		ynew.append(dTransit['y'][element])
-		yerrnew.append(dTransit['yerr'][element])
+    	if dTransit['TransitMask'] == []:
+		print 'No transits!'
+		dout = {'kid':dTransit['kid'],'x':dTransit['x'],'y':dTransit['y'],'yerr':dTransit['yerr']}
+	else:
+		xnew = []
+		ynew = []
+		yerrnew = []
 		
-	dout= {'kid':dTransit['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
+		idx=num.where(dTransit['TransitMask'] == False)
+		for element in idx:
+			xnew.append(dTransit['x'][element])
+			ynew.append(dTransit['y'][element])
+			yerrnew.append(dTransit['yerr'][element])
+			
+		dout= {'kid':dTransit['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
 
         return dout
 
 def cutOT(data):
 	""" This function cuts outliers and transits from the data and returns x, y and yerr"""
+	if data['TransitMask'] == []:
+		print 'No transits! Just cutting outliers...'
+		dout = kep.proc.cutOutliers(data)
+	else:
+		idx = num.where((data['OutlierMask']==False) & (data['TransitMask']==False))
 
-	idx = num.where((data['OutlierMask']==False) & (data['TransitMask']==False))
-	
-	idx2 = num.where(data['TransitMask'] != False)
-	idx3 = num.where(data['OutlierMask'] != False)
-	
-	#print len(idx2[0])
-	#print len(idx3[0])
-	#print len(idx[0])
+		idx2 = num.where(data['TransitMask'] != False)
+		idx3 = num.where(data['OutlierMask'] != False)
 		
-	xnew = []
-	ynew = []
-	yerrnew = []
-	
-	for el in idx[0]:
-		xnew.append(data['x'][el])
-		ynew.append(data['y'][el])
-		yerrnew.append(data['yerr'][el])
-		#print el
-	
-	dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
+		#print len(idx2[0])
+		#print len(idx3[0])
+		#print len(idx[0])
+			
+		xnew = []
+		ynew = []
+		yerrnew = []
+		
+		for el in idx[0]:
+			xnew.append(data['x'][el])
+			ynew.append(data['y'][el])
+			yerrnew.append(data['yerr'][el])
+			#print el
+		
+		dout= {'kid':data['kid'],'x':num.array(xnew).ravel(),'y':num.array(ynew).ravel(),'yerr':num.array(yerrnew).ravel()}
 	
 	return dout
 
@@ -176,30 +179,33 @@ def onlyTransits(dTransit):
          Input = data dictionary
          Output = data dictionary without points in transits.
         """
-
-	xnew = []
-	ynew = []
-	yerrnew = []
-	
-	idx=num.where(dTransit['TransitMask'] == True)
-        for element in idx:
-		xnew.append(dTransit['x'][element])
-		ynew.append(dTransit['y'][element])
-		yerrnew.append(dTransit['yerr'][element])
+	if dTransit['TransitMask'] == []:
+		print 'No transits! Returning empty dictionary'
+		dout = {}
+	else:
+		xnew = []
+		ynew = []
+		yerrnew = []
 		
-		
-	dout= {'kid':dTransit['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
+		idx=num.where(dTransit['TransitMask'] == True)
+		for element in idx:
+			xnew.append(dTransit['x'][element])
+			ynew.append(dTransit['y'][element])
+			yerrnew.append(dTransit['yerr'][element])
+			
+			
+		dout= {'kid':dTransit['kid'],'x':num.array(xnew),'y':num.array(ynew),'yerr':num.array(yerrnew)}
 
         return dout
 	
 def stackPortions(data):
     
-    if data['portion1']['bool']==False:
+    if data['portion1']['TransitMask']==[]:
         """rejoins/stacks all portions in the dictionary into one."""
         xarr=num.array([])
         yarr=num.array([])
         yerrarr=num.array([])
-        TransitMask=num.array([])
+        TransitMask=[]
         OutlierMask=num.array([])
         OTMask=num.array([])
         UnMasked=num.array([])
@@ -216,7 +222,7 @@ def stackPortions(data):
             #print len(data[portion]['x']), len(xarr), portion
             kid=data[portion]['kid']
         #kid=kid1
-        pd={'OTMask':OTMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid, 'bool':False}
+        pd={'OTMask':OTMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid, 'TransitMask':TransitMask}
     else:
         """rejoins/stacks all portions in the dictionary into one."""
         xarr=num.array([])
@@ -241,7 +247,7 @@ def stackPortions(data):
             kid=data[portion]['kid']
         #kid=kid1
     
-        pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid,'bool':True}
+        pd={'OTMask':OTMask,'TransitMask':TransitMask,'OutlierMask':OutlierMask,'UnMasked':UnMasked,'yerr':yerrarr,'y':yarr,'x':xarr,'kid':kid}
     return pd
 
 def bin(data):

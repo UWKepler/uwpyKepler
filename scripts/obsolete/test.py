@@ -19,6 +19,7 @@ d4 = kep.proc.detrendData(d3,100,5)
 pylab.show()
 d5 = kep.proc.stackPortions(d4)
 
+print d5.keys()
 
 d6 = kep.proc.cutTransits(d5)
 #d7 = kep.proc.cutOutliers(d5)
