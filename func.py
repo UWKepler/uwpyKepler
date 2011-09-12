@@ -16,7 +16,7 @@ def movingMedian(data,window):
     
 def compute1Sigma(data):
     """
-    
+    return 1-sigma 
     """
     
     dsort = num.sort(data)
@@ -24,33 +24,6 @@ def compute1Sigma(data):
     sigma = (dsort[.8415*npts]-dsort[.1585*npts])/2
     return sigma
                    
-
-def bin(data):
-    """bins data, doesn't return anything, just graphs"""
-    npts = len(data['x'])
-    for nperbin in [1, 5, 10, 20, 50, 100]:
-    
-        binX    = []
-        binY    = []
-        for i in range(npts-nperbin):
-            binX.append( data['x'][i:i+nperbin].mean() )
-            binY.append( data['y'][i:i+nperbin].mean() )
-        binX    = num.array(binX)
-        binY    = num.array(binY)
-        binY   /= binY.mean()
-    
-        if nperbin == 1: symb='ro'
-        if nperbin == 5: symb='mo'
-        if nperbin == 10: symb='yo'
-        if nperbin == 20: symb='go'
-        if nperbin == 50: symb='co'
-        if nperbin == 100: symb='bo'
-        pylab.errorbar(binX, binY, fmt=symb)
-        pylab.ylim()
-        pylab.title('binsize = %d' % (nperbin))
-        
-    pylab.show()
-
 def bin2(data,binlist):
 	""" bins data and returns dictionary with an x and y list
 	    for every binsize """

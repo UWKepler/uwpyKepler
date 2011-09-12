@@ -16,19 +16,16 @@ lcData = kep.pipeline.RemoveBadEvents(lcData)
 lcData = kep.pipeline.FlagEclipses(lcData,eData,BJDREFI)
 lcDataP = kep.pipeline.SplitPortions(lcData,2)
 lcDataP = kep.pipeline.FlagOutliers(lcDataP,10,5)
-lcDataP = kep.pipeline.DetrendData(lcDataP, 50, 3)
-lcData = kep.pipeline.StackPortions(lcDataP)
+lcDataP = kep.pipeline.DetrendData(lcDataP,50,4)
 
-rlist = ['all','elc','eonly','o','k','ok']
-Nplots = len(rlist)
-i = 1
-for typeName in rlist:
-    pylab.subplot(Nplots,1,i)
-    x,y,yerr = kep.lcmod.returnData(lcData,typeName)
-    print len(x), len(y), len(yerr), len(lcData['x'])
-    pylab.plot(x,y,'bo')
-    pylab.error(x,y,yerr=yerr,fmt=None)
-    pylab.title(typeName)
-    i += 1
+for portion in lcDataP.keys():
+    lcDataP = kep.lcmod.ApplyMaskPortions(lcDataP,'OKMask',portion)
+    x = lcDataP[portion]['x']
+    y = lcDataP[portion]['y']
+    yerr = lcDataP[portion]['yerr']
+    ycor = lcDataP[portion]['Correction']
+    pylab.plot(x,y,'yo')
+    #pylab.errorbar(x,y,yerr=yerr,ecolor=None)
+    pylab.plot(x,ycor,'k.',linewidth=3)
     
 pylab.show()

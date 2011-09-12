@@ -72,7 +72,7 @@ def getKIDsFP():
 
 def getKIDsPC():
     """
-    Gets all distinct KIDs from Planet Candidates table
+    Gets all distinct KIDs from the Planet Candidates table
     """
     
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
@@ -85,7 +85,7 @@ def getKIDsPC():
 
 def getKIDsSource():
     """
-    Gets all distinct KIDs from source table
+    Gets all distinct KIDs from the source table
     """
     
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
