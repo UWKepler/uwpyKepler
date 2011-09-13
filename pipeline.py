@@ -133,7 +133,8 @@ def SplitPortions(lcData,gapsize):
         'yerr':lcData['yerr'][istamps[j][0]:istamps[j][1]+1],\
         'NoMask':lcData['NoMask'][istamps[j][0]:istamps[j][1]+1],\
         'eMask':lcData['eMask'][istamps[j][0]:istamps[j][1]+1],\
-        'KEMask':lcData['KEMask'][istamps[j][0]:istamps[j][1]+1]}
+        'KEMask':lcData['KEMask'][istamps[j][0]:istamps[j][1]+1],\
+        'cadence':lcData['cadence'][istamps[j][0]:istamps[j][1]+1]}
 
     return outData
     
@@ -238,7 +239,7 @@ def DetrendData(lcData, window, polyorder):
         newerr = num.ma.getdata(lcData[portion]['yerr'])/mergedy
         
         lcData = ApplyMaskPortions(lcData,'NoMask',portion)
-        lcData[portion]['Correction'] = mergedy
+        lcData[portion]['correction'] = mergedy
         lcData[portion]['ydt'] = newarr
         lcData[portion]['yerrdt'] = newerr
         
@@ -253,6 +254,7 @@ def StackPortions(lcData):
     ydtarr=num.array([])
     yerrdtarr=num.array([])
     corrarr = num.array([])
+    cadarr = num.array([])
     eMask=num.array([])
     OMask=num.array([])
     NoMask=num.array([])
@@ -264,7 +266,8 @@ def StackPortions(lcData):
     for portion in lcData.keys():
         xarr=num.hstack((xarr,lcData[portion]['x']))
         yarr=num.hstack((yarr,lcData[portion]['y']))
-        corrarr=num.hstack((corrarr,lcData[portion]['Correction']))
+        corrarr=num.hstack((corrarr,lcData[portion]['correction']))
+        cadarr=num.hstack((cadrarr,lcData[portion]['cadence']))
         yerrarr=num.hstack((yerrarr,lcData[portion]['yerr']))
         ydtarr=num.hstack((ydtarr,lcData[portion]['ydt']))
         yerrdtarr=num.hstack((yerrdtarr,lcData[portion]['yerrdt']))
@@ -278,8 +281,9 @@ def StackPortions(lcData):
     kid=lcData[portion]['kid']
     
     oData={'kid':kid,'x':xarr,'y':yarr,'yerr':yerrarr, \
-    'ydt':ydtarr,'yerrdt':yerrdtarr,'Correction':corrarr,\
-    'eMask':eMask,'OMask':OMask,'KEMask':KEMask,\
-    'OKMask':OKMask,'ALLMask':ALLMask,'NoMask':NoMask}
+    'ydt':ydtarr,'yerrdt':yerrdtarr,'correction':corrarr,\
+    'cadence':cadarr,'eMask':eMask,'OMask':OMask,\
+    'KEMask':KEMask,'OKMask':OKMask,'ALLMask':ALLMask,\
+    'NoMask':NoMask}
     
     return oData

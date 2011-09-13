@@ -1,0 +1,7 @@
+
+def padLC(lcData):
+    """
+    """
+    
+    
+    
