@@ -84,7 +84,6 @@ for ip in range(nperiod):
     tmin = num.floor(period0*(1-f/2))
     tmax = num.ceil(period0*(1+f/2))
     q = num.floor(8e0*(float(period0)/600e0)**(1./3.))
-    #  q=num.floor(4d0*(float(period0)/600d0)^(1./3.))
     print ip,period0
     for idata in range(ndata):
         datatmp=(data[idata][:].ravel())
@@ -100,9 +99,6 @@ for ip in range(nperiod):
 snr=speriod/num.sqrt(mbest*qbest)
 pylab.plot(period,snr[0][:],'b.')
 pylab.show()
-
-
-
 
 #for idata in range(ndata):
     #ibest = num.where(snr[idata][:] == max(snr[idata][:]))[0]

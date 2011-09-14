@@ -2,7 +2,6 @@ import sys
 import MySQLdb
 import numpy as num
 import pylab
-import uwpyKepler as kep
 #num.warning.warn(action = 'ignore')
 
             
