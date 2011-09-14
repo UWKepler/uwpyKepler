@@ -20,9 +20,9 @@ lcDataP = kep.pipeline.FlagOutliers(lcDataP,10,5)
 lcDataP = kep.pipeline.DetrendData(lcDataP, 50, 3)
 lcData = kep.pipeline.StackPortions(lcDataP)
 
-fluxdt=[]
-yflux=[]
-xflux=[]
+#fluxdt=[]
+#yflux=[]
+#xflux=[]
 
 #for i in range(len(lcData1['y'])-1):
     #fluxdt.append(abs(lcData1['y'][i+1]-lcData1['y'][i]))
