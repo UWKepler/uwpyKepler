@@ -267,7 +267,7 @@ def StackPortions(lcData):
         xarr=num.hstack((xarr,lcData[portion]['x']))
         yarr=num.hstack((yarr,lcData[portion]['y']))
         corrarr=num.hstack((corrarr,lcData[portion]['correction']))
-        cadarr=num.hstack((cadrarr,lcData[portion]['cadence']))
+        cadarr=num.hstack((cadarr,lcData[portion]['cadence']))
         yerrarr=num.hstack((yerrarr,lcData[portion]['yerr']))
         ydtarr=num.hstack((ydtarr,lcData[portion]['ydt']))
         yerrdtarr=num.hstack((yerrdtarr,lcData[portion]['yerrdt']))

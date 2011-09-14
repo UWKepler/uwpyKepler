@@ -51,6 +51,8 @@ def returnData(lcdtData,typeTag):
         idx = num.where((lcdtData['OKMask']))[0]
     elif typeTag.lower() == 'eonly':
         idx = num.where((lcdtData['eMask']))[0]
+    elif typeTag.lower() == 'flat' :
+        idx = num.where( (lcdtData['OKMask'] == False) & (lcdtData['eMask'] == False) )[0]
     elif typeTag.lower() == 'all':
         idx = num.where((lcdtData['NoMask'] == False))[0]
     else:
