@@ -1,5 +1,48 @@
 import numpy as num
 
+def makeDTwindows(nsize,window):
+    """ Given a portion length and window size,
+        this function creates appropriate for detrending.
+    """
+    
+    set1 = num.arange(0,nsize,window)
+    set2 = num.arange(0+window/2,nsize,window)
+    set2 = num.hstack( (0,set2) )
+    x = range(nsize)
+    outwin = {}
+    diff1 = nsize - set1[-1]
+    diff2 = nsize - set2[-1]
+    if diff1 < window/2:
+        set1[-1] = set1[-1]+diff1
+    else:
+        set1 = num.hstack((set1,nsize))
+    if diff2 < window/2:
+        set2[-1] = set2[-1]+diff2
+    else:
+        set2 = num.hstack((set2,nsize))
+
+    if len(set1) == 1:
+        set1 = num.hstack((0,set1))
+    if len(set2) == 1:
+        set2 = num.hstack((0,set2))
+
+    outSet1 = makeRangePairs(set1)
+    outSet2 = makeRangePairs(set2)
+    idict = {1:outSet1,2:outSet2}
+ 
+    return idict
+
+def makeRangePairs(indexList):
+    """
+    Given a list of indicies make a list of pairs.
+    """
+    
+    set = []
+    for i in range(len(indexList)-1):
+        set.append([indexList[i],indexList[i+1]])
+
+    return set
+
 def movingMedian(data,window):
     """
     Returns the median smoothed version of a given function.

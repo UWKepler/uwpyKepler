@@ -187,54 +187,46 @@ def FlagOutliers(lcData,medwin,threshold):
             #print len(mask2), len(lcData[portion]['KEMask'])
     
     return lcData
-                    
+
 def DetrendData(lcData, window, polyorder):
     """Detrends the data"""
     
     for portion in lcData.keys():
 	lcData = ApplyMaskPortions(lcData,'ALLMask',portion)
         nsize = len(lcData[portion]['x'])
-        points = num.arange(0,nsize,0.5*window)
-        points= num.hstack( (points,nsize))
+        idict = makeDTwindows(nsize,window)
         dtfunc1 = num.array([])
         dtfunc2 = num.array([])
-        set1 = []
-        set2 = []
         weight1 = (num.cos(num.pi*num.arange(nsize)/window))**2
         weight2 = (num.sin(num.pi*num.arange(nsize)/window))**2
-        
-        for i in range(len(points)):
-            if i < len(points)-1:
-                i1  = long(max(0,points[i]-window/2))
-            else:
-                i1 = long(points[i-2]+window/2)
-            i2 = long(min(points[i]+window/2,points[-1]))
-            
-            unmasked = \
-            num.where(lcData[portion]['x'][i1:i2].mask == False)[0]
-            xdata =\
-            num.array(lcData[portion]['x'][i1:i2][unmasked])
-            ydata =\
-            num.array(lcData[portion]['y'][i1:i2][unmasked])
-            
-            # find the fit
-            coeff = scipy.polyfit(xdata, ydata, polyorder)
 
-            # unmask data and apply the polynomial
-            all_data_x =\
-            num.ma.getdata(lcData[portion]['x'][i1:i2])
-            
-            outy = scipy.polyval(coeff,all_data_x)
+        # iterate through the different sets (for sin**2 and cos**2) 
+        for key in idict.keys():
+            # iterate through each range pair
+            for i in range(len(idict[key])):
+                i1 = idict[key][i][0]
+                i2 = idict[key][i][1]
+                unmasked = \
+                num.where(lcData[portion]['x'][i1:i2].mask == False)[0]
+                xdata =\
+                num.array(lcData[portion]['x'][i1:i2][unmasked])
+                ydata =\
+                num.array(lcData[portion]['y'][i1:i2][unmasked])
+                # find the fit
+                coeff = scipy.polyfit(xdata, ydata, polyorder)
 
-            if i%2 == 0:
-                set1.append( (i1,i2) )
-                dtfunc1 = num.hstack((dtfunc1,outy))
-                #pylab.plot(all_data_x,outy,'r-',linewidth=3)
-            else:
-                set2.append( (i1,i2) )
-                dtfunc2 = num.hstack((dtfunc2,outy))
-                #pylab.plot(all_data_x,outy,'c-',linewidth=3)
-            
+                # unmask data and apply the polynomial
+                all_data_x =\
+                num.ma.getdata(lcData[portion]['x'][i1:i2])
+                outy = scipy.polyval(coeff,all_data_x)
+
+                if key == 1:
+                    dtfunc1 = num.hstack((dtfunc1,outy))
+                    #pylab.plot(all_data_x,outy,'r-',linewidth=3)
+                else:
+                    dtfunc2 = num.hstack((dtfunc2,outy))
+                    #pylab.plot(all_data_x,outy,'c-',linewidth=3)
+
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
         #pylab.plot(data[portion]['x'],mergedy,'k-')
 
