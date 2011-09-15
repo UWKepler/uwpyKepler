@@ -148,7 +148,10 @@ def FlagOutliers(lcData,medwin,threshold):
     """
 
     for portion in lcData.keys():
-        npts = len(lcData[portion]['x'])
+        lcData[portion]['x'].mask = lcData[portion]['eMask']
+        lcData[portion]['y'].mask = lcData[portion]['eMask']
+        lcData[portion]['yerr'].mask = lcData[portion]['eMask']
+	npts = len(lcData[portion]['x'])
         # defining the window
         medflux = []
         medhalf = (medwin-1)/2
@@ -166,10 +169,11 @@ def FlagOutliers(lcData,medwin,threshold):
         outliers = num.ma.getdata(lcData[portion]['y']) - medflux
         sigma = compute1Sigma(outliers)
         outliers = lcData[portion]['y'] - medflux
-        idx=num.where( (abs(num.array(outliers))>threshold*sigma))[0]
+        idx=num.where( (abs(num.array(outliers))>threshold*sigma) & (lcData[portion]['eMask'] == False))
+	
         # creating the outlier mask
         lcData[portion]['x'].mask = lcData[portion]['NoMask']
-        lcData[portion]['x'][idx] = num.ma.masked
+	lcData[portion]['x'][idx[0]] = num.ma.masked
         mask2 = num.ma.copy(lcData[portion]['x'].mask)
         lcData[portion]['OMask']=mask2
         mask3 = num.ma.mask_or(mask2,lcData[portion]['eMask'])

@@ -65,3 +65,4 @@ def returnData(lcdtData,typeTag):
     yerr = lcdtData['yerrdt'][idx]
     
     return x,y,yerr
+    #return {'x':x,'y':y,'yerr':yerr}
