@@ -35,11 +35,6 @@ def returnData(lcdtData,typeTag):
     """
 
     lcdtData = ApplyMask(lcdtData,'NoMask')
-    #print len(num.where(lcdtData['OKMask'])[0])
-    #print len(num.where(lcdtData['OMask'])[0])
-    #print len(num.where(lcdtData['eMask'])[0])
-    #print len(num.where(lcdtData['KEMask'])[0])
-    #print len(num.where(lcdtData['NoMask'])[0])
     
     if typeTag.lower() == 'elc':
         idx = num.where( (lcdtData['OKMask'] == False))[0]
@@ -52,7 +47,9 @@ def returnData(lcdtData,typeTag):
     elif typeTag.lower() == 'eonly':
         idx = num.where((lcdtData['eMask']))[0]
     elif typeTag.lower() == 'flat' :
-        idx = num.where( (lcdtData['OKMask'] == False) & (lcdtData['eMask'] == False) )[0]
+        idx = num.where((lcdtData['ALLMask'] == False))[0]
+    elif typeTag.lower() == 'allflags' :
+        idx = num.where((lcdtData['ALLMask']))[0]
     elif typeTag.lower() == 'all':
         idx = num.where((lcdtData['NoMask'] == False))[0]
     else:

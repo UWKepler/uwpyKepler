@@ -1,5 +1,15 @@
 import numpy as num
 
+
+def getNumBool(List,bool):
+    """ 
+    Returns the total number of certain booleans in a list
+    """
+    List = num.array(List)
+    id0 = num.where(List == bool)[0]
+    #print len(id0)
+    return len(id0)
+
 def makeDTwindows(nsize,window):
     """ Given a portion length and window size,
         this function creates appropriate for detrending.
