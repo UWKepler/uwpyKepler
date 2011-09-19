@@ -28,6 +28,7 @@ def fmax(MM,N,tmin,tmax,q,dc):
     for m in range(1,MM+1,1):
         # Compute omega:
         om = omega_m(m,MM,tmin,tmax,N,q)
+        #print len(MM), len(N), len(om)
         if (m == 1):
             fmnMM[m-1][om] = dc[om]
         else:
@@ -39,7 +40,6 @@ def fmax(MM,N,tmin,tmax,q,dc):
     singlefmnMN = fmnMM[MM-1][om].ravel()
     fmax0 = max(singlefmnMN)
     imax = singlefmnMN.argmax()
-    imax = fmnMM[MM-1][om].argmax()
     nhat = num.zeros(MM)
     nhat[MM-1] = om[imax]
     for m in range(MM-1,0,-1):

@@ -28,6 +28,13 @@ PERIOD = 3.5222970
 T0 = 54954.118
 TD = 0.13691667
 
+#pylab.plot(tflat,fflat,'b.')
+#pylab.show()
+#pylab.plot(tflat,flagflat,'b.')
+#pylab.show()
+
+#sys.exit()
+
 nt = len(tflat)
 ndata = 3
 data = num.zeros( (ndata,nt) )
@@ -51,7 +58,8 @@ gap = num.median(tflat[1L:nt]-tflat[0L:nt-1])
 # p_i  = p_i-1 *(1+f/2)/(1-f/2)  from 100 -10,000# f=0.2# round tmin & tmax
 # Search from 5 days to 150 days:
 pmin = long(num.floor(1.3e0/gap))
-pmax = long(num.ceil(50e0/gap*2e0))
+#pmin = long(num.floor(60e0/gap))
+pmax = long(num.ceil(100e0/gap))
 print 'Range of periods: ',pmin,pmax
 #pmin=num.floor(5d0/gap)
 #pmax=num.ceil(150d0/gap)
@@ -84,7 +92,7 @@ for ip in range(nperiod):
     tmin = num.floor(period0*(1-f/2))
     tmax = num.ceil(period0*(1+f/2))
     q = num.floor(8e0*(float(period0)/600e0)**(1./3.))
-    print ip,period0
+    #print ip,period0
     for idata in range(ndata):
         datatmp=(data[idata][:].ravel())
         MM,nhat,smax,dc = kep.qats.qpt_detect(datatmp,tmin,tmax,q)
@@ -96,9 +104,14 @@ for ip in range(nperiod):
             nhatbest[idata][ip][0:MM]=nhat
             spmax[idata]=smax
 
-snr=speriod/num.sqrt(mbest*qbest)
-pylab.plot(period,snr[0][:],'b.')
-pylab.show()
+
+
+#ax = pylab.subplot(1,1,1)
+#snr=speriod/num.sqrt(mbest*qbest)
+#print num.shape(snr)
+#pylab.plot(period,snr[0][:],'b-')
+#ax.set_xscale('log')
+#pylab.show()
 
 #for idata in range(ndata):
     #ibest = num.where(snr[idata][:] == max(snr[idata][:]))[0]

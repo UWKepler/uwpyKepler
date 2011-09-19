@@ -109,7 +109,11 @@ def ReadLightCurve(KeplerID, **kwargs):
         corflux = num.ma.array([x[3] for x in results])
         corerr  = num.ma.array([x[4] for x in results])
         qflag  = num.array([x[7] for x in results])
-                
+        
+        if len(cadence) == 0:
+            print 'Impossible Exception, no data found'
+            sys.exit(1)
+
         sortindex = cadence.argsort()
         time = time[sortindex]
         corflux = corflux[sortindex]
