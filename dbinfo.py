@@ -79,4 +79,31 @@ def retrunCoordKID(KIDlist):
         DEC.append(r1[0][1])
 
     return RA, DEC
+    
+def returnKIDsInKEPFP(KIDlist):
+
+    """1. iterate through KIDs in list
+    2. keep a list of only those KIDs which are are in KEPFP
+    return list """
+
+    KIDFP = []
+    for kid in KIDlist:
+        result = kep.iodb.inKEPFP(kid)
+        if result == True:
+            KIDFP.append(kid)
+    return KIDFP
+
+
+def returnKIDsInKEPPC(KIDlist):
+
+    """1. iterate through KIDs in list
+    2. keep a list of only those KIDs which are are in KEPPC
+    return list """
+
+    KIDPC = []
+    for kid in KIDlist:
+        result = kep.iodb.inKEPPC(kid)
+        if result == True:
+            KIDPC.append(kid)
+    return KIDPC
 
