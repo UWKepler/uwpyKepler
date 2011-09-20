@@ -4,8 +4,18 @@ dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
 dBname0 = 'Kepler'
-
+import uwpyKepler as kep
 from uwpyKepler import iodb.dbConnect as dbConnect
+
+def returnKIDsNonKOI(starList):
+    filteredList = []
+    for i in range(len(starList)):
+        FPflag = kep.iodb.inKEPFP(starList[i])
+        PCflag =kep.iodb.inKEPPC(starList[i])
+        if (FPflag == False) & (PCflag == False):
+            filteredList.append(starList[i])
+
+    return filteredList
 
 def getKIDsFP():
     """
