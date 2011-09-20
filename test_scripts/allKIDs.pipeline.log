@@ -1,43 +1,7 @@
 Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 30, in <module>
-    lcDataP = kep.pipeline.DetrendData(lcDataP,100,7)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 224, in DetrendData
-    coeff = scipy.polyfit(xdata, ydata, polyorder)
-  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/lib/polynomial.py", line 538, in polyfit
-    raise TypeError, "expected non-empty vector for x"
-TypeError: expected non-empty vector for x
-#  9631995 SC 3
-Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 30, in <module>
-    lcDataP = kep.pipeline.DetrendData(lcDataP,100,7)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 224, in DetrendData
-    coeff = scipy.polyfit(xdata, ydata, polyorder)
-  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/lib/polynomial.py", line 538, in polyfit
-    raise TypeError, "expected non-empty vector for x"
-TypeError: expected non-empty vector for x
-#  9631995  3
-Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 28, in <module>
-    lcDataP = kep.pipeline.SplitPortions(lcData,2)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 125, in SplitPortions
-    istamps.append([i0,i1])
-UnboundLocalError: local variable 'i0' referenced before assignment
+  File "test_pipeline_listKIDs.py", line 25, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
 #  8845026 SC 3
-Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 30, in <module>
-    lcDataP = kep.pipeline.DetrendData(lcDataP,100,7)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 224, in DetrendData
-    coeff = scipy.polyfit(xdata, ydata, polyorder)
-  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/lib/polynomial.py", line 538, in polyfit
-    raise TypeError, "expected non-empty vector for x"
-TypeError: expected non-empty vector for x
-#  3544595 SC 3
-Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 30, in <module>
-    lcDataP = kep.pipeline.DetrendData(lcDataP,100,7)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 224, in DetrendData
-    coeff = scipy.polyfit(xdata, ydata, polyorder)
-  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/lib/polynomial.py", line 538, in polyfit
-    raise TypeError, "expected non-empty vector for x"
-TypeError: expected non-empty vector for x
-#  3544595  3
