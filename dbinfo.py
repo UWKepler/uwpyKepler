@@ -62,3 +62,21 @@ def returnSkyGroupKIDs(SGNumber):
     
     return r1
 
+def retrunCoordKID(KIDlist):
+    """
+    Returns RA and DEC for a given list of KIDs
+    """
+    
+    RA = []
+    DEC = []
+    for KID in KIDlist:
+        cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+        command = 'select distinct RA_OBJ, DEC_OBJ from object where \
+        KEPLERID = %s' % KID
+        cursor.execute(command)
+        r1 = cursor.fetchall()
+        RA.append(r1[0][0])
+        DEC.append(r1[0][1])
+
+    return RA, DEC
+
