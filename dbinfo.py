@@ -45,3 +45,20 @@ def getKIDsSource():
     r1 = ["%s" % el[0] for el in results]
     
     return r1
+
+def returnSkyGroupKIDs(SGNumber):
+    """
+    Gets all distinct KIDs from the source table from \
+    a given Sky Group (SGNumber)
+    Kepler SGNumbers go from 1 to 84
+    """
+
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+    command = 'select distinct KEPLERID from \
+    object where SKYGROUP = %s' % long(SGNumber)
+    cursor.execute(command)
+    results = cursor.fetchall()
+    r1 = ["%s" % el[0] for el in results]
+    
+    return r1
+

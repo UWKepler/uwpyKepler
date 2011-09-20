@@ -105,27 +105,26 @@ def ReadLightCurve(KeplerID, **kwargs):
         
         # reading time, corrected flux and flux errors
         cadence = num.array([x[1] for x in results])
-        time    = num.ma.array([x[2] for x in results])
-        corflux = num.ma.array([x[3] for x in results])
-        corerr  = num.ma.array([x[4] for x in results])
-        qflag  = num.array([x[7] for x in results])
-        
         if len(cadence) == 0:
-            print 'Impossible Exception, no data found'
-            sys.exit(1)
-
-        sortindex = cadence.argsort()
-        time = time[sortindex]
-        corflux = corflux[sortindex]
-        corerr = corerr[sortindex]
-        qflag = qflag[sortindex]
-        cadence = cadence[sortindex]
-
-        return {'kid':KeplerID,'x':time,'y':corflux,\
-    'yerr':corerr,'qflag':qflag,'cadence':cadence}
+            print 'Data not found for %s in Kepler.source for' % (KeplerID)
+            print ' %s option' % kwargs['selection']
+            return
+        else:
+            time    = num.ma.array([x[2] for x in results])
+            corflux = num.ma.array([x[3] for x in results])
+            corerr  = num.ma.array([x[4] for x in results])
+            qflag  = num.array([x[7] for x in results])
+            sortindex = cadence.argsort()
+            time = time[sortindex]
+            corflux = corflux[sortindex]
+            corerr = corerr[sortindex]
+            qflag = qflag[sortindex]
+            cadence = cadence[sortindex]
+            return {'kid':KeplerID,'x':time,'y':corflux,\
+            'yerr':corerr,'qflag':qflag,'cadence':cadence}
     else:
         print 'Kepler ID %s not found in Kepler.source' % (KeplerID)
-        return None
+        return
 
 def getEclipseData(KeplerID):
     """ Queries the database for Transit or Eclipse data """
@@ -137,14 +136,16 @@ def getEclipseData(KeplerID):
         cursor.execute(foo1)
         r1 = cursor.fetchall()
 	for i in range(len(r1)):
-            eData['KOI'][format(r1[i][0],'.2f')] = {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
+            eData['KOI'][format(r1[i][0],'.2f')] =\
+            {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
         eData['eDataExists'] = True
     elif inKEPFP(KeplerID):
         foo1 = 'select KOI, Period, Duration, Epoch from KEPFP where (KID = %s)' % KeplerID
         cursor.execute(foo1)
         r1 = cursor.fetchall()
 	for i in range(len(r1)):
-            eData['KOI'][format(r1[i][0],'.2f')] = {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
+            eData['KOI'][format(r1[i][0],'.2f')] =\
+            {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
         eData['eDataExists'] = True
     else:
         print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'

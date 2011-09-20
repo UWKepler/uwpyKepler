@@ -26,8 +26,14 @@ for KeplerID in allKIDs:
                 lcData = kep.pipeline.RemoveBadEvents(lcData)
                 lcData = kep.pipeline.FlagEclipses(lcData,eData,BJDREFI)
                 lcDataP = kep.pipeline.SplitPortions(lcData,2)
-                lcDataP = kep.pipeline.FlagOutliers(lcDataP,10,sig)
-                lcDataP = kep.pipeline.DetrendData(lcDataP,100,7)
+                if selopt =='LC':
+                    outwin = 10
+                    dtwin = 100
+                else:
+                    outwin = 1000
+                    dtwin = 10000
+                lcDataP = kep.pipeline.FlagOutliers(lcDataP,outwin,sig)
+                lcDataP = kep.pipeline.DetrendData(lcDataP,dtwin,7)
                 lcData = kep.pipeline.StackPortions(lcDataP)
                 passcount += 1
                 print 'pass ',KeplerID, selopt, sig

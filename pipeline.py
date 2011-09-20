@@ -8,7 +8,7 @@ import pylab
 
 def FlagKeplerEvents(lcData):
     """ Flag the Kepler event flags as outliers. """
-
+    
     # Creating the UnMaskedArray
     mask0 = num.ma.getmaskarray(lcData['x'])
     lcData['NoMask'] = mask0
