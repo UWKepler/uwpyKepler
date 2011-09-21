@@ -3,9 +3,7 @@ dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
 dBname0 = 'Kepler'
-from uwpyKepler.iodb import dbConnect as dbConnect
-from uwpyKepler.iodb import inKEPFP, inKEPPC
-
+from iodb import dbConnect, inKEPFP, inKEPPC
 
 def getKIDsFP():
     """
