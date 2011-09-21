@@ -1,9 +1,8 @@
 import sys
 import MySQLdb
 import numpy as num
-import pylab
+#import pylab
 #num.warning.warn(action = 'ignore')
-
             
 def ApplyMask(lcdtData,mask):
     """ This function applies a given mask """
@@ -31,7 +30,15 @@ def ApplyMaskPortions(lcData,mask,portion):
 
 def returnData(lcdtData,typeTag):
     """
-        typeTag - all, eonly, elc, o, k, ok
+        typeTags
+        all - All data (unmasked)
+        eonly - eclipse portions only
+        elc - eclipse and flat portions (outliers removed)
+        flat - only the flat part of the lightcurve
+        allflags - all flagged points, o, k and eclipse (opposite of flat)
+        o - uwpyKepler outliers only
+        k - Kepler flagged events (aka Kepler outliers)
+        ok - uwpyKepler and Kepler outliers
     """
 
     lcdtData = ApplyMask(lcdtData,'NoMask')
@@ -60,6 +67,6 @@ def returnData(lcdtData,typeTag):
     x = lcdtData['x'][idx]
     y = lcdtData['ydt'][idx]
     yerr = lcdtData['yerrdt'][idx]
+    cad = lcdtData['cadence'][idx]
     
-    return x,y,yerr
-    #return {'x':x,'y':y,'yerr':yerr}
+    return x,y,yerr,cad
