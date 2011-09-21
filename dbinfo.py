@@ -5,7 +5,7 @@ dBpass = 'tddb'
 dBname = 'KeplerNew'
 dBname0 = 'Kepler'
 import uwpyKepler as kep
-from uwpyKepler import iodb.dbConnect as dbConnect
+from uwpyKepler.iodb import dbConnect as dbConnect
 
 def returnKIDsNonKOI(starList):
     filteredList = []
@@ -72,7 +72,7 @@ def returnSkyGroupKIDs(SGNumber):
     
     return r1
 
-def retrunCoordKID(KIDlist):
+def returnCoordKID(KIDlist):
     """
     Returns RA and DEC for a given list of KIDs
     """
@@ -85,8 +85,10 @@ def retrunCoordKID(KIDlist):
         KEPLERID = %s' % KID
         cursor.execute(command)
         r1 = cursor.fetchall()
-        RA.append(r1[0][0])
-        DEC.append(r1[0][1])
+        #print r1, KID
+        if len(r1)> 0:
+            RA.append(r1[0][0])
+            DEC.append(r1[0][1])
 
     return RA, DEC
     
@@ -102,7 +104,6 @@ def returnKIDsInKEPFP(KIDlist):
         if result == True:
             KIDFP.append(kid)
     return KIDFP
-
 
 def returnKIDsInKEPPC(KIDlist):
 
