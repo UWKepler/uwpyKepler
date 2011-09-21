@@ -1,21 +1,11 @@
-
 dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
 dBname0 = 'Kepler'
-import uwpyKepler as kep
 from uwpyKepler.iodb import dbConnect as dbConnect
+from uwpyKepler.iodb import inKEPFP, inKEPPC
 
-def returnKIDsNonKOI(starList):
-    filteredList = []
-    for i in range(len(starList)):
-        FPflag = kep.iodb.inKEPFP(starList[i])
-        PCflag =kep.iodb.inKEPPC(starList[i])
-        if (FPflag == False) & (PCflag == False):
-            filteredList.append(starList[i])
-
-    return filteredList
 
 def getKIDsFP():
     """
@@ -86,6 +76,7 @@ def returnCoordKID(KIDlist):
         cursor.execute(command)
         r1 = cursor.fetchall()
         #print r1, KID
+        # temporary fix to ISSUE26
         if len(r1)> 0:
             RA.append(r1[0][0])
             DEC.append(r1[0][1])
@@ -93,28 +84,39 @@ def returnCoordKID(KIDlist):
     return RA, DEC
     
 def returnKIDsInKEPFP(KIDlist):
-
-    """1. iterate through KIDs in list
-    2. keep a list of only those KIDs which are are in KEPFP
-    return list """
+    """ Iterates through KIDs in list
+        and returns a list of KIDs in KEPFP.
+    """
 
     KIDFP = []
     for kid in KIDlist:
-        result = kep.iodb.inKEPFP(kid)
+        result = inKEPFP(kid)
         if result == True:
             KIDFP.append(kid)
     return KIDFP
 
 def returnKIDsInKEPPC(KIDlist):
-
-    """1. iterate through KIDs in list
-    2. keep a list of only those KIDs which are are in KEPPC
-    return list """
+    """ Iterates through KIDs in list
+        and returns a list of KIDs in KEPPC.
+    """
 
     KIDPC = []
     for kid in KIDlist:
-        result = kep.iodb.inKEPPC(kid)
+        result = inKEPPC(kid)
         if result == True:
             KIDPC.append(kid)
     return KIDPC
 
+def returnKIDsNonKOI(KIDlist):
+    """ Iterates through KIDs in list
+        and returns list of KIDs not in KEPPF and KEPPC.
+    """
+    
+    filteredList = []
+    for kid in KIDlist:
+        FPflag = inKEPFP(kid)
+        PCflag = inKEPPC(kid)
+        if (FPflag == False) & (PCflag == False):
+            filteredList.append(kid)
+
+    return filteredList
