@@ -4,7 +4,7 @@ import pylab
 import uwpyKepler as kep
 import sys
 
-file = open('QATSTEST.txt','r')
+file = open('','r')
 file = file.readlines()
 tflat = []
 fflat = []
