@@ -1,15 +1,15 @@
 import numpy as num
 
 def padLC(lcData):
+    
     """
     Pads missing cadences with ones.
     Returns the padded lightcurve.
     """
-    newcadence = ['Placeholder']
-    newtstamp = ['Placeholder']
-    gaps = True
-    efficiencynum = 0
-    diffs = []
+    
+    minCad = min(lcData['cadence'])
+    maxCad = max(lcData['cadence'])
+    CadSet = num.linspace(minCad,maxCad,1)
     
     for i in range(len(lcData['cadence'])):
         if i < len(lcData['cadence'])-1:

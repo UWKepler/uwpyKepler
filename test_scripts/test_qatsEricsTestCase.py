@@ -84,7 +84,8 @@ nhatbest = num.zeros( (ndata,nperiod,500),dtype='int64')
 mbest = num.zeros( (ndata,nperiod) )
 qbest = num.zeros( (ndata,nperiod) )
 
-for ip in range(nperiod):
+#for ip in range(nperiod):
+for ip in [0]:
     spmax = num.zeros(ndata)
     period0 = (period0*(1+f/2)/(1-f/2))
     #  period0=period[ip]
@@ -93,9 +94,11 @@ for ip in range(nperiod):
     tmax = num.ceil(period0*(1+f/2))
     q = num.floor(8e0*(float(period0)/600e0)**(1./3.))
     #print ip,period0
-    for idata in range(ndata):
+    #for idata in range(ndata):
+    for idata in [0]:
         datatmp=(data[idata][:].ravel())
         MM,nhat,smax,dc = kep.qats.qpt_detect(datatmp,tmin,tmax,q)
+        print MM,num.shape(nhat),smax,num.shape(dc)
         speriod[idata,ip]=smax
         if(smax > spmax[idata]):
             mbest[idata][ip]=MM
@@ -103,7 +106,6 @@ for ip in range(nperiod):
             nhatbest[idata][ip][:]=0
             nhatbest[idata][ip][0:MM]=nhat
             spmax[idata]=smax
-
 
 
 #ax = pylab.subplot(1,1,1)

@@ -33,7 +33,7 @@ for typeName in rlist:
         ax1 = pylab.subplot(Nplots,1,i)
     else:
         pylab.subplot(Nplots,1,i, sharex=ax1)
-    x,y,yerr = kep.lcmod.returnData(lcData,typeName)
+    x,y,yerr,cad = kep.lcmod.returnData(lcData,typeName)
     pylab.plot(x,y,'bo')
     #pylab.errorbar(x,y,yerr=yerr,fmt=None)
     pylab.title(typeName)
