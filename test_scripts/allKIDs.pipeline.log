@@ -1,7 +1,21 @@
 Traceback (most recent call last):
-  File "test_pipeline_listKIDs.py", line 25, in <module>
+  File "test_pipeline_allKIDs.py", line 25, in <module>
     lcData = kep.pipeline.FlagKeplerEvents(lcData)
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
     mask0 = num.ma.getmaskarray(lcData['x'])
 TypeError: 'NoneType' object is unsubscriptable
-#  8845026 SC 3
+#  121 LC 3
+Traceback (most recent call last):
+  File "test_pipeline_allKIDs.py", line 25, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  121 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_allKIDs.py", line 25, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  121  3

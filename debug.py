@@ -24,13 +24,12 @@ def getUniqueTraceback(logFile):
         #and start writing the lines of this message
         if fileLines[i].startswith('Traceback'):
             errDict[erri] = Stack
-            stkDict[erri] = Stack
             StackList.append(Stack)
             erri += 1
             StartStack = True
             Stack = ''
         #Look for the start of the KID and 
-        #input parameter notes and write these lines
+        #input parameter. note and write these lines
         if fileLines[i].startswith('#'):
             objDict[erri] = fileLines[i]
             StartStack = False
@@ -38,7 +37,6 @@ def getUniqueTraceback(logFile):
         if StartStack:
             Stack += fileLines[i]
 
-    #print len(set(StackList[1:])), len(StackList[1:])
     #Get the set of unique bugs and write to file
     UniqueBugs = list(set(StackList[1:]))
     UBugFile = open('UniqueBug.log','w')
@@ -52,6 +50,7 @@ def getUniqueTraceback(logFile):
         FOList.append(open(bFileName,'a'))
         
     UBugFile.close()
+    #remove useless key-value pair
     del errDict[0]
     
     for i in errDict.keys():
