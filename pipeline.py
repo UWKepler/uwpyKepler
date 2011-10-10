@@ -4,6 +4,7 @@ from lcmod import ApplyMaskPortions
 import scipy
 import warnings
 warnings.simplefilter('ignore', num.RankWarning)
+#import pylab
 
 def FlagKeplerEvents(lcData, **kwargs):
     """ Flag the Kepler event flags as outliers. """

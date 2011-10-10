@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-09 16:26:57
+ Last Updated: 2011-Oct-09 19:41:30
 
 
 + lcmod.py
@@ -38,15 +38,17 @@
      bin2(data,binlist):
 
 + pipeline.py
-     FlagKeplerEvents(lcData):
+     FlagKeplerEvents(lcData, **kwargs):
      RemoveBadEvents(lcData):
-     FlagEclipses(lcData,eclipseData,BJDREFI):
+     FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
      SplitPortions(lcData,gapsize):
      FlagOutliers(lcData,medwin,threshold):
      DetrendData(lcData, window, polyorder):
      StackPortions(lcData):
 
 + keplc.py
+    class keplc:
+    class kw:
 
 + qatsprep.py
      padLC(lcData):

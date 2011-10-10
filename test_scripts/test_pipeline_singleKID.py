@@ -4,9 +4,6 @@ import numpy as num
 import sys
 
 KeplerID = sys.argv[1]
-#KeplerID = '1722276'
-#KeplerID = '10341831'
-#KeplerID = '6850504'
 
 lcData = kep.iodb.ReadLightCurve(KeplerID,selection='LC')
 eData = kep.iodb.getEclipseData(KeplerID)
