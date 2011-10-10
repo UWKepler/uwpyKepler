@@ -4,15 +4,13 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-09 19:41:30
+ Last Updated: 2011-Oct-10 14:09:31
 
 
 + lcmod.py
      ApplyMask(lcdtData,mask):
      ApplyMaskPortions(lcData,mask,portion):
      returnData(lcdtData,typeTag):
-
-+ detectfuncs.py
 
 + dbinfo.py
      getKIDsFP():
@@ -24,35 +22,6 @@
      returnKIDsInKEPPC(KIDlist):
      returnKIDsNonKOI(KIDlist):
 
-+ debug.py
-     getUniqueTraceback(logFile):
-
-+ ioresults.py
-
-+ func.py
-     getNumBool(List,bool):
-     makeDTwindows(nsize,window):
-     makeRangePairs(indexList):
-     movingMedian(data,window):
-     compute1Sigma(data):
-     bin2(data,binlist):
-
-+ pipeline.py
-     FlagKeplerEvents(lcData, **kwargs):
-     RemoveBadEvents(lcData):
-     FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
-     SplitPortions(lcData,gapsize):
-     FlagOutliers(lcData,medwin,threshold):
-     DetrendData(lcData, window, polyorder):
-     StackPortions(lcData):
-
-+ keplc.py
-    class keplc:
-    class kw:
-
-+ qatsprep.py
-     padLC(lcData):
-
 + iodb.py
      dbConnect(dBhost,dBuser,dBpass,dBname):
      inSource(KeplerID):
@@ -63,10 +32,42 @@
      getEclipseData(KeplerID):
      getBJDREFI(KeplerID):
 
++ pipeline.py
+     FlagKeplerEvents(lcData, **kwargs):
+     RemoveBadEvents(lcData):
+     FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
+     SplitPortions(lcData,gapsize):
+     FlagOutliers(lcData,medwin,threshold):
+     DetrendData(lcData, window, polyorder):
+     StackPortions(lcData):
+
++ debug.py
+     getUniqueTraceback(logFile):
+
++ ioresults.py
+
++ keplc.py
+    class keplc:
+    class lcData:
+    class kw:
+
++ func.py
+     getNumBool(List,bool):
+     makeDTwindows(nsize,window):
+     makeRangePairs(indexList):
+     movingMedian(data,window):
+     compute1Sigma(data):
+     bin2(data,binlist):
+
++ qatsprep.py
+     padLC(lcData):
+
 + qats.py
      gamma_m(m,tmin,tmax,n,q):
      omega_m(m,mm,tmin,tmax,n,q):
      fmax(MM,N,tmin,tmax,q,dc):
      qpt_convolve(data,q):
      qpt_detect(data,tmin,tmax,q):
+
++ detectfuncs.py
 

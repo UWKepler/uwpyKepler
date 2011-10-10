@@ -1,21 +1,222 @@
 Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 25, in <module>
+  File "test_pipeline_listKIDs.py", line 26, in <module>
     lcData = kep.pipeline.FlagKeplerEvents(lcData)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
     mask0 = num.ma.getmaskarray(lcData['x'])
 TypeError: 'NoneType' object is unsubscriptable
-#  121 LC 3
+#  11495781 SC 3
 Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 25, in <module>
+  File "test_pipeline_listKIDs.py", line 26, in <module>
     lcData = kep.pipeline.FlagKeplerEvents(lcData)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
     mask0 = num.ma.getmaskarray(lcData['x'])
 TypeError: 'NoneType' object is unsubscriptable
-#  121 SC 3
+#  11390408 SC 3
 Traceback (most recent call last):
-  File "test_pipeline_allKIDs.py", line 25, in <module>
+  File "test_pipeline_listKIDs.py", line 26, in <module>
     lcData = kep.pipeline.FlagKeplerEvents(lcData)
-  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
     mask0 = num.ma.getmaskarray(lcData['x'])
 TypeError: 'NoneType' object is unsubscriptable
-#  121  3
+#  11443679 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11547260 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11495712 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11177950 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11649804 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11390968 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11125263 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11442481 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11339246 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11391978 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11599176 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11177822 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+    lcData = kep.pipeline.FlagKeplerEvents(lcData)
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11232225 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11802159 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11390196 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11700784 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11650859 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11177729 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11285303 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11548108 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 23, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/iodb.py", line 103, in ReadLightCurve
+    cursor.execute(foo)
+  File "build/bdist.linux-x86_64/egg/MySQLdb/cursors.py", line 174, in execute
+    self.errorhandler(self, exc, value)
+  File "build/bdist.linux-x86_64/egg/MySQLdb/connections.py", line 36, in defaulterrorhandler
+    raise errorclass, errorvalue
+KeyboardInterrupt
+#  11548108  3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 36, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 169, in FlagOutliers
+    medflux.append(num.ma.median(lcData[portion]['y'][i1:i2]))
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/extras.py", line 661, in median
+    result = _median1D(asorted)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/extras.py", line 649, in _median1D
+    return data[choice].mean(0)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/core.py", line 2966, in __getitem__
+    dout._mask = _mask[indx]
+KeyboardInterrupt
+#  11494888 LC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11494888 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 23, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/iodb.py", line 115, in ReadLightCurve
+    corerr  = num.ma.array([x[4] for x in results])
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/core.py", line 5735, in array
+    fill_value=fill_value, ndmin=ndmin, shrink=shrink)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/core.py", line 2669, in __new__
+    mask = np.array([getmaskarray(m) for m in data],
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/core.py", line 1300, in getmaskarray
+    def getmaskarray(arr):
+KeyboardInterrupt
+#  11494888  3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 36, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 169, in FlagOutliers
+    medflux.append(num.ma.median(lcData[portion]['y'][i1:i2]))
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/extras.py", line 661, in median
+    result = _median1D(asorted)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/extras.py", line 649, in _median1D
+    return data[choice].mean(0)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/core.py", line 2958, in __getitem__
+    dout._update_from(self)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/core.py", line 2755, in _update_from
+    _optinfo.update(getattr(obj, '_basedict', {}))
+KeyboardInterrupt
+#  11700656 LC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
+#  11700656 SC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 36, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 169, in FlagOutliers
+    medflux.append(num.ma.median(lcData[portion]['y'][i1:i2]))
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/extras.py", line 661, in median
+    result = _median1D(asorted)
+  File "/astro/apps/pkg/python64/lib/python2.6/site-packages/numpy/ma/extras.py", line 649, in _median1D
+    return data[choice].mean(0)
+KeyboardInterrupt
+#  11391790 LC 3
+Traceback (most recent call last):
+  File "test_pipeline_listKIDs.py", line 26, in <module>
+  File "/astro/users/martincj/pycode/uwpyKepler/pipeline.py", line 13, in FlagKeplerEvents
+    mask0 = num.ma.getmaskarray(lcData['x'])
+TypeError: 'NoneType' object is unsubscriptable
