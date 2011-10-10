@@ -9,13 +9,11 @@ warnings.simplefilter('ignore', num.RankWarning)
 def FlagKeplerEvents(lcData, **kwargs):
     """ Flag the Kepler event flags as outliers. """
     
+    aGap = 1
     for key in kwargs:
         if key.lower().startswith('ag'):
             # look for artificial gapsize keyword and set aGap 
             aGap = long(kwargs[key])
-        else:
-            # default radius of artificial gap
-            aGap = 1
             
     # Creating the UnMaskedArray
     mask0 = num.ma.getmaskarray(lcData['x'])
@@ -69,14 +67,12 @@ def FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
         'TransitMask' and 'NoMask'
     """
     
+    dfac = 2e0
     for key in kwargs:
         if key.lower().startswith('dur'):
             # look for duration multiplier to adjust
             # wrong kepler transit durations
             dfac = float(kwargs[key])
-        else:
-            # default duration multiplier
-            dfac = 2e0
 
     i = 0
     # use eclipse data to create the transit mask
@@ -282,8 +278,9 @@ def StackPortions(lcData):
     OKMask=num.array([])
     ALLMask=num.array([])
     oData = {}
-        
-    for portion in lcData.keys():
+    Nportions = len(lcData.keys())
+    for ip in range(Nportions):
+        portion = 'portion'+str(ip+1)
         xarr=num.hstack((xarr,lcData[portion]['x']))
         yarr=num.hstack((yarr,lcData[portion]['y']))
         corrarr=num.hstack((corrarr,lcData[portion]['correction']))
