@@ -1,4 +1,3 @@
-
 import uwpyKepler as kep
 import pylab
 import numpy as num
@@ -7,18 +6,20 @@ import traceback
 import optparse
 
 parser = optparse.OptionParser()
-parser.add_option('-l','--lcdtwin',type=int,default=100,help='Detrending window size for LC data.')
-parser.add_option('-s','--scdtwin',type=int,default=10000,help='Detrending window size for SC data.')
-parser.add_option('-o','--order',type=int,default = 7,help='Detrending function polynomial order.')
-parser.add_option('-m','--lcoutwin',type=int,default=10,help='Window size for determining median of LC data points.')
-parser.add_option('-n','--scoutwin',type=int,default=1000,help='Window size for determining median of SC data points.')
-parser.add_option('-t','--threshold',type=int,default=3,help="Sigma threshold for flagging outliers.")
-parser.parse_args()
+parser.add_option('-l','--lcdtwin',type=int,default=100,help='Detrending window size for LC data. Default=100')
+parser.add_option('-s','--scdtwin',type=int,default=10000,help='Detrending window size for SC data. Default=10000')
+parser.add_option('-o','--order',type=int,default=7,help='Detrending function polynomial order.\nDefault=7')
+parser.add_option('-m','--lcoutwin',type=int,default=10,help='Window size for determining median of LC data points. Default=10')
+parser.add_option('-n','--scoutwin',type=int,default=1000,help='Window size for determining median of SC data points. Default=1000')
+parser.add_option('-t','--thresholdmax',type=int,default=3,help='Maximum sigma threshold for flagging outliers. Default=3')
+parser.add_option('-b','--thresholdmin',type=int,default=3,help='Minimum sigma threshold for flagging outliers. Each KID will be tested from the minimum to the maximum threshold. Default=3')
+options, SGNumber = parser.parse_args()
 
-SGNumber = sys.argv[0]
-allkids = kep.dbinfo.returnSkyGroupsKIDs(SGNumber)
+#allkids = kep.dbinfo.returnSkyGroupKIDs(SGNumber[0])
 selectoption = ['LC','SC','']
-outlierSigma = 3
+#outlierSigma = [3]
+outlierSigma = range(options.thresholdmin, options.thresholdmax+1)
+print "Outlier Sigmas: ", outlierSigma
 #allKIDs = kep.dbinfo.getKIDsSource()
 allKIDs = ['9631995','8845026','3544595']
 failcount = 0
@@ -39,11 +40,11 @@ for KeplerID in allKIDs:
                 lcData = kep.pipeline.FlagEclipses(lcData,eData,BJDREFI)
                 lcDataP = kep.pipeline.SplitPortions(lcData,2)
                 if selopt =='LC':
-                    outwin = 10
-                    dtwin = 100
+                    outwin = options.lcoutwin
+                    dtwin = options.lcdtwin
                 else:
-                    outwin = 1000
-                    dtwin = 10000
+                    outwin = options.scoutwin
+                    dtwin = options.scdtwin
                 lcDataP = kep.pipeline.FlagOutliers(lcDataP,outwin,sig)
                 lcDataP = kep.pipeline.DetrendData(lcDataP,dtwin,7)
                 lcData = kep.pipeline.StackPortions(lcDataP)
