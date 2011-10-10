@@ -1,8 +1,6 @@
 import MySQLdb
-import sys
 import numpy as num
-import scipy
-import pylab
+#import pylab
 
 dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'

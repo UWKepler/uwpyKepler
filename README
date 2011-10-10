@@ -1,5 +1,72 @@
-uwpyKepler is a set of functions written in python to access the local copy of the Kepler public data.
+ uwpyKepler used to access the local public Kepler lightcurves 
+ 
+ Authors - E. Agol, A. C. Becker, N. H. Thomas, C. J. Martin, 
+           T. Steckler, J. Mehlhaff & P. Kundurthy 
+ 
+ Institution - University of Washington, Seattle 
+ Last Updated: 2011-Oct-09 19:41:30
 
-Authors - E. Agol, A. C. Becker, N. H. Thomas, C. J. Martin, 
-          T. Steckler, J. Mehlhaff & P. Kundurthy
-Institution - University of Washington, Seattle
+
++ lcmod.py
+     ApplyMask(lcdtData,mask):
+     ApplyMaskPortions(lcData,mask,portion):
+     returnData(lcdtData,typeTag):
+
++ detectfuncs.py
+
++ dbinfo.py
+     getKIDsFP():
+     getKIDsPC():
+     getKIDsSource():
+     returnSkyGroupKIDs(SGNumber):
+     returnCoordKID(KIDlist):
+     returnKIDsInKEPFP(KIDlist):
+     returnKIDsInKEPPC(KIDlist):
+     returnKIDsNonKOI(KIDlist):
+
++ debug.py
+     getUniqueTraceback(logFile):
+
++ ioresults.py
+
++ func.py
+     getNumBool(List,bool):
+     makeDTwindows(nsize,window):
+     makeRangePairs(indexList):
+     movingMedian(data,window):
+     compute1Sigma(data):
+     bin2(data,binlist):
+
++ pipeline.py
+     FlagKeplerEvents(lcData, **kwargs):
+     RemoveBadEvents(lcData):
+     FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
+     SplitPortions(lcData,gapsize):
+     FlagOutliers(lcData,medwin,threshold):
+     DetrendData(lcData, window, polyorder):
+     StackPortions(lcData):
+
++ keplc.py
+    class keplc:
+    class kw:
+
++ qatsprep.py
+     padLC(lcData):
+
++ iodb.py
+     dbConnect(dBhost,dBuser,dBpass,dBname):
+     inSource(KeplerID):
+     inKEPPC(KeplerID):
+     inKEPFP(KeplerID):
+     getKOI(KeplerID):
+     ReadLightCurve(KeplerID, **kwargs):
+     getEclipseData(KeplerID):
+     getBJDREFI(KeplerID):
+
++ qats.py
+     gamma_m(m,tmin,tmax,n,q):
+     omega_m(m,mm,tmin,tmax,n,q):
+     fmax(MM,N,tmin,tmax,q,dc):
+     qpt_convolve(data,q):
+     qpt_detect(data,tmin,tmax,q):
+

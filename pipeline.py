@@ -4,11 +4,17 @@ from lcmod import ApplyMaskPortions
 import scipy
 import warnings
 warnings.simplefilter('ignore', num.RankWarning)
-import pylab
+#import pylab
 
-def FlagKeplerEvents(lcData):
+def FlagKeplerEvents(lcData, **kwargs):
     """ Flag the Kepler event flags as outliers. """
     
+    aGap = 1
+    for key in kwargs:
+        if key.lower().startswith('ag'):
+            # look for artificial gapsize keyword and set aGap 
+            aGap = long(kwargs[key])
+            
     # Creating the UnMaskedArray
     mask0 = num.ma.getmaskarray(lcData['x'])
     lcData['NoMask'] = mask0
@@ -20,7 +26,6 @@ def FlagKeplerEvents(lcData):
     
     # Creating an artificial gap near
     # telescope attitude shifts
-    aGap = 1
     for el in id1:
         for j in range(-1*aGap,aGap+1,1):
             lcData['y'][el+j] = -99
@@ -53,7 +58,7 @@ def RemoveBadEvents(lcData):
 
     return lcData
     
-def FlagEclipses(lcData,eclipseData,BJDREFI):
+def FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
     """ This function flags points within a tranit and
     applies a mask.
         Input = data dictionary
@@ -62,6 +67,13 @@ def FlagEclipses(lcData,eclipseData,BJDREFI):
         'TransitMask' and 'NoMask'
     """
     
+    dfac = 2e0
+    for key in kwargs:
+        if key.lower().startswith('dur'):
+            # look for duration multiplier to adjust
+            # wrong kepler transit durations
+            dfac = float(kwargs[key])
+
     i = 0
     # use eclipse data to create the transit mask
     if eclipseData['eDataExists']:
@@ -69,7 +81,7 @@ def FlagEclipses(lcData,eclipseData,BJDREFI):
             period = eclipseData['KOI'][koi]['Period']
             t0 = eclipseData['KOI'][koi]['T0']
             dur = eclipseData['KOI'][koi]['Duration']
-            dur = (2*dur/24e0)
+            dur = (dfac*dur/24e0)
             t0 = t0 + 2454900e0
             width = dur/period
             maxphase=1-width/2
@@ -266,8 +278,9 @@ def StackPortions(lcData):
     OKMask=num.array([])
     ALLMask=num.array([])
     oData = {}
-        
-    for portion in lcData.keys():
+    Nportions = len(lcData.keys())
+    for ip in range(Nportions):
+        portion = 'portion'+str(ip+1)
         xarr=num.hstack((xarr,lcData[portion]['x']))
         yarr=num.hstack((yarr,lcData[portion]['y']))
         corrarr=num.hstack((corrarr,lcData[portion]['correction']))
