@@ -15,31 +15,38 @@ def labels_beneath(rects):
         pylab.text(rect.get_x()+rect.get_width()/2.,0.70*height, '%d'%int(height)) 
 
 #skyNumber = sys.argv[1]
-skyNumber = [1,2,3]
+skyNumber = [1]
 pylab.figure(1)
+FPs = []
+PCs = []
+SGs = []
 for i in skyNumber:
-	skyGroup = kep.dbinfo.returnSkyGroupKIDs(i)
-
-	FP = kep.dbinfo.returnKIDsInKEPFP(skyGroup)
-	PC = kep.dbinfo.returnKIDsInKEPPC(skyGroup)
-	
-	FPCoords = kep.dbinfo.returnCoordKID(FP)
-	PCCoords = kep.dbinfo.returnCoordKID(PC)
-	skyCoords = kep.dbinfo.returnCoordKID(skyGroup)
-	
-	pylab.plot(skyCoords[0], skyCoords[1], 'k.')
-	pylab.plot(FPCoords[0], FPCoords[1], 'ro')
-	pylab.plot(PCCoords[0], PCCoords[1], 'co')
-	pylab.legend(('SG='+str(skyNumber),'NFP='+str(len(FP)),'NPC='+str(len(PC))))
+    print "Working: Skyplot SG ", i
+    skyGroup = kep.dbinfo.returnSkyGroupKIDs(i)
+    FP = kep.dbinfo.returnKIDsInKEPFP(skyGroup)
+    PC = kep.dbinfo.returnKIDsInKEPPC(skyGroup)
+    SGs.append(skyGroup)
+    FPs.append(FP)
+    PCs.append(PC)
+    
+    FPCoords = kep.dbinfo.returnCoordKID(FP)
+    PCCoords = kep.dbinfo.returnCoordKID(PC)
+    skyCoords = kep.dbinfo.returnCoordKID(skyGroup)
+    
+    pylab.plot(skyCoords[0], skyCoords[1], 'k.')
+    pylab.plot(FPCoords[0], FPCoords[1], 'ro')
+    pylab.plot(PCCoords[0], PCCoords[1], 'co')
+    pylab.legend(('SG='+str(skyNumber),'NFP='+str(len(FP)),'NPC='+str(len(PC))))
 
 pylab.figure(2)
 lFP = []
 lPC = []
 lskyGroup = []
 for i in skyNumber:
-    skyGroup = kep.dbinfo.returnSkyGroupKIDs(i)
-    FP = kep.dbinfo.returnKIDsInKEPFP(skyGroup)
-    PC = kep.dbinfo.returnKIDsInKEPPC(skyGroup)
+    print "Working: Histogram SG ", i
+    FP = FPs[i-1]
+    PC = PCs[i-1]
+    skyGroup = SGs[i-1]
     if len(FP) > 0:
         lFP.append(len(FP))
     else:
