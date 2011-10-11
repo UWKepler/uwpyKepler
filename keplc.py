@@ -39,7 +39,7 @@ class kw:
     def __init__(self, **kwargs):
         
         self.agap = None
-        self.durf = None
+        self.durfac = None
         for key in kwargs:
             if key == 'ctype':
                 self.ctype = kwargs[key]
@@ -56,5 +56,5 @@ class kw:
             elif key == 'agap':
                 self.agap = kwargs[key]
             elif key == 'durf':
-                self.durf = kwargs[key]
+                self.durfac = kwargs[key]
                 

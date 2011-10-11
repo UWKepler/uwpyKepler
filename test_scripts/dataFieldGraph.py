@@ -45,13 +45,16 @@ for i in skyNumber:
     
 
 N=len(skyNumber)
-ind = num.arange(N)
+ind = num.arange(N)+1
 width = .35
 
-p1 = plt.bar(ind, lskyGroup, width, color='b')
-p2 = plt.bar(ind, lFP,  width, color='r', bottom=lFP)
-p3 = plt.bar(ind, lPC, width, color='y')
-
+#p1 = plt.bar(ind, lskyGroup, width, color='b')
+#p2 = plt.bar(ind, lFP,  width, color='r', bottom=lFP)
+#p3 = plt.bar(ind, lPC, width, color='y')
+plt.plot(ind,lskyGroup,'k.')
+plt.plot(ind,lFP,'b.')
+plt.plot(ind,lPC,'r.')
+plt.setp(plt.gca().set_yscale('log'))
 plt.ylabel('objects')
 plt.title('PC and FP vs all')
 #plt.xticks(ind+width/2., ('G1', 'G2', 'G3', 'G4', 'G5') )

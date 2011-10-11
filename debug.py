@@ -39,13 +39,13 @@ def getUniqueTraceback(logFile):
 
     #Get the set of unique bugs and write to file
     UniqueBugs = list(set(StackList[1:]))
-    UBugFile = open('UniqueBug.log','w')
+    UBugFile = open('UniqueBug.'+logFile,'w')
     FOList = []
     for i in range(len(UniqueBugs)):
         print >> UBugFile, '# '+str(i+1)
         print >> UBugFile, UniqueBugs[i]
         # Failed object (KID) list file
-        bFileName = 'OBJ_BUG.'+str(i+1)+'.log'
+        bFileName = 'OBJ_BUG.'+str(i+1)+'.'+logFile
         os.system('rm -v %s' % bFileName)
         FOList.append(open(bFileName,'a'))
         
