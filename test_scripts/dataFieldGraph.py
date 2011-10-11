@@ -4,32 +4,42 @@ import numpy as num
 import sys
 import matplotlib.pyplot as plt
 
-#skyNumber = sys.argv[1]
-skyNumber = [1,2,3,4]
-#for i in range(skyNumber):
-	#skyGroup = kep.dbinfo.returnSkyGroupKIDs(skyNumber)
+def labels_above(rects):
+    for rect in rects:
+        height = rect.get_height()
+        pylab.text(rect.get_x()+rect.get_width()/2.,1.10*height, '%d'%int(height))
 
-	#FP = kep.dbinfo.returnKIDsInKEPFP(skyGroup)
-	#PC = kep.dbinfo.returnKIDsInKEPPC(skyGroup)
+def labels_beneath(rects):
+    for rect in rects:
+        height = rect.get_height()
+        pylab.text(rect.get_x()+rect.get_width()/2.,0.70*height, '%d'%int(height)) 
+
+#skyNumber = sys.argv[1]
+skyNumber = [1,2,3]
+pylab.figure(1)
+for i in skyNumber:
+	skyGroup = kep.dbinfo.returnSkyGroupKIDs(i)
+
+	FP = kep.dbinfo.returnKIDsInKEPFP(skyGroup)
+	PC = kep.dbinfo.returnKIDsInKEPPC(skyGroup)
 	
-	#FPCoords = kep.dbinfo.returnCoordKID(FP)
-	#PCCoords = kep.dbinfo.returnCoordKID(PC)
-	#skyCoords = kep.dbinfo.returnCoordKID(skyGroup)
+	FPCoords = kep.dbinfo.returnCoordKID(FP)
+	PCCoords = kep.dbinfo.returnCoordKID(PC)
+	skyCoords = kep.dbinfo.returnCoordKID(skyGroup)
 	
-	#pylab.plot(skyCoords[0], skyCoords[1], 'k.')
-	#pylab.plot(FPCoords[0], FPCoords[1], 'ro')
-	#pylab.plot(PCCoords[0], PCCoords[1], 'co')
-	#pylab.legend(('SG='+str(skyNumber),'NFP='+str(len(FP)),'NPC='+str(len(PC))))
+	pylab.plot(skyCoords[0], skyCoords[1], 'k.')
+	pylab.plot(FPCoords[0], FPCoords[1], 'ro')
+	pylab.plot(PCCoords[0], PCCoords[1], 'co')
+	pylab.legend(('SG='+str(skyNumber),'NFP='+str(len(FP)),'NPC='+str(len(PC))))
+
+pylab.figure(2)
 lFP = []
 lPC = []
 lskyGroup = []
-print type(lFP)
 for i in skyNumber:
     skyGroup = kep.dbinfo.returnSkyGroupKIDs(i)
-    
     FP = kep.dbinfo.returnKIDsInKEPFP(skyGroup)
     PC = kep.dbinfo.returnKIDsInKEPPC(skyGroup)
-    print type(lFP)
     if len(FP) > 0:
         lFP.append(len(FP))
     else:
@@ -38,29 +48,29 @@ for i in skyNumber:
         lPC.append(len(PC))
     else:
         lPC.append(0)
-    
     lskyGroup.append(len(skyGroup))
-    
-   
-    
 
 N=len(skyNumber)
 ind = num.arange(N)+1
-width = .35
+width = 1.0
+indlabels = []
+for i in skyNumber:
+    indlabels.append('SG'+str(i))
+    
+rects1 = pylab.bar(ind, lskyGroup, width, color='b', bottom=0.1, label='LCs in SkyGroup')
+rects2 = pylab.bar(ind, lPC, width, color='y', bottom=0.1, label='PCs in SkyGroup')
+rects3 = pylab.bar(ind, lFP, width, color='r', bottom=0.1, label='FPs in SkyGroup')
 
-#p1 = plt.bar(ind, lskyGroup, width, color='b')
-#p2 = plt.bar(ind, lFP,  width, color='r', bottom=lFP)
-#p3 = plt.bar(ind, lPC, width, color='y')
-plt.plot(ind,lskyGroup,'k.')
-plt.plot(ind,lFP,'b.')
-plt.plot(ind,lPC,'r.')
-plt.setp(plt.gca().set_yscale('log'))
-plt.ylabel('objects')
-plt.title('PC and FP vs all')
-#plt.xticks(ind+width/2., ('G1', 'G2', 'G3', 'G4', 'G5') )
-#plt.yticks(np.arange(0,81,10))
+pylab.setp(plt.gca().set_yscale('log'))
+pylab.xticks(ind+width/2., indlabels, horizontalalignment='center')
+pylab.ylabel('objects')
+pylab.title('PC and FP vs all')
+pylab.legend()
 
-plt.show()
+labels_above(rects1)
+labels_above(rects2)
+labels_beneath(rects3)
+pylab.show()
 
     
     #####FPCoords = kep.dbinfo.returnCoordKID(FP)

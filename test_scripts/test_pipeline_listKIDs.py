@@ -6,13 +6,34 @@ import traceback
 import optparse
 
 parser = optparse.OptionParser()
-parser.add_option('-l','--lcdtwin',type=int,default=100,help='Detrending window size for LC data. Default=100')
-parser.add_option('-s','--scdtwin',type=int,default=10000,help='Detrending window size for SC data. Default=10000')
-parser.add_option('-o','--order',type=int,default=7,help='Detrending function polynomial order.\nDefault=7')
-parser.add_option('-m','--lcoutwin',type=int,default=10,help='Window size for determining median of LC data points. Default=10')
-parser.add_option('-n','--scoutwin',type=int,default=1000,help='Window size for determining median of SC data points. Default=1000')
-parser.add_option('-t','--thresholdmax',type=int,default=3,help='Maximum sigma threshold for flagging outliers. Default=3')
-parser.add_option('-b','--thresholdmin',type=int,default=3,help='Minimum sigma threshold for flagging outliers. Each KID will be tested from the minimum to the maximum threshold. Default=3')
+parser.add_option('-l','--lcdtwin',\
+                   type=int,\
+                   default=100,\
+                   help='Detrending window size for LC data. Default=100')
+parser.add_option('-s','--scdtwin',\
+                   type=int,\
+                   default=10000,\
+                   help='Detrending window size for SC data. Default=10000')
+parser.add_option('-o','--order',\
+                   type=int,\
+                   default=7,\
+                   help='Detrending function polynomial order.\nDefault=7')
+parser.add_option('-m','--lcoutwin',\
+                   type=int,\
+                   default=10,\
+                   help='Window size for determining median of LC data points. Default=10')
+parser.add_option('-n','--scoutwin',\
+                   type=int,\
+                   default=1000,\
+                   help='Window size for determining median of SC data points. Default=1000')
+parser.add_option('-t','--thresholdmax',\
+                   type=int,\
+                   default=3,\
+                   help='Maximum sigma threshold for flagging outliers. Default=3')
+parser.add_option('-b','--thresholdmin',\
+                   type=int,\
+                   default=3,\
+                   help='Minimum sigma threshold for flagging outliers. Each KID will be tested from the minimum to the maximum threshold. Default=3')
 options, SGNumber = parser.parse_args()
 
 #allkids = kep.dbinfo.returnSkyGroupKIDs(SGNumber[0])
