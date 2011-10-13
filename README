@@ -4,13 +4,15 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-10 14:09:31
+ Last Updated: 2011-Oct-13 15:56:45
 
 
 + lcmod.py
      ApplyMask(lcdtData,mask):
      ApplyMaskPortions(lcData,mask,portion):
      returnData(lcdtData,typeTag):
+
++ detectfuncs.py
 
 + dbinfo.py
      getKIDsFP():
@@ -22,15 +24,19 @@
      returnKIDsInKEPPC(KIDlist):
      returnKIDsNonKOI(KIDlist):
 
-+ iodb.py
-     dbConnect(dBhost,dBuser,dBpass,dBname):
-     inSource(KeplerID):
-     inKEPPC(KeplerID):
-     inKEPFP(KeplerID):
-     getKOI(KeplerID):
-     ReadLightCurve(KeplerID, **kwargs):
-     getEclipseData(KeplerID):
-     getBJDREFI(KeplerID):
++ debug.py
+     getUniqueTraceback(logFile):
+
++ ioresults.py
+     readKIDsFromFile(File):
+
++ func.py
+     getNumBool(List,bool):
+     makeDTwindows(nsize,window):
+     makeRangePairs(indexList):
+     movingMedian(data,window):
+     compute1Sigma(data):
+     bin2(data,binlist):
 
 + pipeline.py
      FlagKeplerEvents(lcData, **kwargs):
@@ -41,26 +47,23 @@
      DetrendData(lcData, window, polyorder):
      StackPortions(lcData):
 
-+ debug.py
-     getUniqueTraceback(logFile):
-
-+ ioresults.py
-
 + keplc.py
     class keplc:
     class lcData:
     class kw:
 
-+ func.py
-     getNumBool(List,bool):
-     makeDTwindows(nsize,window):
-     makeRangePairs(indexList):
-     movingMedian(data,window):
-     compute1Sigma(data):
-     bin2(data,binlist):
-
 + qatsprep.py
      padLC(lcData):
+
++ iodb.py
+     dbConnect(dBhost,dBuser,dBpass,dBname):
+     inSource(KeplerID):
+     inKEPPC(KeplerID):
+     inKEPFP(KeplerID):
+     getKOI(KeplerID):
+     ReadLightCurve(KeplerID, **kwargs):
+     getEclipseData(KeplerID):
+     getBJDREFI(KeplerID):
 
 + qats.py
      gamma_m(m,tmin,tmax,n,q):
@@ -68,6 +71,4 @@
      fmax(MM,N,tmin,tmax,q,dc):
      qpt_convolve(data,q):
      qpt_detect(data,tmin,tmax,q):
-
-+ detectfuncs.py
 

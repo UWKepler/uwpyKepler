@@ -11,7 +11,6 @@ if __name__ == '__main__':
     
     FileALLKIDs = open('ALL_KIDs.list','w')
     FileALLFPs = open('ALL_FPs.list','w')
-    FileALLPCs = open('ALL_PCs.list','w')
     FileALLSinglePCs = open('ALL_SinglePCs.list','w')
     FileALLMultiPCs = open('ALL_MultiPCs.list','w')
     for SG in SGList:
