@@ -1,3 +1,4 @@
+import numpy as num
 
 def readPipelinePars(File):
     """
@@ -32,17 +33,20 @@ def SortParOption(OptionString):
     
     return List
 
-def genPipelineParLists(ParDict):
-    """
-    generates a key word argument string for runPipeline
-    """
-    
-    for key in ParDict.keys():
-        if key != 'parsetName' or key != 'cChoice':
-
-
 class PipelinePars:
 
     def __init__(self, FileName):
         
-        
+        ParDict = readPipelinePars(FileName)
+        for key in ParDict.keys():
+            if key != 'parsetName' or key != 'cChoice':
+                ListData = SortParOptions(ParDict[key])
+                setattr(self,key,ListData)
+            elif key == 'cChoice':
+                ListData = map(str,ParDict[key].split(','))
+                if not isinstance(ListData,list):
+                    ListData = [ListData]
+                setattr(self,key,ListData)
+            else:
+                setattr(self,key,ParDict[key])
+                 
