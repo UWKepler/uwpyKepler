@@ -6,7 +6,7 @@ dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
-dBname0 = 'Kepler'
+#dBname0 = 'Kepler'
 
 def dbConnect(dBhost,dBuser,dBpass,dBname):
     """ Connect to server and return cursor """
@@ -31,7 +31,7 @@ def inSource(KeplerID):
 def inKEPPC(KeplerID):
     """ Checks if a certain KID exists in the KEPPC database. """
     
-    cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
     foo1 = 'select %s from KEPPC where (KID = %s)' % (KeplerID,KeplerID)
     cursor.execute(foo1)
     results = cursor.fetchall()
@@ -44,7 +44,7 @@ def inKEPPC(KeplerID):
 def inKEPFP(KeplerID):
     """ Checks if a certain KID exists in the KEPFP database. """
     
-    cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
     foo1 = 'select %s from KEPFP where (KID = %s)' % (KeplerID,KeplerID)
     cursor.execute(foo1)
     results = cursor.fetchall()
@@ -59,12 +59,12 @@ def getKOI(KeplerID):
     
     # check for ID in Planet candidate and False positive table
     if inKEPPC(KeplerID):
-        cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+        cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
         foo1 = 'select KOI from KEPPC where (KID = %s)' % (KeplerID)
         cursor.execute(foo1)
         results = cursor.fetchall()
     elif inKEPFP(KeplerID):
-        cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+        cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
         foo1 = 'select KOI from KEPFP where (KID = %s)' % (KeplerID)
         cursor.execute(foo1)
         results = cursor.fetchall()
@@ -127,7 +127,7 @@ def ReadLightCurve(KeplerID, **kwargs):
 def getEclipseData(KeplerID):
     """ Queries the database for Transit or Eclipse data """
     
-    cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
     eData = {'KOI':{}}
     if inKEPPC(KeplerID):
         foo1 = 'select KOI, Period, Dur, Epoch from KEPPC where (KID = %s)' % KeplerID

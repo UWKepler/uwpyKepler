@@ -2,7 +2,8 @@ dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
-dBname0 = 'Kepler'
+
+#dBname0 = 'Kepler'
 from iodb import dbConnect, inKEPFP, inKEPPC
 
 def getKIDsFP():
@@ -10,7 +11,7 @@ def getKIDsFP():
     Gets all distinct KIDs from False positive table
     """
     
-    cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
     foo1 = 'select DISTINCT KID from KEPFP'
     cursor.execute(foo1)
     results = cursor.fetchall()
@@ -23,7 +24,7 @@ def getKIDsPC():
     Gets all distinct KIDs from the Planet Candidates table
     """
     
-    cursor = dbConnect(dBhost,dBuser,dBpass,dBname0)
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
     foo1 = 'select DISTINCT KID from KEPPC'
     cursor.execute(foo1)
     results = cursor.fetchall()

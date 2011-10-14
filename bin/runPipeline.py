@@ -77,10 +77,11 @@ if __name__ == '__main__':
     #check agap size
     if opts.gize > opts.agap:
         opts.agap = opts.gize
-        
-    x = kep.keplc.keplc(opts.kid) 
+
+    x = kep.keplc.keplc(opts.kid)
     kw = kep.keplc.kw(ctype=opts.ctype,gsize=opts.gsize,owin=opts.owin,\
                       othresh=opts.othresh,dwin=opts.dwin,\
                       polyorder=opts.polyorder,\
                       agap=opts.agap,durfac=opts.durfac)
+
     x.runPipeline(kw)
