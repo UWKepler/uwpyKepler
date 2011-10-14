@@ -72,7 +72,7 @@ if __name__ == '__main__':
             Except = True
     if Except:
         parser.print_help()
-        raise NameError('Mandatory options missing') 
+        raise NameError('Mandatory options missing')
     
     #check agap size
     if opts.gize > opts.agap:

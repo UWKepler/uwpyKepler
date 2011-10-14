@@ -3,7 +3,6 @@ dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
 
-#dBname0 = 'Kepler'
 from iodb import dbConnect, inKEPFP, inKEPPC
 
 def getKIDsFP():

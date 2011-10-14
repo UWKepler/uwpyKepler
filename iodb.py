@@ -6,7 +6,6 @@ dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'KeplerNew'
-#dBname0 = 'Kepler'
 
 def dbConnect(dBhost,dBuser,dBpass,dBname):
     """ Connect to server and return cursor """
