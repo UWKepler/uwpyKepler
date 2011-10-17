@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-17 13:28:33
+ Last Updated: 2011-Oct-17 13:33:19
 
 
 + lcmod.py
@@ -18,9 +18,9 @@
      readPipelinePars(File):
      SortParOptions(OptionString):
      computeNTrials(ParObject):
-    class PipelinePars:
+     class PipelinePars:
      TrialList(UberList):
-    class trial:
+     class trial:
 
 + dbinfo.py
      getKIDsFP():
@@ -56,9 +56,9 @@
      StackPortions(lcData):
 
 + keplc.py
-    class keplc:
-    class lcData:
-    class kw:
+     class keplc:
+     class lcData:
+     class kw:
 
 + qatsprep.py
      padLC(lcData):

@@ -23,7 +23,7 @@ def readFunc():
                 if line.startswith('def'):
                     OutString += "    "+line[3:]
                 elif line.startswith('class'):
-                    OutString += "    "+line
+                    OutString += "     "+line
     print >> OutReadMe, HEADER
     print >> OutReadMe, OutString
     OutReadMe.close()
