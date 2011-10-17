@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-17 13:08:43
+ Last Updated: 2011-Oct-17 13:28:33
 
 
 + lcmod.py
@@ -13,6 +13,14 @@
      returnData(lcdtData,typeTag):
 
 + detectfuncs.py
+
++ pipelinepars.py
+     readPipelinePars(File):
+     SortParOptions(OptionString):
+     computeNTrials(ParObject):
+    class PipelinePars:
+     TrialList(UberList):
+    class trial:
 
 + dbinfo.py
      getKIDsFP():
@@ -46,12 +54,6 @@
      FlagOutliers(lcData,medwin,threshold):
      DetrendData(lcData, window, polyorder):
      StackPortions(lcData):
-     readPipelinePars(File):
-     SortParOptions(OptionString):
-     computeNTrials(ParObject):
-    class PipelinePars:
-     TrialList(UberList):
-    class trial:
 
 + keplc.py
     class keplc:
