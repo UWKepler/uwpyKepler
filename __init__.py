@@ -18,8 +18,8 @@ import qats
 # the transit detection algorithm
 import qatsprep
 
-# post-pipeline file input/output
-import ioresults 
+# file input/output
+import iofiles 
 
 # the keplc and related classes
 # most uwpyKepler functions will be wrapped into these class objects
@@ -27,3 +27,7 @@ import keplc
 
 # functions for debuging log files
 import debug
+
+# the set of classes and functions for automating the data retrieval pipeline
+import pipelinepars
+

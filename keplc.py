@@ -1,5 +1,4 @@
 
-
 import optparse
 import iodb, pipeline
 
@@ -55,6 +54,11 @@ class kw:
                 self.dPolyorder = kwargs[key]
             elif key == 'agap':
                 self.agap = kwargs[key]
-            elif key == 'durf':
+            elif key == 'durationfactor':
                 self.durfac = kwargs[key]
                 
+    def printString(self):
+        
+        OutString = ''
+        for 
+        

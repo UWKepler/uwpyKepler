@@ -304,3 +304,4 @@ def StackPortions(lcData):
     'NoMask':NoMask}
     
     return oData
+    

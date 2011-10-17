@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-13 15:56:45
+ Last Updated: 2011-Oct-17 13:08:43
 
 
 + lcmod.py
@@ -27,9 +27,6 @@
 + debug.py
      getUniqueTraceback(logFile):
 
-+ ioresults.py
-     readKIDsFromFile(File):
-
 + func.py
      getNumBool(List,bool):
      makeDTwindows(nsize,window):
@@ -37,6 +34,9 @@
      movingMedian(data,window):
      compute1Sigma(data):
      bin2(data,binlist):
+
++ iofiles.py
+     readKIDsFromFile(File):
 
 + pipeline.py
      FlagKeplerEvents(lcData, **kwargs):
@@ -46,6 +46,12 @@
      FlagOutliers(lcData,medwin,threshold):
      DetrendData(lcData, window, polyorder):
      StackPortions(lcData):
+     readPipelinePars(File):
+     SortParOptions(OptionString):
+     computeNTrials(ParObject):
+    class PipelinePars:
+     TrialList(UberList):
+    class trial:
 
 + keplc.py
     class keplc:
