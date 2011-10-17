@@ -1,15 +1,16 @@
 import numpy as num
+import pylab
 
 def padLC(lcData):
-    
     """
     Pads missing cadences with ones.
     Returns the padded lightcurve.
     """
-    
-    minCad = min(lcData['cadence'])
-    maxCad = max(lcData['cadence'])
-    CadSet = num.linspace(minCad,maxCad,1)
+    newcadence = ['Placeholder']
+    newtstamp = ['Placeholder']
+    gaps = True
+    efficiencynum = 0
+    diffs = []
     
     for i in range(len(lcData['cadence'])):
         if i < len(lcData['cadence'])-1:
@@ -43,17 +44,11 @@ def padLC(lcData):
                     lcData['cadence'] = num.hstack((lcData['cadence'],newcadence))
                     lcData['x'] = num.hstack((lcData['x'],newtstamp))
                     sortindex = lcData['cadence'].argsort()
-                    #for key in lcData.keys():
-                        #if key == 'ydt' or 'yerrdt' or 'y' or 'yerr':
-                            #print key
-                            #lcData[key] = num.hstack((lcData[key],ones)) 
-                            #lcData[key] = lcData[key][sortindex]
-                        #if key == 'cadence' or 'x':
-                            #lcData[key] = lcData[key][sortindex]
                     lcData['ydt'] = num.hstack((lcData['ydt'],ones)) 
                     lcData['yerrdt'] = num.hstack((lcData['yerrdt'],ones)) 
                     lcData['y'] = num.hstack((lcData['y'],ones)) 
                     lcData['yerr'] = num.hstack((lcData['yerr'],ones)) 
+                    
                     lcData['ydt'] = lcData['ydt'][sortindex]
                     lcData['yerrdt'] = lcData['yerrdt'][sortindex]
                     lcData['y'] = lcData['y'][sortindex]
@@ -65,30 +60,15 @@ def padLC(lcData):
                     if efficiencynum == 0:
                         difftstamp = lcData['x'][i+1]-lcData['x'][i]
                         efficiencynum += 1
+                        
+    lcData['flagflat'] = num.zeros(len(lcData['y']))
+    lcData['flagflat'][num.where(lcData['y'] == 1)[0]] = 1
     
-    #delindex = []
-    #for i in lcData['x']:
-        #if len(num.where(lcData['x'][i] == lcData['x'][i])[0]) > 1:
-            #print len(num.where(lcData['x'][i] == lcData['x'][i])[0])
-            #delindex = num.where(lcData['x'][i] == lcData['x'][i])[0][1]
-            #lcData['cadence'] = lcData['cadence'].tolist()
-            #lcData['x'] = lcData['x'].tolist()
-            #lcData['ydt'] = lcData['ydt'].tolist()
-            #lcData['yerrdt'] = lcData['yerrdt'].tolist()
-            #lcData['y'] = lcData['y'].tolist()
-            #lcData['yerr'] = lcData['yerr'].tolist()
-            #del(lcData['cadence'][delindex])
-            #del(lcData['x'][delindex])
-            #del(lcData['ydt'][delindex])
-            #del(lcData['yerrdt'][delindex])
-            #del(lcData['y'][delindex])
-            #del(lcData['yerr'][delindex])
-            #lcData['cadence'] = num.array(lcData['cadence'])
-            #lcData['x'] = num.array(lcData['x'])
-            #lcData['ydt'] = num.array(lcData['ydt'])
-            #lcData['yerrdt'] = num.array(lcData['yerrdt'])
-            #lcData['y'] = num.array(lcData['y'])
-            #lcData['yerr'] = num.array(lcData['yerr'])
+    #x1 = pylab.subplot(211)
+    #pylab.plot(lcData['x'], lcData['y'], 'bo')
+    #x2 = pylab.subplot(212, sharex=x1)
+    #pylab.plot(lcData['x'], lcData['flagflat'], 'ro')
+    #pylab.show()
             
     return lcData
     
