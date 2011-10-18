@@ -1,11 +1,23 @@
 import numpy as num
 import pylab
 
-def padLC(lcData):
+def padLC(lcData,FlagIds):
     """
     Pads missing cadences with ones.
     Returns the padded lightcurve.
     """
+    
+    # the eclipse lightcurve data are the best place to start
+    x,y,yerr,cad = returnData(lcData,'elc')
+    
+    if len(x)-1 < max(FlagIds):
+        raise NameError("len(x) < max(FlagIds) "+\
+        str(len(x))+" < "+str(len(FlagArray))
+
+    c0 = min(cad)
+    c1 = max(cad)
+    cad = 
+
     newcadence = ['Placeholder']
     newtstamp = ['Placeholder']
     gaps = True
@@ -64,12 +76,6 @@ def padLC(lcData):
     lcData['flagflat'] = num.zeros(len(lcData['y']))
     lcData['flagflat'][num.where(lcData['y'] == 1)[0]] = 1
     
-    #x1 = pylab.subplot(211)
-    #pylab.plot(lcData['x'], lcData['y'], 'bo')
-    #x2 = pylab.subplot(212, sharex=x1)
-    #pylab.plot(lcData['x'], lcData['flagflat'], 'ro')
-    #pylab.show()
-            
     return lcData
     
     

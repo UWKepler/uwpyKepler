@@ -84,7 +84,7 @@ class PipelinePars:
         and a List of KIDs
         """
         
-        self.NKIDs = len(KIDList)
+        self.NKIDs = len(KIDList['KIDList'])
         UberList = KIDList
         for parName in self.ParList:
             UberList[parName] = getattr(self,parName)

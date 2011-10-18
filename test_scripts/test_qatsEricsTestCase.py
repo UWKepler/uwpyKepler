@@ -32,7 +32,6 @@ TD = 0.13691667
 #pylab.show()
 #pylab.plot(tflat,flagflat,'b.')
 #pylab.show()
-
 #sys.exit()
 
 nt = len(tflat)
@@ -106,7 +105,6 @@ for ip in [0]:
             nhatbest[idata][ip][:]=0
             nhatbest[idata][ip][0:MM]=nhat
             spmax[idata]=smax
-
 
 #ax = pylab.subplot(1,1,1)
 #snr=speriod/num.sqrt(mbest*qbest)

@@ -89,9 +89,12 @@ def ReadLightCurve(KeplerID, **kwargs):
             elif kwargs[key] == 'SC':
                 addition = ' and LCFLAG = 0'
             else:
-                continue
+                #setting default to LC
+                addition = ' and LCFLAG = 1'
         else:
             #print key+' not recognized. using default'
+            #setting default to LC
+            addition = ' and LCFLAG = 1'
             continue
             
     foo = 'select * from source where (KEPLERID = %s' % (KeplerID)

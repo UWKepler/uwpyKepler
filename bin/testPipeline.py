@@ -37,11 +37,21 @@ def testPipeline(KIDFile,ParFile, **kwargs):
             failCount += 1
             if kwargs['silent']: print 'Fail ', logString
             print >> FailLog, logString
+            BugLog = open(BugLogFileName,'a')
             traceback.print_exc(file=open(BugLogFileName,"a"))
             print >> BugLog, '# '+logString
 
-    print >> SummaryLog, '# passCount, failCount, totalTrials, NKIDs, Nkwopts'
-    print >> SummaryLog, passCount, failCount, par.NTrials, par.NKIDs, par.Nkw
+    print >> BugLog, 'Traceback (placehoder string for debugging scripts):'
+    summary= {0:'total Trials = '+str(par.NTrials),1:'passCount = '+str(passCount),\
+              2:'failCount = '+str(failCount),3:'NKIDs = '+str(par.NKIDs),\
+              4:'Nkwopts = '+str(par.Nkw)}
+    
+    for i in range(len(summary.keys())):
+        print >> SummaryLog, summary[i]
+    
+    BugLog.close()
+    FailLog.close()
+    PassLog.close()
     SummaryLog.close()
 
 if __name__ == '__main__':
