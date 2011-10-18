@@ -6,8 +6,9 @@ def readKIDsFromFile(File):
     """
     
     fileObj = open(File,'r')
-    Out = {'File':File,'KIDlist':[]}
+    Out = {'File':File,'KIDList':[]}
     for line in fileObj.readlines():
-        Out['KIDlist'].append(line.strip('\n'))
+        if len(line) > 0:
+            Out['KIDList'].append(long(line.strip('\n')))
     
     return Out

@@ -145,7 +145,7 @@ def getEclipseData(KeplerID):
             {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
         eData['eDataExists'] = True
     else:
-        print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
+        #print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
         eData['eDataExists'] = False
         
     return eData

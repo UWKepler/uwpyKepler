@@ -39,26 +39,31 @@ class kw:
         
         self.agap = None
         self.durfac = None
+        printString = ''
         for key in kwargs:
             if key == 'ctype':
                 self.ctype = kwargs[key]
+                printString += ' ctype='+str(kwargs[key])+','
             elif key == 'gsize':
                 self.gapSize = kwargs[key]
+                printString += ' gsize='+str(kwargs[key])+','
             elif key == 'owin':
                 self.oWin = kwargs[key]
+                printString += ' owin='+str(kwargs[key])+','
             elif key == 'othresh':
                 self.oThreshold = kwargs[key]
+                printString += ' othreshold='+str(kwargs[key])+','
             elif key == 'dwin':
                 self.dWin = kwargs[key]
+                printString += ' dwin='+str(kwargs[key])+','
             elif key == 'polyorder':
                 self.dPolyorder = kwargs[key]
+                printString += ' polyorder='+str(kwargs[key])+','
             elif key == 'agap':
                 self.agap = kwargs[key]
+                printString += ' agap='+str(kwargs[key])+','
             elif key == 'durationfactor':
                 self.durfac = kwargs[key]
+                printString += ' durationfactor='+str(kwargs[key])+','
                 
-    def printString(self):
-        
-        OutString = ''
-        for 
-        
+        self.printString = printString[:-1] 

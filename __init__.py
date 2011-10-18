@@ -19,7 +19,7 @@ import qats
 import qatsprep
 
 # file input/output
-import iofiles 
+import iofiles
 
 # the keplc and related classes
 # most uwpyKepler functions will be wrapped into these class objects
@@ -30,4 +30,3 @@ import debug
 
 # the set of classes and functions for automating the data retrieval pipeline
 import pipelinepars
-
