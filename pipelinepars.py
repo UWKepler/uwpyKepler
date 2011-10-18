@@ -121,7 +121,7 @@ class keptrial:
     """
     
     def __init__(self,InDict):
-        #print InDict
+        #print type(InDict['KIDList'])
         self.kid = str(InDict['KIDList'])
         del InDict['KIDList']
         self.kw = InDict

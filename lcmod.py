@@ -63,7 +63,6 @@ def returnData(lcdtData,typeTag):
         'No match for typeTag found'
         idx = []
     
-    print len(idx), typeTag
     x = lcdtData['x'][idx]
     y = lcdtData['ydt'][idx]
     yerr = lcdtData['yerrdt'][idx]

@@ -1,5 +1,18 @@
 import numpy as num
-import pylab
+from lcmod import returnData
+
+def getListIndicies(Array,ListValues):
+    """
+    Return a list of indices where a list of values exists
+    in a given array
+    """ 
+    
+    lArray = Array.tolist()
+    lLV = ListValues.tolist()
+    
+    indX = [lArray.index(x) if x in lLV else None for x in lLV]
+    
+    return indX
 
 def padLC(lcData,FlagIds):
     """
@@ -10,75 +23,41 @@ def padLC(lcData,FlagIds):
     # the eclipse lightcurve data are the best place to start
     x,y,yerr,cad = returnData(lcData,'elc')
     
-    if len(x)-1 < max(FlagIds):
-        raise NameError("len(x) < max(FlagIds) "+\
-        str(len(x))+" < "+str(len(FlagArray))
+    if len(FlagIds) > 0:
+        if len(x)-1 < max(FlagIds):
+            raise NameError("len(x) < max(FlagIds) "+\
+            str(len(x))+" < "+str(len(FlagIds)) )
 
+    x0 = min(x)
+    x1 = max(x)
     c0 = min(cad)
     c1 = max(cad)
-    cad = 
+    diffx = num.diff(x)
+    Tcad = num.median(diffx)
+    xcomplete = num.arange(x0,x1,Tcad)
+    cadcomplete = num.arange(c0,c1+1,1)
+    
+    if len(xcomplete) != len(cadcomplete):
+        print len(xcomplete), len(cadcomplete)
+        raise NameError("mismatch in cadence and time intervals") 
+    
+    #missing = num.array(list(set.difference(set(cadcomplete),set(cad))))
+    #missingIDX = getListIndicies(cadcomplete,missing)
+    existingIDX = getListIndicies(cadcomplete,cad)
+    print len(missingIDX),len(existingIDX),len(cadcomplete),len(missingIDX)+len(existingIDX)
 
-    newcadence = ['Placeholder']
-    newtstamp = ['Placeholder']
-    gaps = True
-    efficiencynum = 0
-    diffs = []
+    zeros = num.zeros(len(xcomplete))
+    yerrcomplete = zeros
+    ycomplete = zeros+1e0                    #to be used for y
     
-    for i in range(len(lcData['cadence'])):
-        if i < len(lcData['cadence'])-1:
-            if lcData['cadence'][i+1]-lcData['cadence'][i] > 1:
-                diffs.append(i)
-                
-    gapnum = len(diffs)
+    xcomplete[existingIDX] = x
+    ycomplete[existingIDX] = y
+    yerrcomplete[existingIDX] = yerr
     
-    while gapnum > 0:
-        for i in range(len(lcData['cadence'])):
-            if i < len(lcData['cadence'])-1:
-                diffcadence = lcData['cadence'][i+1]-lcData['cadence'][i]
-                if diffcadence > 1:
-                    gapnum -= 1
-                    newcadence = []
-                    newtstamp = []
-                    diff = lcData['cadence'][i+1]-lcData['cadence'][i]
-                    cnewidx = num.arange(diff-1)+i+1 #Does not work after first gap: indices off. Problem addressed below
-                    tnewidx = num.arange(diff-1)
-                    for j in range(len(cnewidx)):
-                        if j == 0:
-                            newcadence.append(cnewidx[j])
-                            newtstamp.append(lcData['x'][i]+difftstamp)
-                        else: #Prevents appending same timestamp when gap is larger than 1 point
-                            newcadence.append(cnewidx[j])
-                            newtstamp.append(newtstamp[j-1]+difftstamp)
-                    ### Put inside for loop to reset lcData at each iteration, solving index problem above ###
-                    newcadence = num.array(newcadence, dtype='int64')
-                    newtstamp = num.array(newtstamp, dtype='float')
-                    ones = num.zeros(len(newcadence))+1e0
-                    lcData['cadence'] = num.hstack((lcData['cadence'],newcadence))
-                    lcData['x'] = num.hstack((lcData['x'],newtstamp))
-                    sortindex = lcData['cadence'].argsort()
-                    lcData['ydt'] = num.hstack((lcData['ydt'],ones)) 
-                    lcData['yerrdt'] = num.hstack((lcData['yerrdt'],ones)) 
-                    lcData['y'] = num.hstack((lcData['y'],ones)) 
-                    lcData['yerr'] = num.hstack((lcData['yerr'],ones)) 
-                    
-                    lcData['ydt'] = lcData['ydt'][sortindex]
-                    lcData['yerrdt'] = lcData['yerrdt'][sortindex]
-                    lcData['y'] = lcData['y'][sortindex]
-                    lcData['yerr'] = lcData['yerr'][sortindex]
-                    lcData['cadence'] = lcData['cadence'][sortindex]
-                    lcData['x'] = lcData['x'][sortindex]
-                    break
-                else:
-                    if efficiencynum == 0:
-                        difftstamp = lcData['x'][i+1]-lcData['x'][i]
-                        efficiencynum += 1
-                        
-    lcData['flagflat'] = num.zeros(len(lcData['y']))
-    lcData['flagflat'][num.where(lcData['y'] == 1)[0]] = 1
+    print x0, min(xcomplete)
+    print x1, max(xcomplete)
+    print c0, min(cadcomplete)
+    print c1, max(cadcomplete)
+
     
-    return lcData
-    
-    
-    
-    
-    
+    return
