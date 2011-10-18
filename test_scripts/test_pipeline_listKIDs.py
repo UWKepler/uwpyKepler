@@ -37,12 +37,13 @@ parser.add_option('-b','--thresholdmin',\
 options, SGNumber = parser.parse_args()
 
 #allkids = kep.dbinfo.returnSkyGroupKIDs(SGNumber[0])
-selectoption = ['LC','SC','']
+selectoption = ['LC']
 #outlierSigma = [3]
 outlierSigma = range(options.thresholdmin, options.thresholdmax+1)
 print "Outlier Sigmas: ", outlierSigma
 #allKIDs = kep.dbinfo.getKIDsSource()
-allKIDs = ['9631995','8845026','3544595']
+#allKIDs = ['9631995','8845026','3544595']
+allKIDs = ['9631995']
 failcount = 0
 passcount = 0
 totalcount = len(allKIDs)*len(selectoption)*len(outlierSigma)
@@ -79,4 +80,5 @@ for KeplerID in allKIDs:
                 print >> ofile,'# ',KeplerID, selopt, sig
                 continue
 
+kep.qatsprep.padLC(lcData)
 print totalcount, passcount, failcount 

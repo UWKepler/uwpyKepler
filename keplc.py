@@ -65,5 +65,5 @@ class kw:
             elif key == 'durationfactor':
                 self.durfac = kwargs[key]
                 printString += ' durationfactor='+str(kwargs[key])+','
-                
+
         self.printString = printString[:-1] 
