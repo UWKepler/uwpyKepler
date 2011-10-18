@@ -91,7 +91,8 @@ def ReadLightCurve(KeplerID, **kwargs):
             else:
                 continue
         else:
-            print key+' not recognized. using default'
+            #print key+' not recognized. using default'
+            continue
             
     foo = 'select * from source where (KEPLERID = %s' % (KeplerID)
     foo += addition+');'
@@ -103,8 +104,8 @@ def ReadLightCurve(KeplerID, **kwargs):
         # reading time, corrected flux and flux errors
         cadence = num.array([x[1] for x in results])
         if len(cadence) == 0:
-            print 'Data not found for %s in Kepler.source for' % (KeplerID)
-            print ' %s option' % kwargs['selection']
+            #print 'Data not found for %s in Kepler.source for' % (KeplerID)
+            #print ' %s option' % kwargs['selection']
             return
         else:
             time    = num.ma.array([x[2] for x in results])
@@ -120,7 +121,7 @@ def ReadLightCurve(KeplerID, **kwargs):
             return {'kid':KeplerID,'x':time,'y':corflux,\
             'yerr':corerr,'qflag':qflag,'cadence':cadence}
     else:
-        print 'Kepler ID %s not found in Kepler.source' % (KeplerID)
+        #print 'Kepler ID %s not found in Kepler.source' % (KeplerID)
         return
 
 def getEclipseData(KeplerID):
@@ -160,9 +161,9 @@ def getBJDREFI(KeplerID):
     if len(r1) == 1:
         return r1[0]
     elif len(r1) > 1:
-        print 'Multiple BJDREFIs found'
+        #print 'Multiple BJDREFIs found'
         return None
     else:
-        print 'No BJDREFIs found'
+        #print 'No BJDREFIs found'
         return None
     

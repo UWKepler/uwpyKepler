@@ -105,8 +105,9 @@ def TrialList(UberList):
     InList = []
     TList = []
     for key in UberList.keys():
-        keyList.append(key)
-        InList.append(UberList[key])
+        if key != 'File':
+            keyList.append(key)
+            InList.append(UberList[key])
 
     ComboList = itertools.product(*InList)
     for combo in ComboList:

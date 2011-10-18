@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-17 13:33:19
+ Last Updated: 2011-Oct-18 11:53:52
 
 
 + lcmod.py
@@ -20,7 +20,7 @@
      computeNTrials(ParObject):
      class PipelinePars:
      TrialList(UberList):
-     class trial:
+     class keptrial:
 
 + dbinfo.py
      getKIDsFP():
