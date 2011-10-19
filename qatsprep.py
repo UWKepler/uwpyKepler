@@ -44,12 +44,13 @@ def padLC(lcData,FlagIds):
     #missing = num.array(list(set.difference(set(cadcomplete),set(cad))))
     #missingIDX = getListIndicies(cadcomplete,missing)
     existingIDX = getListIndicies(cadcomplete,cad)
-    print len(missingIDX),len(existingIDX),len(cadcomplete),len(missingIDX)+len(existingIDX)
 
     zeros = num.zeros(len(xcomplete))
-    yerrcomplete = zeros
-    ycomplete = zeros+1e0                    #to be used for y
+    yerrcomplete = zeros                #padding errors with 0
+    ycomplete = zeros+1e0               #padding lc with 1
     
+    # padded datasets
+    # re-using original time-stamps for existing cadences
     xcomplete[existingIDX] = x
     ycomplete[existingIDX] = y
     yerrcomplete[existingIDX] = yerr
@@ -58,6 +59,11 @@ def padLC(lcData,FlagIds):
     print x1, max(xcomplete)
     print c0, min(cadcomplete)
     print c1, max(cadcomplete)
-
     
+    #plot check
+    import pylab
+    pylab.plot(xcomplete,ycompelte,'b.')
+    pylab.errorbar(xcomplete,ycompelte,yerr=yerrcomplete,fmt=None)
+    pylab.show()
+
     return

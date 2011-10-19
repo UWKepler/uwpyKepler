@@ -1,0 +1,10 @@
+# Pipeline         | Parset
+parsetName         | set2
+ctype              | SC
+gsize              | 4
+owin               | 100
+othresh            | 5
+dwin               | 1000
+polyorder          | 4
+agap               | 4
+durationfactor     | 2
