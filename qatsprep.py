@@ -14,56 +14,86 @@ def getListIndicies(Array,ListValues):
     
     return indX
 
-def padLC(lcData,FlagIds):
-    """
-    Pads missing cadences with ones.
-    Returns the padded lightcurve.
-    """
-    
-    # the eclipse lightcurve data are the best place to start
-    x,y,yerr,cad = returnData(lcData,'elc')
-    
-    if len(FlagIds) > 0:
-        if len(x)-1 < max(FlagIds):
-            raise NameError("len(x) < max(FlagIds) "+\
-            str(len(x))+" < "+str(len(FlagIds)) )
+class qatslc:
 
-    x0 = min(x)
-    x1 = max(x)
-    c0 = min(cad)
-    c1 = max(cad)
-    diffx = num.diff(x)
-    Tcad = num.median(diffx)
-    xcomplete = num.arange(x0,x1,Tcad)
-    cadcomplete = num.arange(c0,c1+1,1)
-    
-    if len(xcomplete) != len(cadcomplete):
-        print len(xcomplete), len(cadcomplete)
-        raise NameError("mismatch in cadence and time intervals") 
-    
-    #missing = num.array(list(set.difference(set(cadcomplete),set(cad))))
-    #missingIDX = getListIndicies(cadcomplete,missing)
-    existingIDX = getListIndicies(cadcomplete,cad)
+    def __init__(self,lcData):
+        
+        self.lcData = lcData
+        self.status = 'Initial Input'
 
-    zeros = num.zeros(len(xcomplete))
-    yerrcomplete = zeros                #padding errors with 0
-    ycomplete = zeros+1e0               #padding lc with 1
-    
-    # padded datasets
-    # re-using original time-stamps for existing cadences
-    xcomplete[existingIDX] = x
-    ycomplete[existingIDX] = y
-    yerrcomplete[existingIDX] = yerr
-    
-    print x0, min(xcomplete)
-    print x1, max(xcomplete)
-    print c0, min(cadcomplete)
-    print c1, max(cadcomplete)
-    
-    #plot check
-    import pylab
-    pylab.plot(xcomplete,ycompelte,'b.')
-    pylab.errorbar(xcomplete,ycompelte,yerr=yerrcomplete,fmt=None)
-    pylab.show()
+    def padLC(self,**kwargs):
+        """
+        Pads missing cadences with ones.
+        Returns the padded lightcurve.
+        
+        FlagIDs must corresepond to input lcData indices
+        i.e. indices of the array from the pipline
+        """
+        
+        #Default = no flaged points
+        FlagIDs = []
+        for key in kwargs:
+            if key.lower() == 'flagids':
+                FlagIDs = kwargs[key]
 
-    return
+        # the eclipse lightcurve data are the best place to start
+        x,y,yerr,cad = returnData(self.lcData,'elc')
+        
+        if len(FlagIDs) > 0:
+            if len(x)-1 < max(FlagIDs):
+                raise NameError("len(x) < max(FlagIds) "+\
+                str(len(x))+" < "+str(len(FlagIds)) )
+            for el in FlagIDs:
+                x.pop(el)
+                y.pop(el)
+                yerr.pop(el)
+                cad.pop(el)
+        else:
+            pass
+        
+        x0 = min(x)
+        x1 = max(x)
+        c0 = min(cad)
+        c1 = max(cad)
+        diffx = num.diff(x)
+        Tcad = num.median(diffx)
+        xcomplete = num.arange(x0,x1,Tcad)
+        cadcomplete = num.arange(c0,c1+1,1)
+        
+        if len(xcomplete) != len(cadcomplete):
+            print len(xcomplete), len(cadcomplete)
+            raise NameError("Mismatch in Cadence and Time Intervals")
+        
+        #missing = num.array(list(set.difference(set(cadcomplete),set(cad))))
+        #missingIDX = getListIndicies(cadcomplete,missing)
+        existingIDX = getListIndicies(cadcomplete,cad)
+    
+        zeros = num.zeros(len(xcomplete))
+        yerrcomplete = zeros                #padding errors with 0
+        ycomplete = zeros+1e0               #padding lc with 1
+        
+        # padded datasets
+        # re-using original time-stamps for existing cadences
+        xcomplete[existingIDX] = x
+        ycomplete[existingIDX] = y
+        yerrcomplete[existingIDX] = yerr
+        self.lcData = {'x':xcomplete,'y':ycomplete,'yerr':yerrcomplete}
+        self.status = 'Padded Lightcurve'
+
+    def extraNoise(self,**kwargs):
+        """
+        add noise to padded data
+        """
+        
+        # Default Sigma
+        Sigma = num.std(self.lcData['y'])
+        
+        for key in kwargs:
+            if key.lower() == 'noise':
+                Sigma = kwargs[key]
+            else:
+                continue
+
+        NoiseIDs = num.where(self.lcData['yerr'] == 0e0)[0]
+        self.lcData['y'][NoiseIDs] += Sigma*num.random.randn(len(NoiseIDs))
+        

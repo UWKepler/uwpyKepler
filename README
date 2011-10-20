@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-18 11:53:52
+ Last Updated: 2011-Oct-20 11:27:16
 
 
 + lcmod.py
@@ -61,7 +61,8 @@
      class kw:
 
 + qatsprep.py
-     padLC(lcData):
+     getListIndicies(Array,ListValues):
+     class qatslc:
 
 + iodb.py
      dbConnect(dBhost,dBuser,dBpass,dBname):
