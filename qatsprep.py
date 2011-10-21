@@ -96,4 +96,24 @@ class qatslc:
 
         NoiseIDs = num.where(self.lcData['yerr'] == 0e0)[0]
         self.lcData['y'][NoiseIDs] += Sigma*num.random.randn(len(NoiseIDs))
+        self.status = 'QATS Ready'
+        
+    def runQATS(self, **kwargs):
+        
+        NPoints = len(self.lcData['x'])
+        self.dt = num.median(self.lcData['x'][1L:NPoints]\
+                            -self.lcData['x'][0L:NPoints-1])
+
+        #default pmin, pmax
+        pmin = long(num.floor(1.3e0/self.dt))
+        pmax = long(num.ceil(100e0/self.dt))
+        f = 0.005e0
+        
+        self.pmin = pmin
+        self.pmax = pmax
+        self.f = f
+        self.period0 = pmin/(1+f/2)*(1-f/2)
+        self.nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
+        
+        
         

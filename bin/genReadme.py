@@ -10,7 +10,7 @@ def readFunc():
     "           T. Steckler, J. Mehlhaff & P. Kundurthy \n \n"+\
     " Institution - University of Washington, Seattle \n"+\
     " Last Updated: "+\
-    time.strftime("%Y-%b-%d %H:%M:%S", time.localtime())+"\n"
+    time.strftime("%Y-%b-%d %I:%M:%S %p", time.localtime())+"\n"
     
     OutReadMe = open('README','w')
     OutString = ''

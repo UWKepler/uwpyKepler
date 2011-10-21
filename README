@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-20 11:27:16
+ Last Updated: 2011-Oct-20 05:00:37 PM
 
 
 + lcmod.py
@@ -54,6 +54,9 @@
      FlagOutliers(lcData,medwin,threshold):
      DetrendData(lcData, window, polyorder):
      StackPortions(lcData):
+
++ qatsvec.py
+     qpt_detect(data,tmin,tmax,q):
 
 + keplc.py
      class keplc:

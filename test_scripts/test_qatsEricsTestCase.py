@@ -1,4 +1,3 @@
-
 import numpy as num
 import pylab
 import uwpyKepler as kep
@@ -54,7 +53,7 @@ if (extranoise != 0e0):
 gap = num.median(tflat[1L:nt]-tflat[0L:nt-1])
 
 # Now call detection routine:
-# p_i  = p_i-1 *(1+f/2)/(1-f/2)  from 100 -10,000# f=0.2# round tmin & tmax
+# p_i  = p_i-1 *(1+f/2)/(1-f/2) from 100 -10,000# f=0.2# round tmin & tmax
 # Search from 5 days to 150 days:
 pmin = long(num.floor(1.3e0/gap))
 #pmin = long(num.floor(60e0/gap))
@@ -66,6 +65,7 @@ print 'Range of periods: ',pmin,pmax
 #pmax=646.88611d0
 #pmin=1647.7602d0
 #pmax=1647.7602d0
+
 f = 0.005e0
 nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
 #print long(nperiod), pmax,pmin
@@ -77,27 +77,28 @@ speriod = num.zeros((ndata,nperiod))
 
 period0 = pmin/(1+f/2)*(1-f/2)
 period = num.zeros(nperiod)
-#period=[pmin,pmax]
-#period=[pmin]
+# period=[pmin,pmax]
+# period=[pmin]
 nhatbest = num.zeros( (ndata,nperiod,500),dtype='int64')
 mbest = num.zeros( (ndata,nperiod) )
 qbest = num.zeros( (ndata,nperiod) )
 
-#for ip in range(nperiod):
+# for ip in range(nperiod):
 for ip in [0]:
     spmax = num.zeros(ndata)
     period0 = (period0*(1+f/2)/(1-f/2))
-    #  period0=period[ip]
+    # period0=period[ip]
     period[ip] = period0
     tmin = num.floor(period0*(1-f/2))
     tmax = num.ceil(period0*(1+f/2))
     q = num.floor(8e0*(float(period0)/600e0)**(1./3.))
-    #print ip,period0
-    #for idata in range(ndata):
+    # print ip,period0
+    # for idata in range(ndata):
     for idata in [0]:
         datatmp=(data[idata][:].ravel())
         MM,nhat,smax,dc = kep.qats.qpt_detect(datatmp,tmin,tmax,q)
-        print MM,num.shape(nhat),smax,num.shape(dc)
+        print MM,num.shape(nhat),smax,num.shape(dc), num.shape(data), num.shape(datatmp), ndata
+        print num.shape(period0),num.shape(q),num.shape(tmin),num.shape(tmax),num.shape(nhat)
         speriod[idata,ip]=smax
         if(smax > spmax[idata]):
             mbest[idata][ip]=MM
@@ -124,7 +125,6 @@ for ip in [0]:
 #print 'Finished'
 
 #import uwpyKepler as kep
-
 #MM = 10
 #N = 10
 #tmin = 1
@@ -132,5 +132,4 @@ for ip in [0]:
 #q = 0.4
 #dc = 10
 #nhat = 10
-
 #print kep.qats.fmax(MM,N,tmin,tmax,q,dc,nhat)

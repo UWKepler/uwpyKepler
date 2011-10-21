@@ -89,3 +89,4 @@ def qpt_detect(data,tmin,tmax,q):
     MM = mmin+imax
     nhat = (nhatMM[imax][0:MM]).ravel()
     return MM,nhat,smax,dc
+    
