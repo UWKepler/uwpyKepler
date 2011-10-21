@@ -24,10 +24,15 @@ def stellar_dens(KID):
     
     Logg = returnLOGG(KID)
     Rstar = returnRstar(KID)
-    Grav = 6.674e-8
-    Msol = 1.99e33
-    Rsol = 6.96e10
-    rho_s = 4e0*num.pi*(10**(Logg))/(Grav*Rstar*Rsol)
+    
+    if Logg == -99 or Rstar == -99:
+        rho_s = -99
+    else:
+        Grav = 6.674e-8
+        Msol = 1.99e33
+        Rsol = 6.96e10
+        rho_s = 4e0*num.pi*(10**(Logg))/(Grav*Rstar*Rsol)
+        
     return rho_s
 
 def tdur(rho_s,b,period):
@@ -45,6 +50,37 @@ def tdur(rho_s,b,period):
     tdur = tdur/86400e0
     
     return tdur
+
+def period_snr(period0,f,nperiod):
+    
+    period = []
+    speriod = []
+    mbest = []
+    qbest = []
+    
+    for i in range(nperiod):
+        #print period0
+        spmax = 0e0
+        period0 = (period0*(1+f/2)/(1-f/2))
+        period.append(period0)
+        tmin = num.floor(period0*(1e0-f/2e0))
+        tmax = num.ceil(period0*(1e0+f/2e0))
+        q = num.floor(tdur(rho_s,b,period0)/self.dt)
+        MM, nhat, smax, dc = \
+        qats.qpt_detect(self.lcData['y'],tmin,tmax,q)
+        speriod.append(smax)
+        if smax > spmax:
+            mbest.append(MM)
+            qbest.append(q)
+            spmax = smax
+
+    period = num.array(period)
+    speriod = num.array(speriod)
+    mbest = num.array(mbest)
+    qbest = num.array(qbest)
+    snr = speriod/num.sqrt(mbest*qbest)
+
+    return snr,period
 
 class qatslc:
 
@@ -112,12 +148,17 @@ class qatslc:
         xcomplete[existingIDX] = x
         ycomplete[existingIDX] = y
         yerrcomplete[existingIDX] = yerr
+        sigma = num.std(self.lcData['y'][existingIDX])
+        flatgauss = 1e0 + sigma*num.random.randn(len(ycomplete))
+        self.sigma = sigma
         qflag = zeros[existingIDX] = 1
         self.lcData = {'x':xcomplete,\
                        'y':ycomplete,\
                        'yerr':yerrcomplete,\
+                       'flat':flatgauss
                        'padflag':padflag}
         self.status = 'Padded Lightcurve'
+        
 
     def addNoise(self,**kwargs):
         """
@@ -125,17 +166,16 @@ class qatslc:
         """
         
         # Default Sigma
-        Sigma = num.std(self.lcData['y'])
         
         for key in kwargs:
             if key.lower() == 'noise':
                 Sigma = kwargs[key]
             else:
-                continue
+                Sigma = self.sigma
 
         NoiseIDs = num.where(self.lcData['yerr'] == 0e0)[0]
         self.lcData['y'][NoiseIDs] += Sigma*num.random.randn(len(NoiseIDs))
-        self.status = 'QATS Ready'
+        self.status = 'Noise Added'
         
     def runQATS(self, **kwargs):
         
@@ -149,6 +189,7 @@ class qatslc:
         f = 0.005e0
         b = 0e0
         rho_s = stellar_dens(self.kid)
+        if rho_s == -99: rho_s = 1.4  #average solar density in g/cc
 
         self.pmin = pmin
         self.pmax = pmax
@@ -156,33 +197,9 @@ class qatslc:
         self.nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
         period0 = pmin/(1+f/2)*(1-f/2)
 
-        period = []
-        speriod = []
-        mbest = []
-        qbest = []
-
-        for i in range(self.nperiod):
-            #print period0
-            spmax = 0e0
-            period0 = (period0*(1+f/2)/(1-f/2))
-            period.append(period0)
-            tmin = num.floor(period0*(1e0-f/2e0))
-            tmax = num.ceil(period0*(1e0+f/2e0))
-            q = num.floor(tdur(rho_s,b,period0)/self.dt)
-            MM, nhat, smax, dc = \
-            qats.qpt_detect(self.lcData['y'],tmin,tmax,q)
-            speriod.append(smax)
-            if smax > spmax:
-                mbest.append(MM)
-                qbest.append(q)
-                spmax = smax
-
-        period = num.array(period)
-        speriod = num.array(speriod)
-        mbest = num.array(mbest)
-        qbest = num.array(qbest)
-        snr = speriod/num.sqrt(mbest*qbest)
+        period, snr0 = period_snr(self.lcData['y'],period0,f,nperiod)
+        period, snr1 = period_snr(self.lcData['flat'],period0,f,nperiod)
+        
         self.period = period
-        self.snr = snr
-        
-        
+        self.snr0 = snr0
+        self.snr1 = snr1
