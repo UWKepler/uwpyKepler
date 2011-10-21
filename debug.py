@@ -48,7 +48,7 @@ def getUniqueTraceback(logFile):
         os.system('rm -v %s' % bFileName)
         FOList.append(open(bFileName,'w'))
         print >> FOList[i],'%'+'-'*20+'%'
-        print >> FOList[i],'%'+UniqueBugs[i]
+        print >> FOList[i],'%'+UniqueBugs[i].replace('\n','\n%')
         print >> FOList[i],'%'+'-'*20+'%'
         
     # remove useless key-value pair
