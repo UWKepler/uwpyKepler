@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-20 05:00:37 PM
+ Last Updated: 2011-Oct-21 01:09:37 PM
 
 
 + lcmod.py
@@ -31,6 +31,8 @@
      returnKIDsInKEPFP(KIDlist):
      returnKIDsInKEPPC(KIDlist):
      returnKIDsNonKOI(KIDlist):
+     returnRstar(KID):
+     returnLOGG(KID):
 
 + debug.py
      getUniqueTraceback(logFile):
@@ -46,6 +48,13 @@
 + iofiles.py
      readKIDsFromFile(File):
 
++ qatspars.py
+     getListIndicies(Array,ListValues):
+     stellar_dens(KID):
+     tdur(rho_s,b,period):
+     period_snr(data,period0,f,nperiod,ds):
+     class qatslc:
+
 + pipeline.py
      FlagKeplerEvents(lcData, **kwargs):
      RemoveBadEvents(lcData):
@@ -55,17 +64,10 @@
      DetrendData(lcData, window, polyorder):
      StackPortions(lcData):
 
-+ qatsvec.py
-     qpt_detect(data,tmin,tmax,q):
-
 + keplc.py
      class keplc:
      class lcData:
      class kw:
-
-+ qatsprep.py
-     getListIndicies(Array,ListValues):
-     class qatslc:
 
 + iodb.py
      dbConnect(dBhost,dBuser,dBpass,dBname):

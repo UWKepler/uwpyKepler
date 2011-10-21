@@ -51,7 +51,7 @@ def tdur(rho_s,b,period):
     
     return tdur
 
-def period_snr(period0,f,nperiod):
+def period_snr(data,period0,f,nperiod,ds):
     
     period = []
     speriod = []
@@ -65,9 +65,9 @@ def period_snr(period0,f,nperiod):
         period.append(period0)
         tmin = num.floor(period0*(1e0-f/2e0))
         tmax = num.ceil(period0*(1e0+f/2e0))
-        q = num.floor(tdur(rho_s,b,period0)/self.dt)
+        q = num.floor(tdur(ds['rho_s'],ds['b'],period0)/ds['dt'])
         MM, nhat, smax, dc = \
-        qats.qpt_detect(self.lcData['y'],tmin,tmax,q)
+        qats.qpt_detect(data,tmin,tmax,q)
         speriod.append(smax)
         if smax > spmax:
             mbest.append(MM)
@@ -80,7 +80,7 @@ def period_snr(period0,f,nperiod):
     qbest = num.array(qbest)
     snr = speriod/num.sqrt(mbest*qbest)
 
-    return snr,period
+    return period, snr
 
 class qatslc:
 
@@ -111,7 +111,7 @@ class qatslc:
         if len(FlagIDs) > 0:
             if len(x)-1 < max(FlagIDs):
                 raise NameError("len(x) < max(FlagIds) "+\
-                str(len(x))+" < "+str(len(FlagIds)) )
+                str(len(x))+" < "+str(len(FlaessengIds)) )
             for el in FlagIDs:
                 x.pop(el)
                 y.pop(el)
@@ -148,14 +148,14 @@ class qatslc:
         xcomplete[existingIDX] = x
         ycomplete[existingIDX] = y
         yerrcomplete[existingIDX] = yerr
-        sigma = num.std(self.lcData['y'][existingIDX])
+        sigma = num.std(ycomplete[existingIDX])
         flatgauss = 1e0 + sigma*num.random.randn(len(ycomplete))
         self.sigma = sigma
         qflag = zeros[existingIDX] = 1
         self.lcData = {'x':xcomplete,\
                        'y':ycomplete,\
                        'yerr':yerrcomplete,\
-                       'flat':flatgauss
+                       'flat':flatgauss,\
                        'padflag':padflag}
         self.status = 'Padded Lightcurve'
         
@@ -166,13 +166,13 @@ class qatslc:
         """
         
         # Default Sigma
-        
+        Sigma = self.sigma
         for key in kwargs:
             if key.lower() == 'noise':
                 Sigma = kwargs[key]
             else:
-                Sigma = self.sigma
-
+                continue
+            
         NoiseIDs = num.where(self.lcData['yerr'] == 0e0)[0]
         self.lcData['y'][NoiseIDs] += Sigma*num.random.randn(len(NoiseIDs))
         self.status = 'Noise Added'
@@ -196,9 +196,10 @@ class qatslc:
         self.f = f
         self.nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
         period0 = pmin/(1+f/2)*(1-f/2)
-
-        period, snr0 = period_snr(self.lcData['y'],period0,f,nperiod)
-        period, snr1 = period_snr(self.lcData['flat'],period0,f,nperiod)
+        
+        ds = {'rho_s':rho_s,'b':b,'dt':self.dt}
+        period, snr0 = period_snr(self.lcData['y'],period0,f,self.nperiod,ds)
+        period, snr1 = period_snr(self.lcData['flat'],period0,f,self.nperiod,ds)
         
         self.period = period
         self.snr0 = snr0
