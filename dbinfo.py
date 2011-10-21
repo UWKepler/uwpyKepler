@@ -127,16 +127,16 @@ def returnRstar(KID):
     #Rstar = []
     #for KID in KIDlist:
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
-    command = 'select distinct RSTAR from object where \
+    command = 'select distinct RADIUS from object where \
     KEPLERID = %s' % KID
     cursor.execute(command)
     r1 = cursor.fetchall()
     # temporary fix to ISSUE26
     if len(r1)> 0:
         #Rstar.append(r1[0])
-        Rstar = r1[0]
+        Rstar = r1[0][0]
         
-    return Rstar
+    return float(Rstar)
         
 def returnLOGG(KID):
     """
@@ -153,6 +153,6 @@ def returnLOGG(KID):
     # temporary fix to ISSUE26
     if len(r1)> 0:
         #LOGG.append(r1[0])
-        LOGG = r1[0]
+        LOGG = r1[0][0]
 
-    return LOGG
+    return float(LOGG)

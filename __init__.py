@@ -16,7 +16,7 @@ import qats
 
 # preparing kepler lightcurves for 
 # the transit detection algorithm
-import qatsprep
+import qatspars
 
 # file input/output
 import iofiles
