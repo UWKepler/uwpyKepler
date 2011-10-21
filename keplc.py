@@ -31,7 +31,7 @@ class lcData:
             self.lcData6 = pipeline.DetrendData(self.lcData5,kw.dWin,kw.dPolyorder)
             self.lcData = pipeline.StackPortions(self.lcData6)
         else:
-            raise NameError('No lightcurve data found for '+str(KID))
+            raise NameError('No lightcurve data found')
         
 class kw:
     

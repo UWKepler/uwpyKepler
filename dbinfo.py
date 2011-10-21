@@ -118,3 +118,41 @@ def returnKIDsNonKOI(KIDlist):
             filteredList.append(kid)
 
     return filteredList
+        
+def returnRstar(KID):
+    """
+    Returns Rstar for a given KID
+    """
+    
+    #Rstar = []
+    #for KID in KIDlist:
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+    command = 'select distinct RSTAR from object where \
+    KEPLERID = %s' % KID
+    cursor.execute(command)
+    r1 = cursor.fetchall()
+    # temporary fix to ISSUE26
+    if len(r1)> 0:
+        #Rstar.append(r1[0])
+        Rstar = r1[0]
+        
+    return Rstar
+        
+def returnLOGG(KID):
+    """
+    Returns LOGG for a given KID
+    """
+    
+    #LOGG = []
+    #for KID in KIDlist:
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+    command = 'select distinct LOGG from object where \
+    KEPLERID = %s' % KID
+    cursor.execute(command)
+    r1 = cursor.fetchall()
+    # temporary fix to ISSUE26
+    if len(r1)> 0:
+        #LOGG.append(r1[0])
+        LOGG = r1[0]
+
+    return LOGG

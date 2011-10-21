@@ -4,8 +4,8 @@ Traceback (most recent call last):
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 17, in runPipeline
     x = lcData(self.KID,self.eData,self.BJDREFI,kw)
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 34, in __init__
-    raise NameError('No lightcurve data found for '+str(KID))
-NameError: No lightcurve data found for 11031239
+    raise NameError('No lightcurve data found')
+NameError: No lightcurve data found
 # 11031239 |  gsize=4, othreshold=5, polyorder=4, dwin=1000, ctype=SC, durationfactor=2, agap=4, owin=100
 Traceback (most recent call last):
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/bin/testPipeline.py", line 32, in testPipeline
@@ -13,8 +13,8 @@ Traceback (most recent call last):
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 17, in runPipeline
     x = lcData(self.KID,self.eData,self.BJDREFI,kw)
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 34, in __init__
-    raise NameError('No lightcurve data found for '+str(KID))
-NameError: No lightcurve data found for 10670578
+    raise NameError('No lightcurve data found')
+NameError: No lightcurve data found
 # 10670578 |  gsize=4, othreshold=5, polyorder=4, dwin=1000, ctype=SC, durationfactor=2, agap=4, owin=100
 Traceback (most recent call last):
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/bin/testPipeline.py", line 32, in testPipeline
@@ -22,7 +22,7 @@ Traceback (most recent call last):
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 17, in runPipeline
     x = lcData(self.KID,self.eData,self.BJDREFI,kw)
   File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 34, in __init__
-    raise NameError('No lightcurve data found for '+str(KID))
-NameError: No lightcurve data found for 10669452
+    raise NameError('No lightcurve data found')
+NameError: No lightcurve data found
 # 10669452 |  gsize=4, othreshold=5, polyorder=4, dwin=1000, ctype=SC, durationfactor=2, agap=4, owin=100
 Traceback (placehoder string for debugging scripts):

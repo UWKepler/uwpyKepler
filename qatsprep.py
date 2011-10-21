@@ -1,5 +1,6 @@
 import numpy as num
 from lcmod import returnData
+from dbinfo import returnLOGG, returnRstar
 
 def getListIndicies(Array,ListValues):
     """
@@ -13,6 +14,23 @@ def getListIndicies(Array,ListValues):
     indX = [lArray.index(x) if x in lLV else None for x in lLV]
     
     return indX
+
+def stellar_dens(KID):
+    """
+    compute stellar density
+    """
+    
+    Logg = num.array(returnLOGG(KIDlist))
+    Rstar = num.array(returnRstar(KIDlist))
+    
+
+def tT(rho_s,b,period):
+    """
+    
+    """
+    
+    
+
 
 class qatslc:
 
@@ -55,8 +73,9 @@ class qatslc:
         x1 = max(x)
         c0 = min(cad)
         c1 = max(cad)
-        diffx = num.diff(x)
-        Tcad = num.median(diffx)
+        dx = num.median(x[1L:len(x)]\
+                            -x[0L:len(x)-1])
+        Tcad = num.median(dx)
         xcomplete = num.arange(x0,x1,Tcad)
         cadcomplete = num.arange(c0,c1+1,1)
         
@@ -70,6 +89,7 @@ class qatslc:
     
         zeros = num.zeros(len(xcomplete))
         yerrcomplete = zeros                #padding errors with 0
+        padflag = zeros
         ycomplete = zeros+1e0               #padding lc with 1
         
         # padded datasets
@@ -77,10 +97,14 @@ class qatslc:
         xcomplete[existingIDX] = x
         ycomplete[existingIDX] = y
         yerrcomplete[existingIDX] = yerr
-        self.lcData = {'x':xcomplete,'y':ycomplete,'yerr':yerrcomplete}
+        qflag = zeros[existingIDX] = 1
+        self.lcData = {'x':xcomplete,\
+                       'y':ycomplete,\
+                       'yerr':yerrcomplete,\
+                       'padflag':padflag}
         self.status = 'Padded Lightcurve'
 
-    def extraNoise(self,**kwargs):
+    def addNoise(self,**kwargs):
         """
         add noise to padded data
         """
@@ -108,12 +132,14 @@ class qatslc:
         pmin = long(num.floor(1.3e0/self.dt))
         pmax = long(num.ceil(100e0/self.dt))
         f = 0.005e0
-        
+        b = 0e0
+        rho_s = compute_stellar_dens(self.KID)
+                
         self.pmin = pmin
         self.pmax = pmax
         self.f = f
         self.period0 = pmin/(1+f/2)*(1-f/2)
         self.nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
-        
-        
+
+        #data = {0:self.lcData['y'],1:
         

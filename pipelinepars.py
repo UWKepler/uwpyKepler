@@ -29,7 +29,7 @@ def SortParOptions(OptionString):
         try:
             List = num.arange(ANumbers[0],ANumbers[1],ANumbers[2])
         except:
-            raise NameError("Bad arange number options '"+OptionString+"'")
+            raise NameError("Bad arange number options ")
     else:
         List = map(long,OptionString.split(','))
         if not isinstance(List,list):

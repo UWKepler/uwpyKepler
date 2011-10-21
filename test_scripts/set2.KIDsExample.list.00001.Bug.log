@@ -1,0 +1,14 @@
+%--------------------%
+%Traceback (most recent call last):
+  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/bin/testPipeline.py", line 32, in testPipeline
+    X.runPipeline(kw)
+  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 17, in runPipeline
+    x = lcData(self.KID,self.eData,self.BJDREFI,kw)
+  File "/astro/users/pkundurthy/ENV/python/uwpyKepler/keplc.py", line 34, in __init__
+    raise NameError('No lightcurve data found')
+NameError: No lightcurve data found
+
+%--------------------%
+# 11031239 |  gsize=4, othreshold=5, polyorder=4, dwin=1000, ctype=SC, durationfactor=2, agap=4, owin=100
+# 10670578 |  gsize=4, othreshold=5, polyorder=4, dwin=1000, ctype=SC, durationfactor=2, agap=4, owin=100
+# 10669452 |  gsize=4, othreshold=5, polyorder=4, dwin=1000, ctype=SC, durationfactor=2, agap=4, owin=100

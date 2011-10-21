@@ -50,6 +50,13 @@ if (extranoise != 0e0):
         inon=(num.where(data[idata][:] != 0e0)[0]).ravel()
         data[idata,inon]=data[idata,inon]+addnoise[inon]
 
+#pylab.plot(data[0][:],'b-')
+#pylab.show()
+#pylab.plot(data[1][:],'b-')
+#pylab.show()
+#pylab.plot(data[2][:],'b-')
+#pylab.show()
+
 gap = num.median(tflat[1L:nt]-tflat[0L:nt-1])
 
 # Now call detection routine:
@@ -59,6 +66,8 @@ pmin = long(num.floor(1.3e0/gap))
 #pmin = long(num.floor(60e0/gap))
 pmax = long(num.ceil(100e0/gap))
 print 'Range of periods: ',pmin,pmax
+pmin = 100
+pmax = 200
 #pmin=num.floor(5d0/gap)
 #pmax=num.ceil(150d0/gap)
 #pmin=646.88611d0
@@ -68,7 +77,7 @@ print 'Range of periods: ',pmin,pmax
 
 f = 0.005e0
 nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
-#print long(nperiod), pmax,pmin
+print long(nperiod), pmax,pmin
 #nperiod=2
 #nperiod=1
 speriod = num.zeros((ndata,nperiod))
@@ -83,8 +92,8 @@ nhatbest = num.zeros( (ndata,nperiod,500),dtype='int64')
 mbest = num.zeros( (ndata,nperiod) )
 qbest = num.zeros( (ndata,nperiod) )
 
-# for ip in range(nperiod):
-for ip in [0]:
+for ip in range(nperiod):
+#for ip in [0]:
     spmax = num.zeros(ndata)
     period0 = (period0*(1+f/2)/(1-f/2))
     # period0=period[ip]
@@ -92,13 +101,13 @@ for ip in [0]:
     tmin = num.floor(period0*(1-f/2))
     tmax = num.ceil(period0*(1+f/2))
     q = num.floor(8e0*(float(period0)/600e0)**(1./3.))
-    # print ip,period0
-    # for idata in range(ndata):
-    for idata in [0]:
+    print ip,period0
+    for idata in range(ndata):
+    #for idata in [0]:
         datatmp=(data[idata][:].ravel())
         MM,nhat,smax,dc = kep.qats.qpt_detect(datatmp,tmin,tmax,q)
-        print MM,num.shape(nhat),smax,num.shape(dc), num.shape(data), num.shape(datatmp), ndata
-        print num.shape(period0),num.shape(q),num.shape(tmin),num.shape(tmax),num.shape(nhat)
+        #print MM,num.shape(nhat),smax,num.shape(dc), num.shape(data), num.shape(datatmp), ndata
+        #print num.shape(period0),num.shape(q),num.shape(tmin),num.shape(tmax),num.shape(nhat)
         speriod[idata,ip]=smax
         if(smax > spmax[idata]):
             mbest[idata][ip]=MM
@@ -107,12 +116,12 @@ for ip in [0]:
             nhatbest[idata][ip][0:MM]=nhat
             spmax[idata]=smax
 
-#ax = pylab.subplot(1,1,1)
-#snr=speriod/num.sqrt(mbest*qbest)
-#print num.shape(snr)
-#pylab.plot(period,snr[0][:],'b-')
-#ax.set_xscale('log')
-#pylab.show()
+ax = pylab.subplot(1,1,1)
+snr=speriod/num.sqrt(mbest*qbest)
+print num.shape(snr)
+pylab.plot(period,snr[0][:],'b-')
+ax.set_xscale('log')
+pylab.show()
 
 #for idata in range(ndata):
     #ibest = num.where(snr[idata][:] == max(snr[idata][:]))[0]

@@ -42,8 +42,10 @@ def testPipeline(KIDFile,ParFile, **kwargs):
             print >> BugLog, '# '+logString
 
     print >> BugLog, 'Traceback (placehoder string for debugging scripts):'
-    summary= {0:'total Trials = '+str(par.NTrials),1:'passCount = '+str(passCount),\
-              2:'failCount = '+str(failCount),3:'NKIDs = '+str(par.NKIDs),\
+    summary= {0:'total Trials = '+str(par.NTrials),\
+              1:'passCount = '+str(passCount),\
+              2:'failCount = '+str(failCount),\
+              3:'NKIDs = '+str(par.NKIDs),\
               4:'Nkwopts = '+str(par.Nkw)}
     
     for i in range(len(summary.keys())):

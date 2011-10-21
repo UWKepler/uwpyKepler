@@ -10,6 +10,7 @@ def getUniqueTraceback(logFile):
     
     file = open(logFile,'r')
     fileLines = file.readlines()
+    FileTag = logFile[:-9]
     
     erri = 0
     StartStack = False
@@ -18,18 +19,19 @@ def getUniqueTraceback(logFile):
     stkDict = {}
     Stack = ''
     StackList = []
-    #Read through each line in the log
+
+    # Read through each line in the log
     for i in range(len(fileLines)):
-        #Look for the start of a new error message
-        #and start writing the lines of this message
+        # Look for the start of a new error message
+        # and start writing the lines of this message
         if fileLines[i].startswith('Traceback'):
             errDict[erri] = Stack
             StackList.append(Stack)
             erri += 1
             StartStack = True
             Stack = ''
-        #Look for the start of the KID and 
-        #input parameter. note and write these lines
+        # Look for the start of the KID and 
+        # input parameter. note and write these lines
         if fileLines[i].startswith('#'):
             objDict[erri] = fileLines[i]
             StartStack = False
@@ -37,20 +39,19 @@ def getUniqueTraceback(logFile):
         if StartStack:
             Stack += fileLines[i]
 
-    #Get the set of unique bugs and write to file
+    # Get the set of unique bugs and write to file
     UniqueBugs = list(set(StackList[1:]))
-    UBugFile = open('UniqueBug.'+logFile,'w')
     FOList = []
     for i in range(len(UniqueBugs)):
-        print >> UBugFile, '# '+str(i+1)
-        print >> UBugFile, UniqueBugs[i]
         # Failed object (KID) list file
-        bFileName = 'OBJ_BUG.'+str(i+1)+'.'+logFile
+        bFileName = FileTag+'.'+str(i+1).zfill(5)+'.Bug.log'
         os.system('rm -v %s' % bFileName)
-        FOList.append(open(bFileName,'a'))
+        FOList.append(open(bFileName,'w'))
+        print >> FOList[i],'%'+'-'*20+'%'
+        print >> FOList[i],'%'+UniqueBugs[i]
+        print >> FOList[i],'%'+'-'*20+'%'
         
-    UBugFile.close()
-    #remove useless key-value pair
+    # remove useless key-value pair
     del errDict[0]
     
     for i in errDict.keys():
