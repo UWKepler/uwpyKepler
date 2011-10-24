@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-21 01:09:37 PM
+ Last Updated: 2011-Oct-24 12:59:40 PM
 
 
 + lcmod.py
@@ -14,6 +14,14 @@
 
 + detectfuncs.py
 
++ qats_cython.py
+     gamma_m(long int m,
+     omega_m(long int m,
+     fmax(long int MM,
+     qpt_convolve(num.ndarray data not None,
+     qpt_detect(num.ndarray data not None,
+     snr(num.ndarray data not None,
+
 + pipelinepars.py
      readPipelinePars(File):
      SortParOptions(OptionString):
@@ -21,6 +29,14 @@
      class PipelinePars:
      TrialList(UberList):
      class keptrial:
+
++ qats_struct.py
+     gamma_m_list(mlist,tmin,tmax,omDict,q):
+     omega_m_list(mlist,MMin,MMax,tmin,tmax,n,q):
+     qpt_convolve(data,q):
+     qpt_convolve_multi(data,qlist):
+     fmax_multi(MMin,MMax,Ndata,tmin,tmax,q,dc):
+     qpt_detect_multi(dcData,pData,Ndata):
 
 + dbinfo.py
      getKIDsFP():
@@ -52,6 +68,7 @@
      getListIndicies(Array,ListValues):
      stellar_dens(KID):
      tdur(rho_s,b,period):
+     mkpDict(period0,nperiod,f,N,ds):
      period_snr(data,period0,f,nperiod,ds):
      class qatslc:
 

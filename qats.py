@@ -16,7 +16,9 @@ def omega_m(m,mm,tmin,tmax,n,q):
     
     j1 = max([(m-1L)*tmin,n-(mm-m+1)*tmax])
     j2 = min([-q+m*tmax,n-q-(mm-m)*tmin])
-    return (j1+num.arange(j2-j1+1,dtype=num.int64)).tolist()
+    out = (j1+num.arange(j2-j1+1,dtype=num.int64)).tolist()
+    #print j1, j2, out
+    return out
 
 def fmax(MM,N,tmin,tmax,q,dc):
     """
@@ -28,12 +30,12 @@ def fmax(MM,N,tmin,tmax,q,dc):
     for m in range(1,MM+1,1):
         # Compute omega:
         om = omega_m(m,MM,tmin,tmax,N,q)
-        #print len(MM), len(N), len(om)
         if (m == 1):
             fmnMM[m-1][om] = dc[om]
         else:
             for i in range(len(om)):
                 j = gamma_m(m,tmin,tmax,om[i],q)
+                #print num.shape(fmnMM[m-2][j[0]:j[1]+1]), j[0],j[1], om[i]
                 fmnMM[m-1][om[i]] = dc[om[i]]\
                 +max(fmnMM[m-2][j[0]:j[1]+1])
     
@@ -47,9 +49,10 @@ def fmax(MM,N,tmin,tmax,q,dc):
         tmp = max(fmnMM[m-1][gam[0]:gam[1]+1])
         imax = fmnMM[m-1][gam[0]:gam[1]+1].argmax()
         nhat[m-1] = gam[0]+imax
-    
+        
+    #print num.shape(nhat), num.shape(fmax0)
     return fmax0,nhat
-   
+    
 def qpt_convolve(data,q):
     """
     """
@@ -77,6 +80,8 @@ def qpt_detect(data,tmin,tmax,q):
     smaxMM = num.zeros(mmax-mmin+1)
     nhatMM = num.zeros( (mmax-mmin+1,mmax) )
     # Loop over the number of transits, MM:
+    #print mmin, mmax
+    #print num.shape(smaxMM)
     for MM in range(mmin,mmax+1,1):
         # for MM=mmin,mmin do begin
         # Optimize the likelihood for a given number of transits:
@@ -88,5 +93,6 @@ def qpt_detect(data,tmin,tmax,q):
     imax = smax.argmax()
     MM = mmin+imax
     nhat = (nhatMM[imax][0:MM]).ravel()
+    
     return MM,nhat,smax,dc
     

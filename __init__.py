@@ -1,3 +1,4 @@
+import qats_struct
 
 # input/output from databases for pipeline
 import iodb
