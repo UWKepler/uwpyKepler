@@ -110,7 +110,7 @@ def bin2(data,binlist):
 		for i in range(npts-nbr):
 			
 			xlist.append(data['x'][i:i+nbr].mean() )
-			ylist.append(data['y'][i:i+nbr].mean() )
+			ylist.append(data['ydt'][i:i+nbr].mean() )
 		
 		xlist = num.array(xlist)
         	ylist = num.array(ylist)
