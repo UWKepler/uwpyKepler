@@ -2,9 +2,7 @@ import numpy as num
 from lcmod import returnData
 from dbinfo import returnLOGG, returnRstar
 import qats
-import qats_struct
 import qats_cython
-import pylab
 
 def getListIndicies(Array,ListValues):
     """
@@ -62,70 +60,12 @@ def getPTQM(period0,nperiod,f,N,ds):
     
     tdur_vec = num.vectorize(tdur)
     q = num.int_(num.floor(tdur_vec(ds['rho_s'],ds['b'],periods)/ds['dt']))
-    tmin = num.floor(periods*(1e0-f/2e0))
-    tmax = num.ceil(periods*(1e0+f/2e0))
+    tmin = num.int_(num.floor(periods*(1e0-f/2e0)))
+    tmax = num.int_(num.ceil(periods*(1e0+f/2e0)))
     mmin= num.int_(num.floor((N+q-1L)/tmax))
     mmax= num.int_(num.floor((N-q)/tmin)+1L)
     
     return periods, tmin, tmax, mmin, mmax, q
-
-def mkpDict(period0,nperiod,f,N,ds):
-    
-    periods = [period0]
-    for ip in range(nperiod):
-        periods.append(periods[-1]*(1+f/2)/(1-f/2))
-    
-    periods = num.array(periods)
-    tdur_vec = num.vectorize(tdur)
-    q = num.int_(num.floor(tdur_vec(ds['rho_s'],ds['b'],periods)/ds['dt']))
-    tmin = num.floor(periods*(1e0-f/2e0))
-    tmax = num.ceil(periods*(1e0+f/2e0))
-    mmin= num.int_(num.floor((N+q-1L)/tmax))
-    mmax= num.int_(num.floor((N-q)/tmin)+1L)
-    
-    pDdict = {}
-    for ip in range(nperiod):
-        pDdict[ip] = {'q':q[ip],
-                      'tmin':tmin[ip],
-                      'tmax':tmax[ip],
-                      'mmin':mmin[ip],
-                      'mmax':mmax[ip],
-                      'period':periods[ip]
-                     }
-                     
-    return pDdict, periods, q
-
-def period_snr(data,period0,f,nperiod,ds):
-    
-    period = []
-    speriod = []
-    mbest = []
-    qbest = []
-    
-    for i in range(nperiod):
-    #for i in range(1):
-        print period0
-        spmax = 0e0
-        period0 = (period0*(1+f/2)/(1-f/2))
-        period.append(period0)
-        tmin = num.floor(period0*(1e0-f/2e0))
-        tmax = num.ceil(period0*(1e0+f/2e0))
-        q = num.floor(tdur(ds['rho_s'],ds['b'],period0)/ds['dt'])
-        MM, nhat, smax, dc = \
-        qats.qpt_detect(data,tmin,tmax,q)
-        speriod.append(smax)
-        if smax > spmax:
-            mbest.append(MM)
-            qbest.append(q)
-            spmax = smax
-
-    period = num.array(period)
-    speriod = num.array(speriod)
-    mbest = num.array(mbest)
-    qbest = num.array(qbest)
-    snr = speriod/num.sqrt(mbest*qbest)
-
-    return period, snr
 
 class qatslc:
 
@@ -230,76 +170,26 @@ class qatslc:
         # default pmin, pmax
         pmin = long(num.floor(1.3e0/self.dt))
         pmax = long(num.ceil(100e0/self.dt))
-        #print pmin, pmax
+        # print pmin, pmax
         f = 0.005e0
         b = 0e0
         rho_s = stellar_dens(self.kid)
         if rho_s == -99: rho_s = 1.4  #average solar density in g/cc
-
-        self.pmin = pmin
-        self.pmax = pmax
-        self.f = f
-        self.nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
-        period0 = pmin/(1+f/2)*(1-f/2)
         
-        ds = {'rho_s':rho_s,'b':b,'dt':self.dt}
-        self.ds = ds
-        period, snr0 = period_snr(self.lcData['y'],period0,f,self.nperiod,ds)
-        period, snr1 = period_snr(self.lcData['flat'],period0,f,self.nperiod,ds)
-        
-        self.periods = period
-        self.snr0 = snr0
-        self.snr1 = snr1
-
-    def runQATS2(self, **kwargs):
-        
-        NPoints = len(self.lcData['x'])
-        self.dt = num.median(self.lcData['x'][1L:NPoints]\
-                            -self.lcData['x'][0L:NPoints-1])
-
-        # default pmin, pmax
-        pmin = long(num.floor(1.3e0/self.dt))
-        pmax = long(num.ceil(100e0/self.dt))
-        #print pmin, pmax
-        f = 0.005e0
-        b = 0e0
-        rho_s = stellar_dens(self.kid)
-        if rho_s == -99: rho_s = 1.4  #average solar density in g/cc
-
-        self.pmin = pmin
-        self.pmax = pmax
-        self.f = f
-        self.nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
-        period0 = pmin/(1+f/2)*(1-f/2)
-        self.ds = {'rho_s':rho_s,'b':b,'dt':self.dt}
-        pDict, periods, qlist = mkpDict(period0,self.nperiod,f,NPoints,self.ds)
-        data0 = self.lcData['y']-num.mean(self.lcData['y'])
-        data1 = self.lcData['flat']-num.mean(self.lcData['flat'])
-
-        dcData0 = qats_struct.qpt_convolve_multi(data0,qlist)
-        dcData1 = qats_struct.qpt_convolve_multi(data1,qlist)
-        
-        snr0 = qats_struct.qpt_detect_multi(dcData0,pDict,NPoints)
-        snr1 = qats_struct.qpt_detect_multi(dcData1,pDict,NPoints)
-        
-        self.periods = periods
-        self.snr0 = snr0
-        self.snr1 = snr1
-        
-    def runQATS3(self, **kwargs):
-        
-        NPoints = len(self.lcData['x'])
-        self.dt = num.median(self.lcData['x'][1L:NPoints]\
-                            -self.lcData['x'][0L:NPoints-1])
-
-        # default pmin, pmax
-        pmin = long(num.floor(1.3e0/self.dt))
-        pmax = long(num.ceil(100e0/self.dt))
-        #print pmin, pmax
-        f = 0.005e0
-        b = 0e0
-        rho_s = stellar_dens(self.kid)
-        if rho_s == -99: rho_s = 1.4  #average solar density in g/cc
+        #sort through keywords
+        for key in kwargs:
+            if key.lower() == 'rho_s':
+                rho_s = kwargs[key]
+            elif key.lower() == 'pmin':
+                pmin = kwargs[key]
+            elif key.lower() == 'pmax':
+                pmax = kwargs[key]
+            elif key.lower() = 'f':
+                f = kwargs[key]
+            elif key.lower() = 'b':
+                b = kwargs[key]
+            else:
+                pass
 
         self.pmin = pmin
         self.pmax = pmax
@@ -311,10 +201,11 @@ class qatslc:
         self.ds = ds
         periods, tmin, tmax, mmin, mmax, q = getPTQM(period0,nperiod,self.f,NPoints,self.ds)
         
-        snr0 = qats_cython.snr(self.lcData['y'],tmin,tmax,q,nperiod+1)
-        snr1 = qats_cython.snr(self.lcData['flat'],tmin,tmax,q,nperiod+1)
+        snr0 = qats_cython.snr(self.lcData['y'],NPoints,tmin,tmax,q,nperiod+1)
+        snr1 = qats_cython.snr(self.lcData['flat'],NPoints,tmin,tmax,q,nperiod+1)
         self.nperiod = nperiod+1
         self.periods = periods
+        self.Ndata = NPoints 
         self.snr0 = snr0
         self.snr1 = snr1
 
