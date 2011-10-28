@@ -1,5 +1,5 @@
 
-def bin(data,binlist):
+def bin2(data,binlist):
 	""" bins data and returns dictionary with an x and y list
 	    for every binsize """
 	
