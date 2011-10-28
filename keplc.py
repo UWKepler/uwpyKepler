@@ -50,7 +50,7 @@ class kw:
             elif key == 'owin':
                 self.oWin = kwargs[key]
                 printString += ' owin='+str(kwargs[key])+','
-            elif key == 'othresh':
+            elif key.lower().startswith('othresh'):
                 self.oThreshold = kwargs[key]
                 printString += ' othreshold='+str(kwargs[key])+','
             elif key == 'dwin':

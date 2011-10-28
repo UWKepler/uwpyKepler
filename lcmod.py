@@ -31,14 +31,14 @@ def ApplyMaskPortions(lcData,mask,portion):
 def returnData(lcdtData,typeTag):
     """
         typeTags
-        all - All data (unmasked)
-        eonly - eclipse portions only
-        elc - eclipse and flat portions (outliers removed)
-        flat - only the flat part of the lightcurve
+        all - All data (return all data without any masks)
+        eonly - eclipse portions only (return only eclipse portions)
+        elc - eclipse and flat portions (return data with outliers (o & k) removed)
+        flat - only the flat part of the lightcurve (return data with o, k and eclipses removed)
         allflags - all flagged points, o, k and eclipse (opposite of flat)
-        o - uwpyKepler outliers only
-        k - Kepler flagged events (aka Kepler outliers)
-        ok - uwpyKepler and Kepler outliers
+        o - uwpyKepler outliers only (return outliers)
+        k - Kepler flagged events (return Kepler flagged outliers)
+        ok - uwpyKepler and Kepler outliers (return all outliers)
     """
 
     lcdtData = ApplyMask(lcdtData,'NoMask')

@@ -4,7 +4,7 @@
            T. Steckler, J. Mehlhaff & P. Kundurthy 
  
  Institution - University of Washington, Seattle 
- Last Updated: 2011-Oct-27 11:41:22 AM
+ Last Updated: 2011-Oct-27 07:44:36 PM
 
 
 + lcmod.py
@@ -12,7 +12,8 @@
      ApplyMaskPortions(lcData,mask,portion):
      returnData(lcdtData,typeTag):
 
-+ detectfuncs.py
++ binningdetect.py
+     bin(data,binlist):
 
 + pipelinepars.py
      readPipelinePars(File):
@@ -34,8 +35,6 @@
      returnRstar(KID):
      returnLOGG(KID):
 
-+ setup_qats_cython.py
-
 + debug.py
      getUniqueTraceback(logFile):
 
@@ -45,17 +44,11 @@
      makeRangePairs(indexList):
      movingMedian(data,window):
      compute1Sigma(data):
-     bin2(data,binlist):
+
++ postqats.py
 
 + iofiles.py
      readKIDsFromFile(File):
-
-+ qatspars.py
-     getListIndicies(Array,ListValues):
-     stellar_dens(KID):
-     tdur(rho_s,b,period):
-     getPTQM(period0,nperiod,f,N,ds):
-     class qatslc:
 
 + pipeline.py
      FlagKeplerEvents(lcData, **kwargs):
@@ -71,8 +64,6 @@
      class lcData:
      class kw:
 
-+ plot_bin.py
-
 + iodb.py
      dbConnect(dBhost,dBuser,dBpass,dBname):
      inSource(KeplerID):
@@ -84,9 +75,9 @@
      getBJDREFI(KeplerID):
 
 + qats.py
-     gamma_m(m,tmin,tmax,n,q):
-     omega_m(m,mm,tmin,tmax,n,q):
-     fmax(MM,N,tmin,tmax,q,dc):
-     qpt_convolve(data,q):
-     qpt_detect(data,tmin,tmax,q):
+     getListIndicies(Array,ListValues):
+     stellar_dens(KID):
+     tdur(rho_s,b,period):
+     getPTQM(period0,nperiod,f,N,ds):
+     class qatslc:
 

@@ -1,33 +1,25 @@
-import qats_struct
 
-# input/output from databases for pipeline
-import iodb
+import lcmod
 
-# data processing steps for kepler public lightcurves
-import pipeline
+import binningdetect
 
-# miscellaneous functions used in uwpyKepler
-import func
+import pipelinepars
 
-# miscellaneous functions related to the database
 import dbinfo
 
-# the transit detection algorithm
-import qats
-
-# preparing kepler lightcurves for 
-# the transit detection algorithm
-import qatspars
-
-# file input/output
-import iofiles
-
-# the keplc and related classes
-# most uwpyKepler functions will be wrapped into these class objects
-import keplc
-
-# functions for debuging log files
 import debug
 
-# the set of classes and functions for automating the data retrieval pipeline
-import pipelinepars
+import func
+
+import postqats
+
+import iofiles
+
+import pipeline
+
+import keplc
+
+import iodb
+
+import qats
+

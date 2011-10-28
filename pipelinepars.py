@@ -125,3 +125,4 @@ class keptrial:
         self.kid = str(InDict['KIDList'])
         del InDict['KIDList']
         self.kw = InDict
+        

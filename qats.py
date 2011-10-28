@@ -1,98 +1,206 @@
 import numpy as num
-import sys
+from lcmod import returnData
+from dbinfo import returnLOGG, returnRstar
+import qats_cython
 
-def gamma_m(m,tmin,tmax,n,q):
+def getListIndicies(Array,ListValues):
     """
+    Return a list of indices where a list of values exists
+    in a given array
+    """ 
+    
+    lArray = Array.tolist()
+    lLV = ListValues.tolist()
+    
+    indX = [lArray.index(x) if x in lLV else None for x in lLV]
+    
+    return indX
+
+def stellar_dens(KID):
+    """
+    compute stellar density
     """
     
-    j1 = max([(m-2L)*tmin,n-tmax])
-    j2 = min([tmax-q+(m-2L)*tmax,n-tmin])
+    Logg = returnLOGG(KID)
+    Rstar = returnRstar(KID)
     
-    return j1,j2
-
-def omega_m(m,mm,tmin,tmax,n,q):
-    """
-    """
-    
-    j1 = max([(m-1L)*tmin,n-(mm-m+1)*tmax])
-    j2 = min([-q+m*tmax,n-q-(mm-m)*tmin])
-    out = (j1+num.arange(j2-j1+1,dtype=num.int64)).tolist()
-    #print j1, j2, out
-    return out
-
-def fmax(MM,N,tmin,tmax,q,dc):
-    """
-    """
-
-    # Computes F_max
-    shape = (MM,N)
-    fmnMM = num.zeros(shape)
-    for m in range(1,MM+1,1):
-        # Compute omega:
-        om = omega_m(m,MM,tmin,tmax,N,q)
-        if (m == 1):
-            fmnMM[m-1][om] = dc[om]
-        else:
-            for i in range(len(om)):
-                j = gamma_m(m,tmin,tmax,om[i],q)
-                #print num.shape(fmnMM[m-2][j[0]:j[1]+1]), j[0],j[1], om[i]
-                fmnMM[m-1][om[i]] = dc[om[i]]\
-                +max(fmnMM[m-2][j[0]:j[1]+1])
-    
-    singlefmnMN = fmnMM[MM-1][om].ravel()
-    fmax0 = max(singlefmnMN)
-    imax = singlefmnMN.argmax()
-    nhat = num.zeros(MM)
-    nhat[MM-1] = om[imax]
-    for m in range(MM-1,0,-1):
-        gam = gamma_m(m+1,tmin,tmax,nhat[m],q)
-        tmp = max(fmnMM[m-1][gam[0]:gam[1]+1])
-        imax = fmnMM[m-1][gam[0]:gam[1]+1].argmax()
-        nhat[m-1] = gam[0]+imax
+    if Logg == -99 or Rstar == -99:
+        rho_s = -99
+    else:
+        Grav = 6.674e-8
+        Msol = 1.99e33
+        Rsol = 6.96e10
+        rho_s = 4e0*num.pi*(10**(Logg))/(Grav*Rstar*Rsol)
         
-    #print num.shape(nhat), num.shape(fmax0)
-    return fmax0,nhat
-    
-def qpt_convolve(data,q):
-    """
-    """
-    
-    tmp=num.convolve(data,num.ones(q),'valid')
-    return tmp
+    return rho_s
 
-def qpt_detect(data,tmin,tmax,q):
+def tdur(rho_s,b,period):
     """
-    Uses the Kel'Manov algorithm for detection of
-    quasi-periodic transits
+    compute transit duration given stellar density,
+    impact parameter and period
     """
     
-    # Subtract the data from the mean:
-    data=num.mean(data)-data
-    N = len(data)
-    # Compute d(u,n):
-    #dc=2d0*qpt_convolve(data,q)-double(q)
-    dc=qpt_convolve(data,q)
-    # Minimum and maximum number of transits given
-    # the duration of the data, q & (tmin,tmax)
-    mmin=long(num.floor((N+q-1L)/tmax))
-    mmax=long(num.floor((N-q)/tmin)+1L)
-    #print 'Range of transit numbers: ',mmin,mmax
-    smaxMM = num.zeros(mmax-mmin+1)
-    nhatMM = num.zeros( (mmax-mmin+1,mmax) )
-    # Loop over the number of transits, MM:
-    #print mmin, mmax
-    #print num.shape(smaxMM)
-    for MM in range(mmin,mmax+1,1):
-        # for MM=mmin,mmin do begin
-        # Optimize the likelihood for a given number of transits:
-        # smaxMM[MM-mmin]=fmax(MM,N,tmin,tmax,q,dc,nhat)^2/double(q*MM)
-        smaxMM[MM-mmin],nhat = fmax(MM,N,tmin,tmax,q,dc)
-        nhatMM[MM-mmin][0:MM] = nhat
+    p_sec = period*86400e0
+    Grav = 6.674e-8
+    tdur = ((3e0*num.pi/Grav)**(1e0/3e0))*\
+           ((1e0/num.pi)*(p_sec/rho_s)**(1e0/3e0))*\
+           (num.sqrt(1e0-b**2))
+         
+    tdur = tdur/86400e0
+    
+    return tdur
 
-    smax = max(smaxMM)
-    imax = smax.argmax()
-    MM = mmin+imax
-    nhat = (nhatMM[imax][0:MM]).ravel()
+def getPTQM(period0,nperiod,f,N,ds):
     
-    return MM,nhat,smax,dc
+    periods = [period0]
+    for ip in range(nperiod):
+        periods.append(periods[-1]*(1+f/2)/(1-f/2))
+    periods = num.array(periods)
     
+    tdur_vec = num.vectorize(tdur)
+    q = num.int_(num.floor(tdur_vec(ds['rho_s'],ds['b'],periods)/ds['dt']))
+    tmin = num.int_(num.floor(periods*(1e0-f/2e0)))
+    tmax = num.int_(num.ceil(periods*(1e0+f/2e0)))
+    mmin= num.int_(num.floor((N+q-1L)/tmax))
+    mmax= num.int_(num.floor((N-q)/tmin)+1L)
+    
+    return periods, tmin, tmax, mmin, mmax, q
+
+class qatslc:
+
+    def __init__(self,lcData,KID):
+        
+        self.lcData = lcData
+        self.kid = KID
+        self.status = 'Initial Input'
+
+    def padLC(self,**kwargs):
+        """
+        Pads missing cadences with ones.
+        Returns the padded lightcurve.
+        
+        FlagIDs must corresepond to input lcData indices
+        i.e. indices of the array from the pipline
+        """
+        
+        #Default = no flaged points
+        FlagIDs = []
+        for key in kwargs:
+            if key.lower() == 'flagids':
+                FlagIDs = kwargs[key]
+
+        # the eclipse lightcurve data are the best place to start
+        
+        if len(FlagIDs) > 0:
+            x,y,yerr,cad = returnData(self.lcData,'all')
+            if len(x)-1 < max(FlagIDs):
+                raise NameError("len(x) < max(FlagIds) "+\
+                str(len(x))+" < "+str(max(FlagIDs)) )
+            x = x[FlagIDs]
+            y = y[FlagIDs]
+            yerr = yerr[FlagIDs]
+            cad = cad[FlagIDs]
+        else:
+            x,y,yerr,cad = returnData(self.lcData,'elc')
+            pass
+
+        x0 = min(x)
+        x1 = max(x)
+        c0 = min(cad)
+        c1 = max(cad)
+        dx = num.median(x[1L:len(x)]\
+                            -x[0L:len(x)-1])
+        Tcad = num.median(dx)
+        xcomplete = num.arange(x0,x1,Tcad)
+        cadcomplete = num.arange(c0,c1+1,1)
+
+        if len(xcomplete) != len(cadcomplete):
+            print len(xcomplete), len(cadcomplete)
+            raise NameError("Mismatch in Cadence and Time Intervals")
+        
+        #missing = num.array(list(set.difference(set(cadcomplete),set(cad))))
+        #missingIDX = getListIndicies(cadcomplete,missing)
+        existingIDX = getListIndicies(cadcomplete,cad)
+    
+        zeros = num.zeros(len(xcomplete))
+        yerrcomplete = zeros                #padding errors with 0
+        padflag = zeros
+        ycomplete = zeros+1e0               #padding lc with 1
+        
+        # padded datasets
+        # re-using original time-stamps for existing cadences
+        xcomplete[existingIDX] = x
+        ycomplete[existingIDX] = y
+        yerrcomplete[existingIDX] = yerr
+        sigma = num.std(ycomplete[existingIDX])
+        flatgauss = 1e0 + sigma*num.random.randn(len(ycomplete))
+        self.sigma = sigma
+        qflag = zeros[existingIDX] = 1
+        self.lcData = {'x':xcomplete,\
+                       'y':ycomplete,\
+                       'yerr':yerrcomplete,\
+                       'flat':flatgauss,\
+                       'padflag':padflag}
+        self.status = 'Padded Lightcurve'
+
+    def addNoise(self,**kwargs):
+        """
+        add noise to padded data
+        """
+        
+        # Default Sigma
+        Sigma = self.sigma
+        for key in kwargs:
+            if key.lower() == 'noise':
+                Sigma = kwargs[key]
+            else:
+                continue
+            
+        NoiseIDs = num.where(self.lcData['yerr'] == 0e0)[0]
+        self.lcData['y'][NoiseIDs] += Sigma*num.random.randn(len(NoiseIDs))
+        self.status = 'Noise Added'
+        
+    def runQATS(self, **kwargs):
+        
+        NPoints = len(self.lcData['x'])
+        self.dt = num.median(self.lcData['x'][1L:NPoints]\
+                            -self.lcData['x'][0L:NPoints-1])
+
+        # default pmin, pmax
+        pmin = long(num.floor(1.3e0/self.dt))
+        pmax = long(num.ceil(100e0/self.dt))
+        # print pmin, pmax
+        f = 0.005e0
+        b = 0e0
+        rho_s = stellar_dens(self.kid)
+        if rho_s == -99: rho_s = 1.4  #average solar density in g/cc
+        
+        #sort through keywords
+        for key in kwargs:
+            if key.lower() == 'rho_s':
+                rho_s = kwargs[key]
+            elif key.lower() == 'pmin':
+                pmin = long(num.floor(kwargs[key]/self.dt))
+            elif key.lower() == 'pmax':
+                pmax = long(num.floor(kwargs[key]/self.dt))
+            elif key.lower() == 'f':
+                f = kwargs[key]
+            elif key.lower() == 'b':
+                b = kwargs[key]
+            else:
+                pass
+
+        nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
+
+        period0 = pmin/(1+f/2)*(1-f/2)
+        ds = {'rho_s':rho_s,'b':b,'dt':self.dt}
+        periods, tmin, tmax, mmin, mmax, q = getPTQM(period0,nperiod,f,NPoints,ds)
+        
+        snr0 = qats_cython.snr(self.lcData['y'],NPoints,tmin,tmax,q,nperiod+1)
+        snr1 = qats_cython.snr(self.lcData['flat'],NPoints,tmin,tmax,q,nperiod+1)
+        self.nperiod = nperiod+1
+        self.periods = periods*self.dt
+        self.Ndata = NPoints 
+        self.snrLC = snr0
+        self.snrFLAT = snr1
+        self.SignalPower = snr0/snr1
