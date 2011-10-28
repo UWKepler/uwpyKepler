@@ -13,7 +13,6 @@ def readKIDsFromFile(File):
     
     return Out
         
-        
 def passFileToTrialList(PassLogFile):
     """
     Convert the pass entries from the pass-log file to a list of trails
