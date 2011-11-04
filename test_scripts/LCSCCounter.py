@@ -1,3 +1,5 @@
+#!/astro/apps/pkg/python64/bin//python
+
 import uwpyKepler as kep
 import sys
 import numpy as num
