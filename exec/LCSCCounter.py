@@ -26,8 +26,8 @@ def ReturnCadence(KeplerID, **kwargs):
     dBuser = 'tddb'
     dBpass = 'tddb'
     dBname = 'KeplerNew'
-    foo = 'select DISTINCT KEPLERID from source where (KEPLERID = %s' % (KeplerID)
-    foo += addition+');'
+    foo = 'select KEPLERID from source where (KEPLERID = %s' % (KeplerID)
+    foo += addition+') LIMIT 1;'
     if kep.iodb.inSource(KeplerID):
         cursor = kep.iodb.dbConnect(dBhost,dBuser,dBpass,dBname)
         cursor.execute(foo)
@@ -35,6 +35,8 @@ def ReturnCadence(KeplerID, **kwargs):
         return results
     
 if __name__ == '__main__':
+    print 'format:'
+    print 'KIDListFile | KIDs | LC KIDs | SC KIDs | LCSC KIDs'
 
     KIDListFile = sys.argv[1]
     skygroup = open(KIDListFile, 'r')
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     #count = 0
     LCkids = []
     SCkids = []
-    SCLCkids = []
+    LCSCkids = []
     KIDs = skygroup.readlines()
     for KID in KIDs:
         #count += 1
@@ -61,13 +63,13 @@ if __name__ == '__main__':
         except:
             continue
         else:
-            SCLCkids.append(KID)
+            LCSCkids.append(KID)
     
-    print KIDListFile
-    print 'N KIDs = ', len(KIDs)
-    print 'N LC KIDs = ', len(LCkids)
-    print 'N SC KIDs = ', len(SCkids)
-    print 'N LC & SC KIDs = ', len(SCLCkids) 
+    print KIDListFile,'|',len(KIDs),'|',len(LCkids),'|',len(SCkids),'|',len(LCSCkids)
+    #print 'N KIDs = ', len(KIDs)
+    #print 'N LC KIDs = ', len(LCkids)
+    #print 'N SC KIDs = ', len(SCkids)
+    #print 'N LC & SC KIDs = ', len(LCSCkids) 
     #file = open('countresults.txt', 'a')
     #print >> file, SGNumber,' | ',len(KIDs),' | ',len(LCkids),' | ', len(SCkids),' | ',len(SCLCkids)
     
