@@ -25,26 +25,31 @@ if __name__ == '__main__':
     parser.add_option('-g','--gsize',\
                         type=int,\
                         dest='gsize',\
+						default=2,\
                         help='The gap-size used to split'\
                         +' split portions in index units')
     parser.add_option('-w','--owin',\
                         type=int,\
                         dest='owin',\
+						default=15,\    # note, this suits only LC
                         help='The window-size for'\
                         +' outlier rejection')
     parser.add_option('-t','--othresh',\
                         type=float,\
                         dest='othresh',\
+						default=5,\
                         help='The threshold in sigmas for'\
                         +' outlier rejection')
     parser.add_option('-d','--dwin',\
                         type=float,\
                         dest='dwin',\
+						default=50,\   # note, this suits only LC
                         help='The window-size for'\
                         +' detrending')
     parser.add_option('-p','--polyorder',\
                         type=int,\
                         dest='polyorder',\
+						default=5,\
                         help='The polynomial order for'\
                         +' detrending')
 
@@ -64,7 +69,7 @@ if __name__ == '__main__':
     (opts,args) = parser.parse_args()
 
     mandatory_options = \
-    ['kid','ctype','gsize','owin','othresh','dwin','polyorder']
+    ['kid']
     Except = False
     for m in mandatory_options:
         if not opts.__dict__[m]:
@@ -74,7 +79,7 @@ if __name__ == '__main__':
         parser.print_help()
         raise NameError('Mandatory options missing')
     
-    #check agap size
+    # check agap size
     if opts.gize > opts.agap:
         opts.agap = opts.gize
 
