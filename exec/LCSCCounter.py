@@ -4,72 +4,61 @@ import uwpyKepler as kep
 import sys
 import numpy as num
 
-def ReturnCadence(KeplerID, **kwargs):
-    addition = ''
-    for key in kwargs:
-        if key == 'selection':
-            if kwargs[key] == 'LC':
-                addition = ' and LCFLAG = 1'
-                
-            elif kwargs[key] == 'SC':
-                addition = ' and LCFLAG = 0'
-            else:
-                #setting default to LC
-                addition = ' and LCFLAG = 1'
-        else:
-            #print key+' not recognized. using default'
-            #setting default to LC
-            addition = ' and LCFLAG = 1'
-            continue
-
+def returnLCSClists(KIDlistfile, KIDlist):
     dBhost = 'tddb.astro.washington.edu'
     dBuser = 'tddb'
     dBpass = 'tddb'
     dBname = 'KeplerNew'
-    foo = 'select KEPLERID from source where (KEPLERID = %s' % (KeplerID)
-    foo += addition+') LIMIT 1;'
-    if kep.iodb.inSource(KeplerID):
-        cursor = kep.iodb.dbConnect(dBhost,dBuser,dBpass,dBname)
-        cursor.execute(foo)
-        results = cursor.fetchall()
-        return results
-    
+    cursor = kep.iodb.dbConnect(dBhost,dBuser,dBpass,dBname)
+    #sg = eval(KIDlistfile[2:5])
+    #skycall = 'select distinct KEPLERID from\
+               #object where SKYGROUP = %s and LCFLAG = 0' % (sg)
+    #cursor.execute(skycall)
+    #results = cursor.fetchall()
+    #print len(results)
+    LCkids = []
+    SCkids = []
+    LCSCkids = []
+    count = 0
+
+    for KID in KIDlist:
+        count += 1
+        if float(count)%100 == 0:
+            print count
+        foo0 = 'select KEPLERID from source where\
+           (KEPLERID = %s and LCFLAG = 0)' % (KID)
+        foo1 = 'select KEPLERID from source where\
+           (KEPLERID = %s and LCFLAG = 1)' % (KID)
+        cursor.execute(foo0)
+        scresults = cursor.fetchall()
+        cursor.execute(foo1)
+        lcresults = cursor.fetchall()
+        if len(scresults) > 0:
+            SCkids.append(KID)
+        if len(lcresults) > 0:
+            LCkids.append(KID)
+        if len(scresults) > 0 and len(lcresults) > 0:
+            LCSCkids.append(KID)
+        if count == 50:
+            break
+
+    return SCkids, LCkids, LCSCkids
+
+
+
 if __name__ == '__main__':
     print 'format:'
     print 'KIDListFile | KIDs | LC KIDs | SC KIDs | LCSC KIDs'
 
     KIDListFile = sys.argv[1]
     skygroup = open(KIDListFile, 'r')
-    
-    #count = 0
-    LCkids = []
-    SCkids = []
-    LCSCkids = []
     KIDs = skygroup.readlines()
-    for KID in KIDs:
-        #count += 1
-        #if float(count)/100. - float(count)//100. == 0:
-            #print count
-        KID = int(KID)
-        LCcadence = ReturnCadence(KID, selection='LC')
-        if len(LCcadence) > 0:
-            LCkids.append(KID)
-        SCcadence = ReturnCadence(KID, selection='SC')
-        if len(SCcadence) > 0:
-            SCkids.append(KID)
-    for KID in SCkids:
-        try:
-            LCkids.index(KID)
-        except:
-            continue
-        else:
-            LCSCkids.append(KID)
-    
+    SCkids, LCkids, LCSCkids = returnLCSClists(KIDListFile, KIDs)
+
     print KIDListFile,'|',len(KIDs),'|',len(LCkids),'|',len(SCkids),'|',len(LCSCkids)
-    #print 'N KIDs = ', len(KIDs)
-    #print 'N LC KIDs = ', len(LCkids)
-    #print 'N SC KIDs = ', len(SCkids)
-    #print 'N LC & SC KIDs = ', len(LCSCkids) 
-    #file = open('countresults.txt', 'a')
-    #print >> file, SGNumber,' | ',len(KIDs),' | ',len(LCkids),' | ', len(SCkids),' | ',len(SCLCkids)
-    
+
+
+
+
+
+
