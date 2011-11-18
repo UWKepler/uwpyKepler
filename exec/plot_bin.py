@@ -121,7 +121,7 @@ kw = kep.keplc.kw(ctype=opts.ctype,gsize=opts.gsize,owin=opts.owin,\
                       agap=opts.agap,durfac=opts.durfac)
 lcData = kep.keplc.lcData(opts.kid,eData,BJDREFI, kw).lcData
 lst = [1, 5, 10, 20, 50, 100]
-bind = kep.func.bin2(lcData, lst)
+bind = kep.func.bin(lcData, lst)
 
 colors = ['r','y','b','c','g','m','k']
 if opts.sharex == 0:

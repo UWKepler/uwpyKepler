@@ -2,6 +2,7 @@ import numpy as num
 from lcmod import returnData
 from dbinfo import returnLOGG, returnRstar
 import qats_cython
+import func
 
 def getListIndicies(Array,ListValues):
     """
@@ -132,7 +133,7 @@ class qatslc:
         xcomplete[existingIDX] = x
         ycomplete[existingIDX] = y
         yerrcomplete[existingIDX] = yerr
-        sigma = num.std(ycomplete[existingIDX])
+        sigma = func.compute1Sigma(ycomplete[existingIDX])
         flatgauss = 1e0 + sigma*num.random.randn(len(ycomplete))
         self.sigma = sigma
         qflag = zeros[existingIDX] = 1
@@ -190,9 +191,9 @@ class qatslc:
             else:
                 pass
 
-        nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)/(1-f/2)))
+        nperiod = long(num.log(pmax/pmin)/num.log((1+f/2)))
 
-        period0 = pmin/(1+f/2)*(1-f/2)
+        period0 = pmin/(1+f/2)
         ds = {'rho_s':rho_s,'b':b,'dt':self.dt}
         periods, tmin, tmax, mmin, mmax, q = getPTQM(period0,nperiod,f,NPoints,ds)
         
@@ -201,6 +202,6 @@ class qatslc:
         self.nperiod = nperiod+1
         self.periods = periods*self.dt
         self.Ndata = NPoints 
-        self.snrLC = snr0
-        self.snrFLAT = snr1
+        self.snrLC = snr0/self.sigma
+        self.snrFLAT = snr1/self.sigma
         self.SignalPower = snr0/snr1
