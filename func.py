@@ -101,7 +101,7 @@ def foldPhase(data,t0,period):
         phase = (time - t0)/period - (time-t0)//period 
 	phaselist.append(phase)    
 
-    pylab.plot(phaselist,data['ydt'],'b.')
-    pylab.show()
+    #pylab.plot(phaselist,data['ydt'],'b.')
+    #pylab.show()
 
-    return lcData
+    return phaselist

@@ -54,7 +54,7 @@ def getPTQM(period0,nperiod,f,N,ds):
     
     periods = [period0]
     for ip in range(nperiod):
-        periods.append(periods[-1]*(1+f/2)/(1-f/2))
+        periods.append(periods[-1]*(1+f/2))
     periods = num.array(periods)
     
     tdur_vec = num.vectorize(tdur)
