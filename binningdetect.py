@@ -1,3 +1,4 @@
+import numpy as num
 
 def bin(data,binlist):
 	""" bins data and returns dictionary with an x and y list
@@ -17,8 +18,8 @@ def bin(data,binlist):
 		
 		for i in range(npts-nbr):
 			
-			xlist.append(data['x'][i:i+nbr].mean() )
-			ylist.append(data['ydt'][i:i+nbr].mean() )
+			xlist.append(data['x'][i:i+nbr].mean())
+			ylist.append(data['ydt'][i:i+nbr].mean())
 		
 		xlist = num.array(xlist)
         	ylist = num.array(ylist)

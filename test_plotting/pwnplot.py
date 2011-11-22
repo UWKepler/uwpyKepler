@@ -6,21 +6,17 @@ import numpy as num
 import pylab
 import optparse
 
-def rawplot(kid,ctype,fold,bin):
+def rawplot(kid,ctype):
     lcData = kep.iodb.ReadLightCurve(kid,selection=ctype)
     BJDREFI = kep.iodb.getBJDREFI(kid)
     x = lcData['x']+BJDREFI
-    if fold:
-        eData_idx = kep.keplc.keplc(kid).eData['KOI'].keys()[0]
-        eData = kep.keplc.keplc(kid).eData['KOI'][eData_idx]
-        x = kep.func.foldPhase(lcData,eData['T0'],eData['Period'])
     pylab.title('KID: %s' % kid)
     pylab.xlabel('BJD')
     pylab.ylabel('Flux')
     pylab.plot(x, lcData['y'], 'b.')
     pylab.show()
 
-def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex,fold,bin):
+def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex):
     keplc = kep.keplc.keplc(kid)
     eData = keplc.eData
     BJDREFI = keplc.BJDREFI
@@ -37,11 +33,6 @@ def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex,fold,bin):
     
     lcData = kep.keplc.lcData(kid,eData,BJDREFI,kw).lcData
     x = lcData['x']+BJDREFI
-    
-    if fold:
-        eData_idx = kep.keplc.keplc(kid).eData['KOI'].keys()[0]
-        eData = kep.keplc.keplc(kid).eData['KOI'][eData_idx]
-        x = kep.func.foldPhase(lcData,eData['T0'],eData['Period'])
 
     if sharex:
         ugly = pylab.subplot(211)
@@ -73,18 +64,18 @@ def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex,fold,bin):
         pylab.plot(x, lcData['correction'], 'k.')
     pylab.show()
 
-def runpwn(kid,ctype,rawplt,pipelineplt,showDetrend,sharex,fold,bin,pipebool):
+def runpwn(kid,ctype,rawplt,pipelineplt,showDetrend,sharex,pipebool):
     if rawplt:
-        rawplot(kid,ctype,fold,bin)
+        rawplot(kid,ctype)
     if pipebool:
-        pipelineplot(kid,ctype,pipelineplt,showDetrend,sharex,fold,bin)
+        pipelineplot(kid,ctype,pipelineplt,showDetrend,sharex)
     if not rawplt and not pipebool:
-        rawplot(kid,ctype,fold,bin)
+        rawplot(kid,ctype)
 
 KID = sys.argv[1]
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage=\
-    "%prog: Use this script to make various lightcurve plots.")
+    "%prog\nUse this script to make various lightcurve plots.\nScript requires a Kepler ID as a system argument.")
     parser.add_option('-r','--rawplot',\
                         action='store_true',\
                         dest='rawplot',\
@@ -109,16 +100,6 @@ if __name__ == '__main__':
                         default=False,\
                         help='plot the detrending function'\
                         ' and detrended data with a shared x-axis')
-    parser.add_option('-f','--fold',\
-                        action='store_true',\
-                        dest='fold',\
-                        default=False,\
-                        help='fold the lightcurve')
-    parser.add_option('-b','--bin',\
-                        action='store_true',\
-                        dest='bin',\
-                        default=False,\
-                        help='bin the lightcurve')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
                         choices=cChoice,\
@@ -132,4 +113,5 @@ if __name__ == '__main__':
     pipebool = False
     if opts.pipelineplot or opts.showDetrend or opts.sharex:
         pipebool = True
-    runpwn(KID,opts.ctype,opts.rawplot,opts.pipelineplot,opts.showDetrend,opts.sharex,opts.fold,opts.bin,pipebool)
+    runpwn(KID,opts.ctype,opts.rawplot,opts.pipelineplot,opts.showDetrend,opts.sharex,pipebool)
+    
