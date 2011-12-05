@@ -39,6 +39,7 @@ def returnData(lcdtData,typeTag):
         o - uwpyKepler outliers only (return outliers)
         k - Kepler flagged events (return Kepler flagged outliers)
         ok - uwpyKepler and Kepler outliers (return all outliers)
+        noeclipse - return everything but the eclipse
     """
 
     lcdtData = ApplyMask(lcdtData,'NoMask')
@@ -59,6 +60,10 @@ def returnData(lcdtData,typeTag):
         idx = num.where((lcdtData['ALLMask']))[0]
     elif typeTag.lower() == 'all':
         idx = num.where((lcdtData['NoMask'] == False))[0]
+    elif typeTag.lower() == 'noeclipse':
+        idx0 = num.where((lcdtData['ALLMask'] == False))[0]
+        idx1 = num.where((lcdtData['OMask']))[0]
+        idx = list(set(num.hstack( (idx0,idx1) ) ) )
     else:
         'No match for typeTag found'
         idx = []

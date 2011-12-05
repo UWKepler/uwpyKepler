@@ -47,9 +47,12 @@ def runfold(kid,ctype,auto,hint,man):
                 x = kep.func.foldPhase(lcData,0,period)
             except:
                 try:
-                    qtsfilepath =\
-                    findInSubdirectory('signal.'+kid+'.data',hint)
-                    qtsfile = open(qtsfilepath,'r')
+                    if hint[-4:] == 'data':
+                        qtsfile = open(hint, 'r')
+                    else:
+                        qtsfilepath =\
+                        findInSubdirectory('signal.'+kid+'.data',hint)
+                        qtsfile = open(qtsfilepath,'r')
                     top = qtsfile.readlines()[0]
                     split = top.split(' ')
                     period = eval(split[3])
