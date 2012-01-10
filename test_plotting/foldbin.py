@@ -49,20 +49,13 @@ def bin(binsize,phase):
 KID_or_Path = sys.argv[1]
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage=\
-    "%prog\nUse this script to fold a given lightcurve.\nScript requires a Kepler ID as a system argument.")
+    "%prog\nUse this script to fold or bin a given lightcurve.\nScript can be run with 1 of 2 system arguments.\n1: Input a KID if the object's transit data is already cataloged in the database.\n2: Input the path (from the current directory) to the QATS file for the object to view.")
     parser.add_option('-a','--auto',\
                         action='store_true',\
                         dest='auto',\
                         default=True,\
                         help='query the database and qats file '\
                         'for a known period')
-    #parser.add_option('-p','--path',\
-                        #type=str,\
-                        #dest='path',\
-                        #default='.',\
-                        #help='supply a path to period file '\
-                        #'if outside current directory to '\
-                        #'dramatically increase speed')
     parser.add_option('-m','--manual',\
                         type=float,\
                         dest='manual',\
