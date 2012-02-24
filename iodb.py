@@ -7,7 +7,6 @@ dBuser = 'tddb'
 dBpass = 'tddb'
 dBname = 'Kepler'
  
-
 def dbConnect(dBhost,dBuser,dBpass,dBname):
     """ Connect to server and return cursor """
     
