@@ -1,5 +1,6 @@
 import numpy as num
 import pylab
+"contains functions"
 
 def getNumBool(List,bool):
     """ 
