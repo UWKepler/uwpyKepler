@@ -1,7 +1,7 @@
 dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
-dBname = 'KeplerNew'
+dBname = 'Kepler'
 
 from iodb import dbConnect, inKEPFP, inKEPPC
 

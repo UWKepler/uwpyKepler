@@ -5,7 +5,8 @@ import numpy as num
 dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
-dBname = 'KeplerNew'
+dBname = 'Kepler'
+ 
 
 def dbConnect(dBhost,dBuser,dBpass,dBname):
     """ Connect to server and return cursor """
@@ -112,7 +113,7 @@ def ReadLightCurve(KeplerID, **kwargs):
             return
         else:
             time    = num.ma.array([x[2] for x in results])
-            corflux = num.ma.array([x[3] for x in results])
+            corflux = num.ma.array([x[8] for x in results])
             corerr  = num.ma.array([x[4] for x in results])
             qflag  = num.array([x[7] for x in results])
             sortindex = cadence.argsort()
