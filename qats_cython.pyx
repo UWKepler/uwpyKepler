@@ -62,7 +62,7 @@ def fmax(long int MM, long int N, long int tmin, long int tmax, long int q, num.
                 j0 = gamma_m0(m,tmin,tmax,k,q)
                 j1 = gamma_m1(m,tmin,tmax,k,q)
                 fmnMM[m-1][k] = dc[k]+max(fmnMM[m-2][j0:j1])
-    
+    #print num.shape(fmnMM[MM-1][k0:k1]), k0, k1, num.shape(fmnMM)
     singlefmnMN = fmnMM[MM-1][k0:k1].ravel()
     fmax0 = max(singlefmnMN)
     imax = singlefmnMN.argmax()

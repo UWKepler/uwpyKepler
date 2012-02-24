@@ -5,7 +5,7 @@ import numpy as num
 dBhost = 'tddb.astro.washington.edu'
 dBuser = 'tddb'
 dBpass = 'tddb'
-dBname = 'KeplerNew'
+dBname = 'Kepler'
 
 def dbConnect(dBhost,dBuser,dBpass,dBname):
     """ Connect to server and return cursor """
