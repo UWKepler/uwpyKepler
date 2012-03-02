@@ -12,7 +12,6 @@ def getListIndicies(Array,ListValues):
     
     lArray = Array.tolist()
     lLV = ListValues.tolist()
-    
     indX = [lArray.index(x) if x in lLV else None for x in lLV]
     
     return indX
@@ -112,9 +111,17 @@ class qatslc:
         dx = num.median(x[1L:len(x)]\
                             -x[0L:len(x)-1])
         Tcad = num.median(dx)
-        xcomplete = num.arange(x0,x1,Tcad)
-        cadcomplete = num.arange(c0,c1+1,1)
+        NCad = c1-c0+1
+        xcomplete = x0 + Tcad*num.arange(NCad)
+        cadcomplete = c0 + num.arange(NCad)
+        
 
+	test = num.arange(len(xcomplete))
+        #print test[0], test[-1]
+
+        #print len(xcomplete)
+        #print len(cadcomplete)
+        
         if len(xcomplete) != len(cadcomplete):
             print len(xcomplete), len(cadcomplete)
             raise NameError("Mismatch in Cadence and Time Intervals")
