@@ -18,7 +18,7 @@ def inSource(KeplerID):
     """ Checks if a certain KID exists in the source database. """
     
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
-    foo    = 'select %s from source where (KEPLERID = %s)' % (KeplerID,KeplerID)
+    foo    = 'select KEPLERID from source where (KEPLERID = %s)' % (KeplerID)
     cursor.execute(foo)
     results = cursor.fetchall()
     Exist = False
@@ -31,7 +31,20 @@ def inKEPPC(KeplerID):
     """ Checks if a certain KID exists in the KEPPC database. """
     
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
-    foo1 = 'select %s from KEPPC where (KID = %s)' % (KeplerID,KeplerID)
+    foo1 = 'select KID from KEPPC where (KID = %s)' % (KeplerID)
+    cursor.execute(foo1)
+    results = cursor.fetchall()
+    Exist = False
+    if len(results) > 0:
+        Exist = True
+    
+    return Exist
+
+def inUWKOI(KeplerID):
+    """ Checks if a certain KID exists in the UWKOI database. """
+    
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+    foo1 = 'select KID from UWKOI where (KID = %s)' % (KeplerID)
     cursor.execute(foo1)
     results = cursor.fetchall()
     Exist = False
@@ -44,7 +57,7 @@ def inKEPFP(KeplerID):
     """ Checks if a certain KID exists in the KEPFP database. """
     
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
-    foo1 = 'select %s from KEPFP where (KID = %s)' % (KeplerID,KeplerID)
+    foo1 = 'select KID from KEPFP where (KID = %s)' % (KeplerID)
     cursor.execute(foo1)
     results = cursor.fetchall()
     Exist = False
@@ -65,6 +78,11 @@ def getKOI(KeplerID):
     elif inKEPFP(KeplerID):
         cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
         foo1 = 'select KOI from KEPFP where (KID = %s)' % (KeplerID)
+        cursor.execute(foo1)
+        results = cursor.fetchall()
+    elif inUWKOI(KeplerID):
+        cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+        foo1 = 'select KOI from UWKOI where (KID = %s)' % (KeplerID)
         cursor.execute(foo1)
         results = cursor.fetchall()
     else:
@@ -129,7 +147,6 @@ def ReadLightCurve(KeplerID, **kwargs):
 
 def getEclipseData(KeplerID):
     """ Queries the database for Transit or Eclipse data """
-    
     cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
     eData = {'KOI':{}}
     if inKEPPC(KeplerID):
@@ -148,6 +165,15 @@ def getEclipseData(KeplerID):
             eData['KOI'][format(r1[i][0],'.2f')] =\
             {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
         eData['eDataExists'] = True
+    elif inUWKOI(KeplerID):
+        foo1 = 'select KOI, Period, Dur, Epoch from UWKOI where (KID = %s)' % KeplerID
+        cursor.execute(foo1)
+        r1 = cursor.fetchall()
+	for i in range(len(r1)):
+            eData['KOI'][format(r1[i][0],'.2f')] =\
+            {'Period':r1[i][1],'Duration':r1[i][2],'T0':r1[i][3]}
+        eData['eDataExists'] = True
+        print "UWKOI", eData
     else:
         #print 'Kepler ID not found in Kepler.KEPPC or Kepler.KEPFP'
         eData['eDataExists'] = False
