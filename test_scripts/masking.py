@@ -38,6 +38,6 @@ def Masking(lc):
             mask[ip][in_transit] = 1
     #mask = mask > 0 #converted into a boolean
     masksum = num.sum(mask,axis=0)
-    lc.data['x'] = lc.data['x'][num.where(masksum==0]
-    lc.data['y'] = lc.data['y'][num.where(masksum==0]
+    lc.data['x'][num.where(masksum>0] = 1.
+    lc.data['y'][num.where(masksum>0] = 1.
     return lc
