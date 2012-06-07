@@ -5,6 +5,13 @@ import sys
 import numpy as num
 import pylab
 import optparse
+import os
+
+KID = sys.argv[1]
+QATS_DIRECTORY = \
+'/astro/store/student-scratch1/johnm26/SPRING_BREAK_RUNS/'
+QATS_FILENAME_FORMAT_HEAD = 'sn.'
+QATS_FILENAME_FORMAT_MID = '.normal.unflipped.'
 
 def rawplot(kid,ctype):
     lcData = kep.iodb.ReadLightCurve(kid,selection=ctype)
@@ -64,15 +71,26 @@ def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex):
         pylab.plot(x, lcData['correction'], 'k.')
     pylab.show()
 
-def runpwn(kid,ctype,rawplt,pipelineplt,showDetrend,sharex,pipebool):
+def runpwn(kid,ctype,rawplt,pipelineplt,\
+           showDetrend,sharex,qatsplot,pipebool):
     if rawplt:
         rawplot(kid,ctype)
     if pipebool:
         pipelineplot(kid,ctype,pipelineplt,showDetrend,sharex)
-    if not rawplt and not pipebool:
+    if qatsplot:
+        qatsPlot(kid, QATS_DIRECTORY)
+    if not rawplt and not pipebool and not qatsplot:
         rawplot(kid,ctype)
 
-KID = sys.argv[1]
+def qatsPlot(kid, QATS_DIRECTORY):
+    sg = kep.dbinfo.getSkyGroup(kid)
+    sgStr = 'SG' + str(sg).zfill(3)
+    QATS_DIRECTORY += sgStr + '/'
+    file = QATS_DIRECTORY + \
+           QATS_FILENAME_FORMAT_HEAD + sgStr + \
+           QATS_FILENAME_FORMAT_MID + kid + '.png'
+    os.system('display ' + file)
+
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage=\
     "%prog\nUse this script to make various lightcurve plots.\nScript requires a Kepler ID as a system argument.")
@@ -100,6 +118,13 @@ if __name__ == '__main__':
                         default=False,\
                         help='plot the detrending function'\
                         ' and detrended data with a shared x-axis')
+    parser.add_option('-q','--qatsplot',\
+                        action='store_true',\
+                        dest='qatsplot',\
+                        default=False,\
+                        help='display qats spectrum for KID;'\
+                        ' directory of qats file and filename' \
+                        ' format hardcoded at top of program')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
                         choices=cChoice,\
@@ -113,5 +138,10 @@ if __name__ == '__main__':
     pipebool = False
     if opts.pipelineplot or opts.showDetrend or opts.sharex:
         pipebool = True
-    runpwn(KID,opts.ctype,opts.rawplot,opts.pipelineplot,opts.showDetrend,opts.sharex,pipebool)
+    runpwn(KID,opts.ctype,opts.rawplot,opts.pipelineplot,opts.showDetrend,opts.sharex,opts.qatsplot,pipebool)
+        
+        
+        
+        
+        
     

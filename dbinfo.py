@@ -156,3 +156,12 @@ def returnLOGG(KID):
         LOGG = r1[0][0]
 
     return float(LOGG)
+    
+def getSkyGroup(KID):
+    cursor = dbConnect(dBhost,dBuser,dBpass,dBname)
+    command = 'select skygroup from object where' \
+    ' KEPLERID = %s' % KID
+    cursor.execute(command)
+    r1 = cursor.fetchall()
+    
+    return r1[0][0]
