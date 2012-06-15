@@ -14,6 +14,7 @@ def getBestPeriod(dfile):
     return float(line.split('|')[1].split(' ')[1])
 
 def getBestPeriodByKID(kid):
+    kid = str(kid)
     sgStr = str(kep.dbinfo.getSkyGroup(kid)).zfill(3)
     dFileName = '/astro/store/student-scratch1/'\
                 'johnm26/SPRING_BREAK_RUNS/SG' + sgStr + \
@@ -48,3 +49,30 @@ def getQatsData(dfile):
     snr = snrLC/snrFLAT
     
     return periods, snr, snrLC, snrFLAT
+    
+# used in flagQats fitting
+def firstFareyVal(p0,p1,p2):
+    m   = 1. # start on right side for when p0 = p1
+    n   = 1.
+    ln  = 0. # 'left numerator'
+    ld  = 1. # 'left denominator'
+    rn  = 1. # 'right numerator'
+    rd  = 1. # 'right denominator'
+    pRatio1 = p1/p0
+    pRatio2 = p2/p0
+    if pRatio2 > 1:
+        temp = pRatio1
+        pRatio1 = 1./pRatio2
+        pRatio2 = 1./temp
+    while m/n < pRatio1 or m/n > pRatio2:
+        if m/n < pRatio1:
+            ln = m
+            ld = n
+            m += rn
+            n += rd
+        else:
+            rn = m
+            rd = n
+            m += ln
+            n += ld
+    return m/n
