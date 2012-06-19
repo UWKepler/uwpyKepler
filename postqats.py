@@ -1,6 +1,6 @@
 import uwpyKepler as kep
 import numpy as num
-import pdb
+import scipy
 
 # returns KID from QATS .data file
 # cursor must be at start of file
@@ -80,3 +80,51 @@ def firstFareyVal(p0,p1,p2):
             m += ln
             n += ld
     return m, n
+
+def firstFareyVals(periods, p0):
+    Qs = []
+    for i in range(len(periods) - 1):
+        m, n = kep.postqats.firstFareyVal(p0, periods[i], periods[i + 1])
+        Qs.append(1. / num.sqrt(m * n))
+    Qs.append(Qs[-1])
+    return num.array(Qs)
+
+def fitQats(kid, periods, snr, polyOrder, **kwargs):
+    order = polyOrder
+    allCoeffs = []
+    chiSqrs = []
+    fits = []
+    for p0 in periods:
+        findQs = lambda Ps: firstFareyVals(Ps, p0)
+        funcs = map(lambda n: lambda x: x**n, range(order + 1)[::-1])
+        funcs.append(findQs)
+        #funcs = [order, order - 1 ... 1, 0, findQs]
+        # where the terms before 'findQs' denote the power
+        # the data are raised to
+        coeffs, fareyVals = \
+        kep.linLeastSquares.linLeastSquares\
+        (periods, snr, funcs, order + 2)
+        allCoeffs.append(coeffs)
+        polynom = scipy.polyval(coeffs[:-1], periods)
+        fit = polynom + coeffs[-1] * fareyVals
+        fits.append(fit)
+        sqrs = (snr - fit)**2 / fit
+        chiSqr = sqrs.sum()
+        chiSqrs.append(chiSqr)
+    minSqr = min(chiSqrs)
+    minIdx = chiSqrs.index(minSqr)
+    
+    bestPeriod = periods[minIdx]
+    bestFit = fits[minIdx]
+    
+    qatsBestPeriod = kep.postqats.getBestPeriodByKID(kid)
+    qatsPeriodIdx = periods.tolist().index(qatsBestPeriod)
+    qatsPeriodFit = fits[qatsPeriodIdx]
+    qatsPeriodSqr = chiSqrs[qatsPeriodIdx]
+    
+    for key in kwargs:
+        if key == 'qats_best_period_fit':
+            if kwargs[key] == True:
+                return bestPeriod, bestFit, minSqr,\
+                       qatsBestPeriod, qatsPeriodFit, qatsPeriodSqr
+    return bestPeriod, bestFit, minSqr
