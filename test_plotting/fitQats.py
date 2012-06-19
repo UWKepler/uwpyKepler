@@ -1,11 +1,11 @@
+#!/astro/apps/pkg/python64/bin//python
+
 import uwpyKepler as kep
 import sys
 import numpy as num
 import pylab
 import scipy
 import os
-import pdb
-import time
 
 def firstFareyValMod(periods, p0):
     Qs = []
@@ -32,26 +32,19 @@ allCoeffs = []
 chiSqrs = []
 fits = []
 for p0 in periods:
-    t0 = time.time()
     findQs = lambda Ps: firstFareyValMod(Ps, p0)
     funcs = map(lambda n: lambda x: x**n, range(order + 1)[::-1])
     funcs.append(findQs)
-    #funcs = [3, 2, 1, 0, findQs]
-    t0 = time.time()
     coeffs, fareyVals = \
     kep.linLeastSquares.linLeastSquares\
     (periods, snr, funcs, order + 2)
     allCoeffs.append(coeffs)
-    #print 'solver time: ', time.time() - t0
     polynom = scipy.polyval(coeffs[:-1], periods)
-    t0 = time.time()
     fit = polynom + coeffs[-1] * fareyVals
-    #print 'findQs time: ', time.time() - t0
     fits.append(fit)
     sqrs = (snr - fit)**2 / fit
     chiSqr = sqrs.sum()
     chiSqrs.append(chiSqr)
-    #print 'finished period: ', p0, time.time() - t0
 minSqr = min(chiSqrs)
 minIdx = chiSqrs.index(minSqr)
 
@@ -67,20 +60,26 @@ print 'chiSqr[minIdx]: ' + str(chiSqrs[minIdx])
 print 'chiSqr[bestIdx]: ' + str(chiSqrs[bestIdx])
 print 'coefficients: ' + str(allCoeffs[minIdx])
 
-pylab.semilogx()
+fig = pylab.figure()
+ax = fig.add_subplot(111)
+ax.semilogx()
 #a = pylab.subplot(211)
-pylab.plot(periods[minIdx], snr[minIdx], 'ro')
-pylab.plot(periods, fits[minIdx], 'c-')
+ax.plot(periods, snr, 'k-',\
+        periods, fits[minIdx], 'c-',\
+        periods[minIdx], snr[minIdx], 'ro',\
+        periods[minIdx], fits[minIdx][minIdx], 'ro')
+ax.legend(('qats SNR', 'fit to qats', 'fit best period'))
 #pylab.plot(periods, bestFit, 'r-')
 #pylab.plot(periods, allQs[bestIdx], 'b-')
 
 #pylab.plot(periods, allMs[bestIdx], 'b.')
 #pylab.plot(periods, allNs[bestIdx], 'r.')
-pylab.plot(periods[minIdx], fits[minIdx][minIdx], 'ro')
-pylab.plot(periods, snr, 'k-')
 #b = pylab.subplot(212, sharex=a)
 #pylab.plot(periods, fits[chiSqrs.index(max(chiSqrs))])
 #pylab.plot(minPeriods, minSnr, 'bo')
 #pylab.plot(periods, diff, 'ro')
+
+pylab.ylabel('SNR')
+pylab.xlabel('periods')
 
 pylab.show()
