@@ -23,4 +23,6 @@ import iodb
 
 import qats
 
+import linLeastSquares
+
 #import qats_nhat

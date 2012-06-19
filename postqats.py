@@ -75,4 +75,4 @@ def firstFareyVal(p0,p1,p2):
             rd = n
             m += ln
             n += ld
-    return m/n
+    return m, n
