@@ -9,18 +9,22 @@ def getKID(dfile):
     KID = int(lines.split('|')[0].split('#')[1])
     return KID
 
-def getBestPeriod(dfile):
-    line = dfile.readline()
-    return float(line.split('|')[1].split(' ')[1])
-
-def getBestPeriodByKID(kid):
+# change this with new sets of qats runs
+def getdFileName(kid):
     kid = str(kid)
     sgStr = str(kep.dbinfo.getSkyGroup(kid)).zfill(3)
     dFileName = '/astro/store/student-scratch1/'\
                 'johnm26/SPRING_BREAK_RUNS/SG' + sgStr + \
                 '/signal.SG' + sgStr + \
                 '.unflipped.' + kid + '.data'
-    dfile = open(dFileName, 'r')
+    return dFileName
+
+def getBestPeriod(dfile):
+    line = dfile.readline()
+    return float(line.split('|')[1].split(' ')[1])
+
+def getBestPeriodByKID(kid):
+    dfile = open(getdFileName(kid), 'r')
     return getBestPeriod(dfile)
 
 def getQatsData(dfile):

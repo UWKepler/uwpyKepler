@@ -16,12 +16,7 @@ def firstFareyValMod(periods, p0):
     return num.array(Qs)
 
 kid = sys.argv[1]
-sgStr = str(kep.dbinfo.getSkyGroup(kid)).zfill(3)
-dFileName = '/astro/store/student-scratch1/'\
-            'johnm26/SPRING_BREAK_RUNS/SG' + sgStr + \
-            '/signal.SG' + sgStr + \
-            '.unflipped.' + kid + '.data'
-dFile = open(dFileName, 'r')
+dFile = open(kep.postqats.getdFileName(kid), 'r')
 
 order = 3
 periods, snr, snrLC, snrFlat = kep.postqats.getQatsData(dFile)
