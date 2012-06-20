@@ -16,6 +16,7 @@ qatsBestPeriod, qatsPeriodFit, qatsPeriodSqr\
 = kep.postqats.fitQats(kid, periods, snr, order,\
                        qats_best_period_fit=True)
 bestPeriodIdx = periods.tolist().index(bestPeriod)
+qatsPeriodIdx = periods.tolist().index(qatsBestPeriod)
 
 print 'best period from fit: ', bestPeriod
 print 'best period from qats: ', qatsBestPeriod
@@ -28,8 +29,11 @@ ax.semilogx()
 ax.plot(periods, snr, 'k-',\
         periods, bestFit, 'c-',\
         periods[bestPeriodIdx], snr[bestPeriodIdx], 'ro',\
-        periods[bestPeriodIdx], bestFit[bestPeriodIdx], 'ro')
-ax.legend(('qats SNR', 'fit to qats', 'fit best period'))
+        periods[bestPeriodIdx], bestFit[bestPeriodIdx], 'ro',\
+        periods[qatsPeriodIdx], snr[qatsPeriodIdx], 'bo',\
+        periods[qatsPeriodIdx], bestFit[qatsPeriodIdx], 'bo')
+ax.legend(('qats SNR', 'fit to qats', \
+           'fit best period', 'qats best period'))
 
 pylab.title('KID: %s' % kid)
 pylab.ylabel('SNR')
