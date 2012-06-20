@@ -29,9 +29,10 @@ ax.semilogx()
 ax.plot(periods, snr, 'k-',\
         periods, bestFit, 'c-',\
         periods[bestPeriodIdx], snr[bestPeriodIdx], 'ro',\
-        periods[bestPeriodIdx], bestFit[bestPeriodIdx], 'ro',\
+        #periods[bestPeriodIdx], bestFit[bestPeriodIdx], 'ro',\
         periods[qatsPeriodIdx], snr[qatsPeriodIdx], 'bo',\
-        periods[qatsPeriodIdx], bestFit[qatsPeriodIdx], 'bo')
+        #periods[qatsPeriodIdx], bestFit[qatsPeriodIdx], 'bo'
+        )
 ax.legend(('qats SNR', 'fit to qats', \
            'fit best period', 'qats best period'))
 
