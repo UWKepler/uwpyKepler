@@ -55,6 +55,7 @@ def getQatsData(dfile):
     return periods, snr, snrLC, snrFLAT
     
 # used in flagQats fitting
+# note: m=1 and n=1 when p0=p1 or p0=p2
 def firstFareyVal(p0,p1,p2):
     m   = 1. # start on right side for when p0 = p1
     n   = 1.

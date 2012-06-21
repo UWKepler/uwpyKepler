@@ -7,20 +7,19 @@ import pylab
 import optparse
 import os
 
-def getphase(eData,path,auto,man):
+def getphase(eData,kid,auto,man):
     if not man:
         try:
             eData_idx = eData['KOI'].keys()[0]
             eData = eData['KOI'][eData_idx]
             phase = \
             kep.func.foldPhase(lcData,eData['T0'],eData['Period'])
+            print 'catalogued period:', eData['Period']
         except:
             try:
-                qtsfile = open(path, 'r')
-                top = qtsfile.readlines()[0]
-                split = top.split(' ')
-                period = eval(split[3])
+                period = kep.postqats.getBestPeriodByKID(kid)
                 phase = kep.func.foldPhase(lcData,0,period)
+                print 'QATS best period:', period
             except:
                 print('no period data found; exiting...\n')
                 sys.exit()
@@ -46,10 +45,10 @@ def bin(binsize,phase):
         
     return binnedx, binnedy, binnedyerr
 
-KID_or_Path = sys.argv[1]
+KID = sys.argv[1]
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage=\
-    "%prog\nUse this script to fold or bin a given lightcurve.\nScript can be run with 1 of 2 system arguments.\n1: Input a KID if the object's transit data is already cataloged in the database.\n2: Input the path (from the current directory) to the QATS file for the object to view.")
+    "%prog\nUse this script to fold or bin a given lightcurve.\nScript takes a KID as a system argument.")
     parser.add_option('-a','--auto',\
                         action='store_true',\
                         dest='auto',\
@@ -85,19 +84,6 @@ if __name__ == '__main__':
     opts, args = parser.parse_args()
 
 ### extracts KID from supplied path or handles KID w/o a path ###
-path = KID_or_Path
-strings = KID_or_Path.split('.')
-kidnum = []
-for thing in strings:
-    try:
-        kidnum.append(int(thing))
-    except:
-        continue
-if not len(kidnum) == 0:
-    KID = kidnum[0]
-else:
-    KID = KID_or_Path
-
 keplc = kep.keplc.keplc(KID)
 eData = keplc.eData
 BJDREFI = keplc.BJDREFI
@@ -115,7 +101,7 @@ durfac=2)
 lcData = kep.keplc.lcData(KID,eData,BJDREFI,kw).lcData
 #lcData['x'] = lcData['x'] + BJDREFI
 
-phase = getphase(eData,path,opts.auto,opts.manual)
+phase = getphase(eData,KID,opts.auto,opts.manual)
 
 if opts.bin:
     bx, by, byerr = bin(opts.bin,phase)
