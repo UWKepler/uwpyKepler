@@ -25,4 +25,6 @@ import qats
 
 import linLeastSquares
 
+import test_plotting.quicklc as quicklc
+
 #import qats_nhat
