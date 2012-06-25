@@ -1,7 +1,7 @@
 import numpy as num
 import time
 
-def linLeastSquares(x, y, funcs, nterms):
+def linLeastSquares(x, y, funcs, nterms, **kwargs):
     # create an array of arrays; each equal in length to len(x)
     col = num.array([num.zeros(len(x))]*nterms)
     # apply functions to data to determine columns
@@ -16,4 +16,10 @@ def linLeastSquares(x, y, funcs, nterms):
     for k in range(len(b)):
         b[k] = num.sum( (col[k] * y) )
     a = num.sum(a, axis=2)
-    return num.linalg.solve(a, b), col[-1]
+    # option to return values allows elimination of
+    # time-consuming computations later
+    for key in kwargs:
+        if key == 'return_func_vals':
+            returnFuncs = kwargs[key]
+            return num.linalg.solve(a, b), col[returnFuncs]
+    return num.linalg.solve(a, b)

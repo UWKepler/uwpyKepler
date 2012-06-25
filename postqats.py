@@ -104,7 +104,7 @@ def fitQats(kid, periods, snr, polyOrder, **kwargs):
         # the data are raised to
         coeffs, fareyVals = \
         kep.linLeastSquares.linLeastSquares\
-        (periods, snr, funcs, order + 2)
+        (periods, snr, funcs, order + 2, return_func_vals=-1)
         allCoeffs.append(coeffs)
         polynom = scipy.polyval(coeffs[:-1], periods)
         fit = polynom + coeffs[-1] * fareyVals
