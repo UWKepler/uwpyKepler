@@ -1,5 +1,5 @@
 import numpy as num
-import time
+import pdb
 
 def linLeastSquares(x, y, funcs, nterms, **kwargs):
     # create an array of arrays; each equal in length to len(x)
@@ -18,6 +18,7 @@ def linLeastSquares(x, y, funcs, nterms, **kwargs):
     a = num.sum(a, axis=2)
     # option to return values allows elimination of
     # time-consuming computations later
+    #pdb.set_trace()
     for key in kwargs:
         if key == 'return_func_vals':
             returnFuncs = kwargs[key]

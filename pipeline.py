@@ -202,11 +202,11 @@ def FlagOutliers(lcData,medwin,threshold):
 
     return lcData
 
-def DetrendData(lcData, window, polyorder):
+def DetrendData(lcData, window, polyorder, **kwargs):
     """Detrends the data"""
     
     for portion in lcData.keys():
-	lcData = ApplyMaskPortions(lcData,'ALLMask',portion)
+        lcData = ApplyMaskPortions(lcData,'ALLMask',portion)
         nsize = len(lcData[portion]['x'])
         idict = makeDTwindows(nsize,window)
         dtfunc1 = num.array([])
@@ -228,13 +228,27 @@ def DetrendData(lcData, window, polyorder):
                 num.array(lcData[portion]['x'][i1:i2][unmasked])
                 ydata =\
                 num.array(lcData[portion]['y'][i1:i2][unmasked])
-                # find the fit
-                coeff = scipy.polyfit(xdata, ydata, polyorder)
-
-                # unmask data and apply the polynomial
+                # unmask data
                 all_data_x =\
                 num.ma.getdata(lcData[portion]['x'][i1:i2])
-                outy = scipy.polyval(coeff,all_data_x)
+                # find the fit
+                for kw in kwargs:
+                    if kw == 'funcs':
+                        funcs = kwargs[kw]
+                        funcIndices = range(len(funcs))
+                        coeff = \
+                        kep.linLeastSquares.linLeastSquares \
+                            (xdata, ydata, funcs, len(funcs))
+                        outy = num.zeros(len(all_data_x))
+                        for i in funcIndices:
+                            outy = funcs[i](all_data_x)*coeff[i] \
+                                 + outy
+                if len(kwargs) == 0:
+                    coeff = scipy.polyfit \
+                            (xdata, ydata, polyorder)
+                    # apply the polynomial
+                    outy = scipy.polyval(coeff,all_data_x)
+
                 #print len(all_data_x), key
                 if key == 1:
                     dtfunc1 = num.hstack((dtfunc1,outy))
