@@ -4,17 +4,9 @@ import numpy as num
 import pylab
 import os
 
-def createLC(kid):
+def createLC(kid, **kwargs):
     lc = kep.keplc.keplc(kid)
-    kw = kep.keplc.kw(\
-    ctype='LC',\
-    gsize=2,\
-    owin=15,\
-    othresh=5,\
-    dwin=50,\
-    polyorder=6,\
-    agap=1,\
-    durfac=2)
+    kw = quickKW(**kwargs)
     lc.runPipeline(kw)
     return lc
 
