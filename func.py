@@ -97,12 +97,9 @@ def foldPhase(data,t0,period):
     """ enter duration dur in hours and t0 is center time of transit"""
     
     t0 = t0 + 2454900e0
-    phaselist = []
-    for time in data['x']:
-        phase = (time - t0)/period - (time-t0)//period 
-	phaselist.append(phase)    
+    phase = (data['x']-t0)/period - (data['x']-t0)//period
 
-    #pylab.plot(phaselist,data['ydt'],'b.')
+    #pylab.plot(phase,data['ydt'],'b.')
     #pylab.show()
 
-    return phaselist
+    return phase

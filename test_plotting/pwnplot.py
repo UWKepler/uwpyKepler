@@ -39,7 +39,8 @@ def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex):
     durfac=2)
     
     lcData = kep.keplc.lcData(kid,eData,BJDREFI,kw).lcData
-    x = lcData['x']+BJDREFI
+    x = lcData['x']+BJDREFI#-2454900e0
+    # uncomment above so that t0 aligns with first transit
 
     if sharex:
         ugly = pylab.subplot(211)
