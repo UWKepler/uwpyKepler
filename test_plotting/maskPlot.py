@@ -8,22 +8,6 @@ import optparse
 import os
 import pdb
 
-def geteData(kid):
-    fileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
-    name = 'eDataDiscoveries.txt'
-    dFile = open(fileDir + name, 'r')
-    # first line is useless
-    dFile.readline()
-    lines = dFile.readlines()
-    for line in lines:
-        if line.split()[0] == str(kid):
-            line   = line.split()
-            period = float(line[1])
-            t0     = float(line[2])
-            q      = float(line[3])
-            break
-    return period, t0, q
-
 def sharexPlot(lc):
     lcData = lc.lcFinal
     idx = num.where(lcData['eMask'] == 1)[0]
@@ -76,7 +60,7 @@ if __name__ == '__main__':
                         +') [default: %default]')
 
     opts, args = parser.parse_args()
-    period, t0, q = geteData(kid)
+    period, t0, q = kep.analysis.geteDataFromFile(kid)
     lc = kep.keplc.keplc(kid)
     lc.eData['eDataExists'] = True
     lc.eData['KOI'] = {'fake':\

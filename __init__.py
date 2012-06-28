@@ -29,4 +29,6 @@ import test_plotting.quicklc as quicklc
 
 import tquick
 
+import analysis
+
 #import qats_nhat
