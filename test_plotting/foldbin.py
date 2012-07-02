@@ -13,18 +13,18 @@ def getphase(eData,kid,auto,man):
             eData_idx = eData['KOI'].keys()[0]
             eData = eData['KOI'][eData_idx]
             phase = \
-            kep.func.foldPhase(lcData,eData['T0'],eData['Period'])
+            kep.func.foldPhase(lcData['x'],eData['T0'],eData['Period'])
             print 'catalogued period:', eData['Period']
         except:
             try:
                 period = kep.postqats.getBestPeriodByKID(kid)
-                phase = kep.func.foldPhase(lcData,0,period)
+                phase = kep.func.foldPhase(lcData['x'],0,period)
                 print 'QATS best period:', period
             except:
                 print('no period data found; exiting...\n')
                 sys.exit()
     else:
-        phase = kep.func.foldPhase(lcData,0,man)
+        phase = kep.func.foldPhase(lcData['x'],0,man)
 
     return phase
 

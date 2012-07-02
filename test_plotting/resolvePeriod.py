@@ -75,7 +75,7 @@ t_dur  = t_dur0/(10.**(zf-1))
 
 testPs = num.arange(p0-t_dur,p0+t_dur,2*t_dur/10.)
 for plot in range(len(testPs)):
-    phase = kep.func.foldPhase(lcData,0,testPs[plot])
+    phase = kep.func.foldPhase(lcData['x'],0,testPs[plot])
     pylab.figure(plot)
     pylab.title('KID: %s, P0: %s, ZoomFac: %s' % \
                 (KID, testPs[plot], zf))

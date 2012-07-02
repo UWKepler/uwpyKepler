@@ -36,7 +36,7 @@ def runfold(kid,ctype,auto,hint,man):
             eData_idx = eData['KOI'].keys()[0]
             eData = eData['KOI'][eData_idx]
             x = \
-            kep.func.foldPhase(lcData,eData['T0'],eData['Period'])
+            kep.func.foldPhase(lcData['x'],eData['T0'],eData['Period'])
         except:
             print 'checking for qats file...'
             try:
@@ -44,7 +44,7 @@ def runfold(kid,ctype,auto,hint,man):
                 top = qtsfile.readlines()[0]
                 split = top.split(' ')
                 period = eval(split[3])
-                x = kep.func.foldPhase(lcData,0,period)
+                x = kep.func.foldPhase(lcData['x'],0,period)
             except:
                 try:
                     if hint[-4:] == 'data':
@@ -56,12 +56,12 @@ def runfold(kid,ctype,auto,hint,man):
                     top = qtsfile.readlines()[0]
                     split = top.split(' ')
                     period = eval(split[3])
-                    x = kep.func.foldPhase(lcData,0,period)
+                    x = kep.func.foldPhase(lcData['x'],0,period)
                 except:
                     print('no period data found; exiting...\n')
                     sys.exit()
     else:
-        x = kep.func.foldPhase(lcData,0,man)
+        x = kep.func.foldPhase(lcData['x'],0,man)
     pylab.title('KID: %s' % kid)
     pylab.xlabel('Phase')
     pylab.ylabel('Flux')
