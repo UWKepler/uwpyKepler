@@ -93,11 +93,11 @@ def compute1Sigma(data):
     return sigma
                    
 
-def foldPhase(data,t0,period):
+def foldPhase(xdata,t0,period):
     """ enter duration dur in hours and t0 is center time of transit"""
     
     t0 = t0 + 2454900e0
-    phase = (data['x']-t0)/period - (data['x']-t0)//period
+    phase = (xdata-t0)/period - (xdata-t0)//period
 
     #pylab.plot(phase,data['ydt'],'b.')
     #pylab.show()
