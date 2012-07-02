@@ -30,7 +30,8 @@ def foldPlot(lc):
     period = lc.eData['KOI']['fake']['Period']
     t0 = lc.eData['KOI']['fake']['T0']
     lcData = lc.lcFinal
-    phase = kep.func.foldPhase(lcData, t0 + 0.5 * period, period)
+    phase = kep.func.foldPhase(\
+        lcData['x'], t0 + 0.5 * period, period)
     pylab.title('KID: %s' % kid)
     pylab.ylabel('CorrFlux')
     pylab.xlabel('Phase')
