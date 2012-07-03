@@ -83,7 +83,6 @@ if __name__ == '__main__':
                         +') [default: %default]')
     opts, args = parser.parse_args()
 
-### extracts KID from supplied path or handles KID w/o a path ###
 keplc = kep.keplc.keplc(KID)
 eData = keplc.eData
 BJDREFI = keplc.BJDREFI

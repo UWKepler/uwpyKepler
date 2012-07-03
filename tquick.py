@@ -3,6 +3,7 @@
 import numpy as np
 import os
 import sys
+import pylab as plt
 np.seterr(divide='ignore')
 
 def ekepler(m,e):
@@ -306,10 +307,22 @@ def TransitLC(timeIn,F0,inc,aRs,Period,RpRs,u1,u2,T0):
         T0 - Mid Transit Time
         
     """
-
+    if inc >= np.pi / 2 + np.arcsin(1. / aRs) \
+    or inc <= np.pi / 2 - np.arcsin(1. / aRs) \
+    or aRs < 1. \
+    or RpRs > 1. \
+    or RpRs < 0. \
+    or T0 < 0.:
+        garbage = np.zeros(len(timeIn))
+        garbage.fill(1e4)
+        return garbage
     # RpRs = tqe.MTQ_getRpRs(u1,u2,tT,tG,D)
     th = (2e0*np.pi/Period)*(timeIn-T0)
+    idxLOS = np.where(np.cos(th) < 0)[0]
+    th[idxLOS] = np.pi/2e0
     z0 = aRs*np.sqrt(1e0 - (np.cos(th)*np.sin(inc))**2e0)
+    #plt.plot(timeIn, np.cos(th),'b.')
+    #plt.show()
     out = occultquad(z0,u1,u2,RpRs)
     flux= out[:][0]*F0
     return flux
