@@ -1,3 +1,5 @@
+#!/astro/apps/pkg/python64/bin//python
+
 import uwpyKepler as kep
 from uwpyKepler.analysis import *
 import numpy as num
@@ -158,7 +160,7 @@ if not lc.eData['eDataExists']:
 kw = kep.quicklc.quickKW(ctype=opts.ctype)
 lc.runPipeline(kw)
 RpRsEst = num.sqrt(1. - min(lc.lcFinal['ydt']))
-firstGuess = num.array([num.pi / 2, 5., RpRsEst, 0.1, 0.1])
+firstGuess = num.array([num.pi / 2, 5.173828125, RpRsEst, 0.1, 0.1])
 
 mod = modelLC(kid, lc, firstGuess)
 
