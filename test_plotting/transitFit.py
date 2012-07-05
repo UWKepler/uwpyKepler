@@ -9,7 +9,28 @@ import sys
 import os
 import optparse
 
-def normalRun(mod, unfold):
+# plots mod.ydata w/ or w/o errorbars
+# determined by errBool
+def withOrWithoutErr(x, errBool):
+    if errBool:
+        pylab.errorbar(x, mod.ydata, \
+            yerr=mod.yerr, fmt='.', color='b')
+    else:
+        pylab.plot(x, mod.ydata, 'b.')
+
+# plots x and y data and model with
+# "unfold" and "error" user specifications
+def foldOrUnfold(unfoldBool, errBool):
+    if not unfoldBool:
+        pylab.xlabel('phase')
+        withOrWithoutErr(mod.phase, errBool)
+        pylab.plot(mod.phase, mod.model, 'k.')
+    else:
+        pylab.xlabel('time in days')
+        withOrWithoutErr(mod.xdata, errBool)
+        pylab.plot(mod.xdata, mod.model, 'k.')
+
+def normalRun(mod, unfold, error):
     if lc.eData['eDataExists']:
         mod.fitIncArsRprs()
         mod.fitPeriodT0()
@@ -26,16 +47,9 @@ def normalRun(mod, unfold):
     
     pylab.title('%s: ' % mod.kid + 'transit fit')
     pylab.ylabel('corrflux')
-    if not unfold:
-        pylab.xlabel('phase')
-        pylab.plot(mod.phase, mod.ydata, 'b.')
-        pylab.plot(mod.phase, mod.model, 'k.')
-    else:
-        pylab.xlabel('time in days')
-        pylab.plot(mod.xdata, mod.ydata, 'b.')
-        pylab.plot(mod.xdata, mod.model, 'k.')
+    foldOrUnfold(unfold, error)
 
-def allPlots(mod, unfold):
+def allPlots(mod, unfold, error):
     plots = ['fit to inc, aRs, RpRs', \
         'fit to period, t0', \
         'fit to u1, u2', \
@@ -54,14 +68,7 @@ def allPlots(mod, unfold):
             pylab.figure()
             pylab.title('%s: ' % mod.kid + plots[i])
             pylab.ylabel('corrflux')
-            if not unfold:
-                pylab.xlabel('phase')
-                pylab.plot(mod.phase, mod.ydata, 'b.')
-                pylab.plot(mod.phase, mod.model, 'k.')
-            else:
-                pylab.xlabel('time in days')
-                pylab.plot(mod.xdata, mod.ydata, 'b.')
-                pylab.plot(mod.xdata, mod.model, 'k.')
+            foldOrUnfold(unfold, error)
     else:
         plots.insert(0, 'prelim period and t0 fit')
         funcs.insert(0, mod.fitPeriodT0)
@@ -73,14 +80,7 @@ def allPlots(mod, unfold):
             pylab.figure()
             pylab.title('%s: ' % mod.kid + plots[i])
             pylab.ylabel('corrflux')
-            if not unfold:
-                pylab.xlabel('phase')
-                pylab.plot(mod.phase, mod.ydata, 'b.')
-                pylab.plot(mod.phase, mod.model, 'k.')
-            else:
-                pylab.xlabel('time in days')
-                pylab.plot(mod.xdata, mod.ydata, 'b.')
-                pylab.plot(mod.xdata, mod.model, 'k.')
+            foldOrUnfold(unfold, error)
 
 def write_NoDuplicates(file, mod):
     idx = None
@@ -128,6 +128,11 @@ if __name__ == '__main__':
                         dest='unfold',\
                         default=False,\
                         help='display lightcurve unfolded')
+    parser.add_option('-e','--error',\
+                        action='store_true',\
+                        dest='error',\
+                        default=False,\
+                        help='plot ydata with errors')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
                         choices=cChoice,\
@@ -159,15 +164,19 @@ if not lc.eData['eDataExists']:
 
 kw = kep.quicklc.quickKW(ctype=opts.ctype)
 lc.runPipeline(kw)
+lcData = lc.lcFinal
+eData = lc.eData
 RpRsEst = num.sqrt(1. - min(lc.lcFinal['ydt']))
+# second element, aRs is FINNICKY;
+# fit can change drastically based guess!!
 firstGuess = num.array([num.pi / 2, 5.173828125, RpRsEst, 0.1, 0.1])
 
-mod = modelLC(kid, lc, firstGuess)
+mod = modelLC(kid, lcData, eData, firstGuess)
 
 if opts.all:
-    allPlots(mod, opts.unfold)
+    allPlots(mod, opts.unfold, opts.error)
 else:
-    normalRun(mod, opts.unfold)
+    normalRun(mod, opts.unfold, opts.error)
 
 if opts.write:
     write_NoDuplicates(opts.write, mod)

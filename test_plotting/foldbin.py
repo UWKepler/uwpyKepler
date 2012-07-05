@@ -12,8 +12,10 @@ def getphase(eData,kid,auto,man):
         try:
             eData_idx = eData['KOI'].keys()[0]
             eData = eData['KOI'][eData_idx]
+            t0 = eData['T0']
+            period = eData['Period']
             phase = \
-            kep.func.foldPhase(lcData['x'],eData['T0'],eData['Period'])
+            kep.func.foldPhase(lcData['x'],t0 + 0.5*period,period)
             print 'catalogued period:', eData['Period']
         except:
             try:
@@ -98,7 +100,7 @@ agap=1,\
 durfac=2)
 
 lcData = kep.keplc.lcData(KID,eData,BJDREFI,kw).lcData
-#lcData['x'] = lcData['x'] + BJDREFI
+lcData['x'] = lcData['x'] + BJDREFI
 
 phase = getphase(eData,KID,opts.auto,opts.manual)
 

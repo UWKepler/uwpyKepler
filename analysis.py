@@ -5,11 +5,11 @@ from scipy import optimize
 import sys
 import os
 
-fileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
+eDatafileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
 name = 'eDataDiscoveries.txt'
 
 def geteDataFromFile(kid):
-    dFile = open(fileDir + name, 'r')
+    dFile = open(eDatafileDir + name, 'r')
     lines = dFile.readlines()
     for line in lines:
         if line.split()[0] == str(kid):
@@ -21,7 +21,7 @@ def geteDataFromFile(kid):
     return -1, -1, -1
     
 def eDataInFile(kid):
-    dFile = open(fileDir + name, 'r')
+    dFile = open(eDatafileDir + name, 'r')
     lines = dFile.readlines()
     for line in lines:
         if line.split()[0] == str(kid):
@@ -29,14 +29,16 @@ def eDataInFile(kid):
     return False
     
 class modelLC:
-    def __init__(self, kid, lc, guess):
+    def __init__(self, kid, lcData, eData, guess):
+        BJDREFI = kep.iodb.getBJDREFI(kid)
         self.kid    = kid
-        self.xdata  = lc.lcFinal['x'] + lc.BJDREFI - 2454900e0
-        self.ydata  = lc.lcFinal['ydt']
-        key = lc.eData['KOI'].keys()[0]
-        self.period = lc.eData['KOI'][key]['Period']
-        self.t0     = lc.eData['KOI'][key]['T0']
-        self.q      = lc.eData['KOI'][key]['Duration']
+        self.xdata  = lcData['x'] + BJDREFI - 2454900e0
+        self.ydata  = lcData['ydt']
+        self.yerr   = lcData['yerrdt']
+        key = eData['KOI'].keys()[0]
+        self.period = eData['KOI'][key]['Period']
+        self.t0     = eData['KOI'][key]['T0']
+        self.q      = eData['KOI'][key]['Duration']
         self.inc    = guess[0]
         self.aRs    = guess[1]
         self.RpRs   = guess[2]
@@ -67,10 +69,10 @@ class modelLC:
             self.u1,\
             self.u2,\
             self.t0)
+        self.chiSqr = self.getChiSqr()
             
     def getChiSqr(self):
-        return num.sum((self.ydata - self.model)**2)
-
+        return num.sum(((self.ydata - self.model) / self.yerr)**2)
 
     def fitIncArsRprs(self):
         warnflag = 1
@@ -78,7 +80,7 @@ class modelLC:
             guess = num.array(\
                 [self.inc, self.aRs, self.RpRs])
             modelChiSqr = lambda args: \
-                num.sum((self.ydata - kep.tquick.TransitLC(\
+                num.sum(((self.ydata - kep.tquick.TransitLC(\
                     self.xdata,\
                     1.,\
                     args[0],\
@@ -87,7 +89,7 @@ class modelLC:
                     args[2],\
                     self.u1,\
                     self.u2,\
-                    self.t0))**2)
+                    self.t0)) / self.yerr)**2)
             oldChiSqr = self.getChiSqr()
             output = \
                 optimize.fmin(modelChiSqr, guess, full_output=True)
@@ -109,7 +111,7 @@ class modelLC:
             guess = num.array(\
                 [self.period, self.t0])
             modelChiSqr = lambda args: \
-                num.sum((self.ydata - kep.tquick.TransitLC(\
+                num.sum(((self.ydata - kep.tquick.TransitLC(\
                     self.xdata,\
                     1.,\
                     self.inc,\
@@ -118,7 +120,7 @@ class modelLC:
                     self.RpRs,\
                     self.u1,\
                     self.u2,\
-                    args[1]))**2)
+                    args[1])) / self.yerr)**2)
             resetPhase = lambda args: self.setPhase(\
                 period=args[0], t0=args[1])
             oldChiSqr = self.getChiSqr()
@@ -132,7 +134,7 @@ class modelLC:
         
         newChiSqr = self.getChiSqr()
         if newChiSqr > oldChiSqr:
-            self.inc, self.aRs, self.RpRs = guess
+            self.period, self.t0 = guess
             print 'fit two discarded'
 
 
@@ -142,7 +144,7 @@ class modelLC:
             guess = num.array(\
                 [self.u1])
             modelChiSqr = lambda args: \
-                num.sum((self.ydata - kep.tquick.TransitLC(\
+                num.sum(((self.ydata - kep.tquick.TransitLC(\
                     self.xdata,\
                     1.,\
                     self.inc,\
@@ -151,7 +153,7 @@ class modelLC:
                     self.RpRs,\
                     args[0],\
                     self.u2,\
-                    self.t0))**2)
+                    self.t0)) / self.yerr)**2)
             oldChiSqr = self.getChiSqr()
             output = \
                 optimize.fmin(modelChiSqr, guess, full_output=True)
@@ -161,7 +163,7 @@ class modelLC:
         
         newChiSqr = self.getChiSqr()
         if newChiSqr > oldChiSqr:
-            self.inc, self.aRs, self.RpRs = guess
+            self.u1 = guess
             print 'u1 fit discarded'
 
 
@@ -171,7 +173,7 @@ class modelLC:
             guess = num.array(\
                 [self.u2])
             modelChiSqr = lambda args: \
-                num.sum((self.ydata - kep.tquick.TransitLC(\
+                num.sum(((self.ydata - kep.tquick.TransitLC(\
                     self.xdata,\
                     1.,\
                     self.inc,\
@@ -180,7 +182,7 @@ class modelLC:
                     self.RpRs,\
                     self.u1,\
                     args[0],\
-                    self.t0))**2)
+                    self.t0)) / self.yerr)**2)
             oldChiSqr = self.getChiSqr()
             output = \
                 optimize.fmin(modelChiSqr, guess, full_output=True)
@@ -190,7 +192,7 @@ class modelLC:
         
         newChiSqr = self.getChiSqr()
         if newChiSqr > oldChiSqr:
-            self.inc, self.aRs, self.RpRs = guess
+            self.u2 = guess
             print 'u2 fit discarded'
             
             
@@ -202,7 +204,7 @@ class modelLC:
                  self.period, self.t0, \
                  self.u1, self.u2])
             modelChiSqr = lambda args: \
-                num.sum((self.ydata - kep.tquick.TransitLC(\
+                num.sum(((self.ydata - kep.tquick.TransitLC(\
                     self.xdata,\
                     1.,\
                     args[0],\
@@ -211,7 +213,7 @@ class modelLC:
                     args[2],\
                     args[5],\
                     args[6],\
-                    args[4]))**2)
+                    args[4])) / self.yerr)**2)
             oldChiSqr = self.getChiSqr()
             output = \
                 optimize.fmin(modelChiSqr, guess, \
@@ -228,5 +230,20 @@ class modelLC:
         
         newChiSqr = self.getChiSqr()
         if newChiSqr > oldChiSqr:
-            self.inc, self.aRs, self.RpRs = guess
+            self.inc, self.aRs, self.RpRs,
+            self.period, self.t0, \
+            self.u1, self.u2 = guess
             print 'final fit discarded'
+            
+    def computeTransitSN(self):
+        depth = max(self.model) - min(self.model)
+        std = num.std(self.ydata)
+        return depth / std
+    
+    #def computeTransitSN(self):
+        #idx = num.where(self.model < 1)[0]
+        #n = len(idx)
+        #meanDepth = max(self.model) - num.mean(self.ydata[idx])
+        #errOfMean = num.mean(self.yerr[idx]) / num.sqrt(n)
+        #snr = meanDepth / errOfMean
+        #return snr
