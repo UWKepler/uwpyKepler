@@ -72,10 +72,12 @@ def allPlots(mod, unfold, error):
     else:
         plots.insert(0, 'prelim period and t0 fit')
         funcs.insert(0, mod.fitPeriodT0)
+        plots.insert(0, 'prelim t0 fit')
+        funcs.insert(0, mod.fitT0)
         for i in range(len(plots)):
-            if i != 4:
+            if i != 5:
                 funcs[i]()
-            if i == 3:
+            if i == 4:
                 funcs[i + 1]()
             pylab.figure()
             pylab.title('%s: ' % mod.kid + plots[i])
@@ -166,10 +168,19 @@ kw = kep.quicklc.quickKW(ctype=opts.ctype)
 lc.runPipeline(kw)
 lcData = lc.lcFinal
 eData = lc.eData
-RpRsEst = num.sqrt(1. - min(lc.lcFinal['ydt']))
+# estimate RpRs without picking up outliers
+ydt = lc.lcFinal['ydt']
+idx = ydt.argsort()
+iMin = idx[num.floor(0.1585*len(idx))]
+RpRsEst = num.sqrt(1. - ydt[iMin])
 # second element, aRs is FINNICKY;
 # fit can change drastically based guess!!
-firstGuess = num.array([num.pi / 2, 5.173828125, RpRsEst, 0.1, 0.1])
+# estimate aRs taking a = 1 / sin(q*pi) and q ~ 0.02
+aRsEst = 1. / num.sin(num.pi * 0.02)
+# estimate inc to be 90 degrees
+incEst = num.pi / 2
+#firstGuess = num.array([num.pi / 2, 5.173828125, RpRsEst, 0.1, 0.1])
+firstGuess = num.array([incEst, aRsEst, RpRsEst, 0.1, 0.1]) 
 
 mod = modelLC(kid, lcData, eData, firstGuess)
 

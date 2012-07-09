@@ -28,18 +28,10 @@ def pipelineplot(kid,ctype,pltlcFinal,dtopt,sharex):
     eData = keplc.eData
     BJDREFI = keplc.BJDREFI
     
-    kw = kep.keplc.kw(\
-    ctype=ctype,\
-    gsize=2,\
-    owin=15,\
-    othresh=5,\
-    dwin=50,\
-    polyorder=6,\
-    agap=1,\
-    durfac=2)
+    kw = kep.quicklc.quickKW(ctype=ctype)
     
     lcData = kep.keplc.lcData(kid,eData,BJDREFI,kw).lcData
-    x = lcData['x']+BJDREFI#-2454900e0
+    x = lcData['x']+BJDREFI-2454900e0
     # uncomment above so that t0 aligns with first transit
 
     if sharex:

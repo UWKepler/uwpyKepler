@@ -32,6 +32,8 @@ def binFromList(data,binlist):
 
 # bins data given binsize in cadence
 def bin(x, y, binsize):
+    if binsize == 0:
+        return x, y
     npts = len(x)
     nbins = npts / int(binsize)
     bx = num.zeros(nbins)

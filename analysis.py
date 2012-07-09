@@ -4,9 +4,11 @@ import pylab
 from scipy import optimize
 import sys
 import os
+import copy
 
 eDatafileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
 name = 'eDataDiscoveries.txt'
+name2 = 'eDataFromFits.txt'
 
 def geteDataFromFile(kid):
     dFile = open(eDatafileDir + name, 'r')
@@ -28,6 +30,24 @@ def eDataInFile(kid):
             return True
     return False
     
+def geteDataFromModelFile(kid):
+    dFile = open(eDatafileDir + name2, 'r')
+    lines = dFile.readlines()
+    for line in lines:
+        if line.split()[0] == str(kid):
+            line   = line.split()
+            period = float(line[1])
+            t0     = float(line[2])
+            q      = float(line[3])
+            inc    = float(line[4])
+            aRs    = float(line[5])
+            RpRs   = float(line[6])
+            u1     = float(line[7])
+            u2     = float(line[8])
+            params = [period, t0, q, inc, aRs, RpRs, u1, u2]
+            return params
+    return num.zeros(8) - 1
+    
 class modelLC:
     def __init__(self, kid, lcData, eData, guess):
         BJDREFI = kep.iodb.getBJDREFI(kid)
@@ -46,6 +66,9 @@ class modelLC:
         self.u2     = guess[4]
         self.setPhase()
         self.updateModel()
+    
+    def copy(self):
+        return copy.deepcopy(self)
             
     def setPhase(self, **kwargs):
         for key in kwargs:
@@ -72,7 +95,7 @@ class modelLC:
         self.chiSqr = self.getChiSqr()
             
     def getChiSqr(self):
-        return num.sum(((self.ydata - self.model) / self.yerr)**2)
+        return num.sum( ((self.ydata - self.model) / self.yerr)**2 )
 
     def fitIncArsRprs(self):
         warnflag = 1
@@ -228,6 +251,37 @@ class modelLC:
             warnflag    = output[-1]
         self.updateModel()
         
+    def fitT0(self):
+        warnflag = 1
+        while warnflag != 0:
+            guess = num.array(\
+                [self.t0])
+            modelChiSqr = lambda args: \
+                num.sum(((self.ydata - kep.tquick.TransitLC(\
+                    self.xdata,\
+                    1.,\
+                    self.inc,\
+                    self.aRs,\
+                    self.period,\
+                    self.RpRs,\
+                    self.u1,\
+                    self.u2,\
+                    args[0])) / self.yerr)**2)
+            resetPhase = lambda args: self.setPhase(\
+                t0=args[0])
+            oldChiSqr = self.getChiSqr()
+            output = \
+                optimize.fmin(modelChiSqr, guess, \
+                    callback=resetPhase, full_output=True)
+            self.t0     = output[0][0]
+            warnflag    = output[-1]
+        self.updateModel()
+        
+        newChiSqr = self.getChiSqr()
+        if newChiSqr > oldChiSqr:
+            self.period, self.t0 = guess
+            print 'fit two discarded'
+        
         newChiSqr = self.getChiSqr()
         if newChiSqr > oldChiSqr:
             self.inc, self.aRs, self.RpRs,
@@ -236,9 +290,11 @@ class modelLC:
             print 'final fit discarded'
             
     def computeTransitSN(self):
-        depth = max(self.model) - min(self.model)
-        std = num.std(self.ydata)
-        return depth / std
+        idx = num.where(self.model < 1)[0]
+        N = len(idx)
+        signal = num.sum(1 - self.ydata[idx])
+        noise = num.sum(self.yerr[idx]**2) / num.sqrt(N)
+        return signal / noise
     
     #def computeTransitSN(self):
         #idx = num.where(self.model < 1)[0]
@@ -247,3 +303,5 @@ class modelLC:
         #errOfMean = num.mean(self.yerr[idx]) / num.sqrt(n)
         #snr = meanDepth / errOfMean
         #return snr
+    
+    

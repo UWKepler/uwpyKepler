@@ -89,15 +89,7 @@ keplc = kep.keplc.keplc(KID)
 eData = keplc.eData
 BJDREFI = keplc.BJDREFI
 
-kw = kep.keplc.kw(\
-ctype=opts.ctype,\
-gsize=2,\
-owin=15,\
-othresh=5,\
-dwin=50,\
-polyorder=6,\
-agap=1,\
-durfac=2)
+kw = kep.quicklc.quickKW(ctype=opts.ctype)
 
 lcData = kep.keplc.lcData(KID,eData,BJDREFI,kw).lcData
 lcData['x'] = lcData['x'] + BJDREFI
