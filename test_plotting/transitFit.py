@@ -38,6 +38,7 @@ def normalRun(mod, unfold, error):
         mod.fitu2()
         mod.finalFit()
     else:
+        mod.fitT0() # lines up model box fit and transit.. ideally
         mod.fitPeriodT0() # get decent period and t0 first
         mod.fitIncArsRprs()
         mod.fitPeriodT0()
@@ -49,36 +50,35 @@ def normalRun(mod, unfold, error):
     pylab.ylabel('corrflux')
     foldOrUnfold(unfold, error)
 
+# plots x and y data and model at
+# all stages of fit
+# using "unfold" and "error" user specifications
 def allPlots(mod, unfold, error):
     plots = ['fit to inc, aRs, RpRs', \
         'fit to period, t0', \
         'fit to u1, u2', \
         'final fit']
-    funcs = [mod.fitIncArsRprs, \
-        mod.fitPeriodT0, \
-        mod.fitu1, \
-        mod.fitu2, \
-        mod.finalFit]
+    # functions called before each plot
+    funcs = [(mod.fitIncArsRprs,), \
+        (mod.fitPeriodT0,), \
+        (mod.fitu1, mod.fitu2), \
+        (mod.finalFit,),]
     if lc.eData['eDataExists']:
         for i in range(len(plots)):
-            if i != 3:
-                funcs[i]()
-            if i == 2:
-                funcs[i + 1]()
+            for func in funcs[i]:
+                func()
             pylab.figure()
             pylab.title('%s: ' % mod.kid + plots[i])
             pylab.ylabel('corrflux')
             foldOrUnfold(unfold, error)
     else:
         plots.insert(0, 'prelim period and t0 fit')
-        funcs.insert(0, mod.fitPeriodT0)
+        funcs.insert(0, (mod.fitPeriodT0,))
         plots.insert(0, 'prelim t0 fit')
-        funcs.insert(0, mod.fitT0)
+        funcs.insert(0, (mod.fitT0,))
         for i in range(len(plots)):
-            if i != 5:
-                funcs[i]()
-            if i == 4:
-                funcs[i + 1]()
+            for func in funcs[i]:
+                func()
             pylab.figure()
             pylab.title('%s: ' % mod.kid + plots[i])
             pylab.ylabel('corrflux')

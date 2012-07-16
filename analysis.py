@@ -10,6 +10,24 @@ eDatafileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
 name = 'eDataDiscoveries.txt'
 name2 = 'eDataFromFits.txt'
 
+def writeEDataToFile(kid, period, t0, q):
+    ofile = open(eDatafileDir + name, 'r')
+    newline = str(kid) + '\t' \
+        + str(period) + '\t' \
+        + str(t0) + '\t' \
+        + str(q)
+    lines = ofile.readlines()
+    kids = [line.split()[0] for line in lines]
+    if str(kid) in kids:
+        idx = kids.index(str(kid))
+        lines[idx] = newline
+    else:
+        lines.append(newline)
+    ofile.close()
+    ofile = open(eDatafileDir + name, 'w')
+    for line in lines:
+        print >> ofile, line.strip()
+
 def geteDataFromFile(kid):
     dFile = open(eDatafileDir + name, 'r')
     lines = dFile.readlines()
@@ -21,6 +39,20 @@ def geteDataFromFile(kid):
             q      = float(line[3])
             return period, t0, q
     return -1, -1, -1
+    
+def alleDataFromFile(kid):
+    periods = []
+    t0s     = []
+    qs      = []
+    dFile = open(eDatafileDir + name, 'r')
+    lines = dFile.readlines()
+    for line in lines:
+        if line.split()[0] == str(kid):
+            line   = line.split()
+            periods.append( float(line[1]) )
+            t0s.append( float(line[2]) )
+            qs.append( float(line[3]) )
+    return periods, t0s, qs
     
 def eDataInFile(kid):
     dFile = open(eDatafileDir + name, 'r')
@@ -237,10 +269,12 @@ class modelLC:
                     args[5],\
                     args[6],\
                     args[4])) / self.yerr)**2)
+            resetPhase = lambda args: self.setPhase(\
+                period=args[3], t0=args[4])
             oldChiSqr = self.getChiSqr()
             output = \
                 optimize.fmin(modelChiSqr, guess, \
-                    full_output=True)
+                    callback=resetPhase, full_output=True)
             self.inc    = output[0][0]
             self.aRs    = output[0][1]
             self.RpRs   = output[0][2]
@@ -295,13 +329,5 @@ class modelLC:
         signal = num.sum(1 - self.ydata[idx])
         noise = num.sum(self.yerr[idx]**2) / num.sqrt(N)
         return signal / noise
-    
-    #def computeTransitSN(self):
-        #idx = num.where(self.model < 1)[0]
-        #n = len(idx)
-        #meanDepth = max(self.model) - num.mean(self.ydata[idx])
-        #errOfMean = num.mean(self.yerr[idx]) / num.sqrt(n)
-        #snr = meanDepth / errOfMean
-        #return snr
     
     

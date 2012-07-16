@@ -40,6 +40,33 @@ def foldPlot(lc):
     ty = lcData['ydt'][idx]
     pylab.plot(phase, lcData['ydt'], 'b.')
     pylab.plot(tphase, ty, 'ro')
+    
+class t0Resetter:
+    def __init__(self, t0, period):
+        self.t0 = t0
+        self.period = period
+        self.fig = pylab.gcf()
+        self.axes = pylab.gca()
+        # connection ID
+        self.cid = \
+            self.fig.canvas.mpl_connect('button_release_event', self)
+    
+    def __call__(self, event):
+        if event.inaxes != self.axes:
+            return
+        self.t0 = t0 + (event.xdata - 0.5) * self.period
+        print 't0 will reset to:', self.t0
+
+def resetT0(t0, period):
+    print '#-----------------------------#'
+    print 'Click on center of transit'
+    print 'to reset t0 to the proper value\n'
+    print 'TO EXIT: close figure'
+    print '#-----------------------------#'
+    tReset = t0Resetter(t0, period)
+    pylab.show()
+    return tReset.t0
+
 
 kid = sys.argv[1]
 if __name__ == '__main__':
@@ -50,6 +77,11 @@ if __name__ == '__main__':
                         dest='fold',\
                         default=False,\
                         help='fold the lightcurve')
+    parser.add_option('-t','--findT0',\
+                        action='store_true',\
+                        dest='findT0',\
+                        default=False,\
+                        help='enter interactive t0 resetter')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
                         choices=cChoice,\
@@ -72,7 +104,12 @@ if __name__ == '__main__':
     
     if opts.fold:
         foldPlot(lc)
+        pylab.show()
+    elif opts.findT0:
+        foldPlot(lc)
+        newt0 = resetT0(t0, period)
+        kep.analysis.writeEDataToFile(kid, period, newt0, q)
+        print 't0 reset to:', newt0
     else:
         sharexPlot(lc)
-
-    pylab.show()
+        pylab.show()

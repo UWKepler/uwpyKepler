@@ -12,7 +12,7 @@ def createLC(kid, **kwargs):
 
 def quickKW(**kwargs):
     ctype='LC'
-    gapSize=3
+    gapSize=2
     oWin=15
     oThreshold=5
     dWin=50

@@ -312,7 +312,9 @@ def TransitLC(timeIn,F0,inc,aRs,Period,RpRs,u1,u2,T0):
     or aRs < 1. \
     or RpRs > 1. \
     or RpRs < 0. \
-    or T0 < 0.:
+    or T0 < 0. \
+    or u1 < 0. or u1 > 1. \
+    or u2 < 0. or u2 > 1.:
         garbage = np.zeros(len(timeIn))
         garbage.fill(1e4)
         return garbage
