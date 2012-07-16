@@ -184,15 +184,6 @@ def multiMain(lc, nPlanets, ctype):
             print 'recorded KOIs exceed expected planet count;'
             print 'exiting'
             exit()
-        #elif len(lc.eData['KOI']) == nPlanets:
-            #period, t0, q = geteDataFromFile(lc.KID)
-            #if period > 0:
-                #lc.eData['KOI']['fake1'] = { \
-                    #'Period':period, \
-                    #'T0':t0, \
-                    #'Duration':q}}
-            #else:
-                #insertCrudeEData(lc, 1)
     if lc.eData['eDataExists']:
         koiCount = len(lc.eData['KOI'])
     else:
