@@ -85,6 +85,8 @@ def allPlots(mod, unfold, error):
             pylab.ylabel('corrflux')
             foldOrUnfold(unfold, error)
 
+# writes best fit parameters 
+# to specified file overriding an entry with same KID
 def write_NoDuplicates(file, mod):
     idx = None
     newline = str(mod.kid) + ' ' + \
@@ -111,54 +113,16 @@ def write_NoDuplicates(file, mod):
     for line in lines:
         print >> ofile, line.strip()
 
-# inserts fake eData
-# override inserts file eData even if eData is found in database
-def insertFakeEData(lc, **kwargs):
-    override = False
-    for kw in kwargs.keys():
-        if kw == 'override':
-            override = kwargs[kw]
-    if not lc.eData['eDataExists'] and not override:
-        if eDataInFile(kid):
-            periods, t0s, qs = alleDataFromFile(kid)
-            lc.eData['eDataExists'] = True
-            for i in range(len(periods)):
-                if tFlag and i == len(periods) - 1:
-                    rawlcData = \
-                        iodb.ReadLightCurve(kid, selection=ctype)
-                    rawlcData = \
-                        pipeline.FlagKeplerEvents(rawlcData)
-                    rawlcData = pipeline.RemoveBadEvents(rawlcData)
-                    eMask = \
-                        FlagEclipses(rawlcData,lc.eData,lc.BJDREFI)['eMask']
-                    excludeTransIdx = \
-                        num.where(FlagEclipses == False)[0]
-                lc.eData['KOI'] = {'fake' + str(i + 1): { \
-                    'Period':periods[i], \
-                    'T0':t0s[i], \
-                    'Duration':qs[i]}}
-            if tFlag:
-                return excludeTransIdx
-        else:
-            # crude estimates to be determined by fit
-            print 'no eData found; using hardcode guesses'
-            period = kep.postqats.getBestPeriodByKID(kid)
-            t0 = 60.
-            q = 1.5
-            lc.eData['KOI'] = {'fake': { \
-                'Period':period, \
-                'T0':t0, \
-                'Duration':q}}
-
-# returns ydata indices of all transits in catalogue and 
-# from periods, t0s, and qs from file except the last encountered
-def getKnownTransitIdx(lc, ctype):
+# returns ydata indices of all points NOT IN TRANSIT using eData 
+# in catalogue and using periods, t0s, and qs from file
+# except the last set of these encountered
+def excludeKnownTransitIdx(lc, ctype):
     rawlcData = kep.iodb.ReadLightCurve(lc.KID, selection=ctype)
     rawlcData = kep.pipeline.FlagKeplerEvents(rawlcData)
     rawlcData = kep.pipeline.RemoveBadEvents(rawlcData)
     eMask = kep.pipeline.FlagEclipses( \
         rawlcData,lc.eData,lc.BJDREFI)['eMask']
-    return num.where(eMask == False)[0]
+    return num.where(eMask == 0)[0]
     
 # only used if no data found in file
 def insertCrudeEData(lc, fakeCount):
@@ -188,21 +152,25 @@ def multiMain(lc, nPlanets, ctype):
         koiCount = len(lc.eData['KOI'])
     else:
         koiCount = 0
+    # insert eData of known transits to be removed
     fakeCount = 1
     while koiCount < nPlanets:
         if not useCrude:
             lc.eData['KOI']['fake' + str(fakeCount)] = { \
                 'Period':periods[fakeCount - 1], \
-                'T0':t0[fakeCount - 1], \
-                'Duration':q[fakeCount - 1]}
+                'T0':t0s[fakeCount - 1], \
+                'Duration':qs[fakeCount - 1]}
             if fakeCount == len(periods):
                 useCrude = True
         else:
             insertCrudeEData(lc, fakeCount)
         fakeCount += 1
         koiCount  += 1
-    idx = getKnownTransitIdx(lc, ctype)
-    # insert remaining eData
+    idx = excludeKnownTransitIdx(lc, ctype)
+    # delete known transit eData
+    for key in lc.eData['KOI'].keys():
+        del lc.eData['KOI'][key]
+    # insert preliminary eData of transit to be modeled
     if not useCrude:
         for i in range(len(periods[fakeCount - 1:])):
             lc.eData['KOI']['fake' + str(fakeCount + i)] = { \
@@ -264,6 +232,8 @@ if opts.nPlanets:
 
 kw = kep.quicklc.quickKW(ctype=opts.ctype)
 lc.runPipeline(kw)
+if not lc.eData['eDataExists']:
+    insertCrudeEData(lc, 0)
 lcData = lc.lcFinal
 eData = lc.eData
 
@@ -277,15 +247,16 @@ ydt = lc.lcFinal['ydt']
 idx = ydt.argsort()
 iMin = idx[num.floor(0.1585*len(idx))]
 RpRsEst = num.sqrt(1. - ydt[iMin])
+
 # aRs is FINNICKY;
-# fit can change drastically based guess!!
+# fit can change drastically based on guess!!
 # estimate aRs taking a = 1 / sin(q*pi) and q ~ 0.02
 aRsEst = 1. / num.sin(num.pi * 0.02)
+
 # estimate inc to be 90 degrees
 incEst = num.pi / 2
-#firstGuess = num.array([num.pi / 2, 5.173828125, RpRsEst, 0.1, 0.1])
-firstGuess = num.array([incEst, aRsEst, RpRsEst, 0.1, 0.1]) 
 
+firstGuess = num.array([incEst, aRsEst, RpRsEst, 0.1, 0.1]) 
 mod = modelLC(kid, lcData, eData, firstGuess)
 
 if opts.all:

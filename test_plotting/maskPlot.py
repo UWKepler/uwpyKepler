@@ -100,7 +100,7 @@ if __name__ == '__main__':
                       {'Period':period, 'T0':t0, 'Duration':q}}
     kw = kep.quicklc.quickKW(ctype=opts.ctype)
     lc.runPipeline(kw)
-    lc.lcFinal['x'] = lc.lcFinal['x'] + lc.BJDREFI - 2454900e0
+    lc.lcFinal['x'] = lc.lcFinal['x'] + lc.BJDREFI
     
     if opts.fold:
         foldPlot(lc)

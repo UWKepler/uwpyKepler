@@ -10,13 +10,22 @@ import os
 def getphase(eData,kid,auto,man):
     if not man:
         try:
-            eData_idx = eData['KOI'].keys()[0]
-            eData = eData['KOI'][eData_idx]
-            t0 = eData['T0']
-            period = eData['Period']
+            eKeys = eData['KOI'].keys()
+            if len(eKeys) > 1:
+                print 'multiple catalogued periods:'
+                for key in eKeys:
+                    print '\t' + key + ' period: ' + str(eData['KOI'][key]['Period'])
+                period = eData['KOI'][eKeys[0]]['Period']
+                t0 = eData['KOI'][eKeys[0]]['T0']
+                print 'using period for ' + eKeys[0] + ': ' + str(period)
+            else:
+                eData_idx = eKeys[0]
+                eData = eData['KOI'][eData_idx]
+                period = eData['Period']
+                t0 = eData['T0']
+                print 'catalogued period:', period
             phase = \
             kep.func.foldPhase(lcData['x'],t0 + 0.5*period,period)
-            print 'catalogued period:', eData['Period']
         except:
             try:
                 period = kep.postqats.getBestPeriodByKID(kid)
