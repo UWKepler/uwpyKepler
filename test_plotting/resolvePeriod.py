@@ -20,7 +20,16 @@ def makeMovie(fileNames):
 
 class interactivePeriodResolver:
     def __init__(self, p0, stepsize, x, ydt):
-        #pylab.ion()
+        print '#-------------------------------------------#'
+        print 'Interactive Period Resolver\n'
+        print 'right arrow: increase period'
+        print 'left arrow:  decrease period'
+        print 'up arrow:    "zoom in"'
+        print '  (decrease period stepsize by factor of 10)'
+        print 'down arrow:  "zoom out"'
+        print '  (increase period stepsize by factor of 10)\n'
+        print 'TO EXIT: close figure'
+        print '#-------------------------------------------#'
         self.phase = kep.func.foldPhase(x,0,p0)
         self.period = p0
         self.step = stepsize
@@ -133,7 +142,8 @@ t_dur  = t_dur0/(10.**(zf-1))
 if opts.interactive:
     phase = kep.func.foldPhase(lcData['x'],0,p0)
     pylab.plot(phase, lcData['ydt'], 'b.')
-    pFinder = interactivePeriodResolver(p0, 2*t_dur/10., lcData['x'], lcData['ydt'])
+    pFinder = interactivePeriodResolver(p0, 2*t_dur/10., \
+        lcData['x'], lcData['ydt'])
     pylab.show()
     sys.exit()
 if opts.animate:

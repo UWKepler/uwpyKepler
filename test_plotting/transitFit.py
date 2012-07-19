@@ -4,11 +4,8 @@ import uwpyKepler as kep
 from uwpyKepler.analysis import *
 import numpy as num
 import pylab
-import scipy
 import sys
-import os
 import optparse
-import pdb
 
 # plots mod.ydata w/ or w/o errorbars
 # determined by errBool
@@ -113,6 +110,29 @@ def write_NoDuplicates(file, mod):
     for line in lines:
         print >> ofile, line.strip()
 
+def makeModelLC(lc):
+    # estimate RpRs without picking up outliers
+    ydt = lc.lcFinal['ydt']
+    idx = ydt.argsort()
+    iMin = idx[num.floor(0.1585*len(idx))]
+    RpRsEst = num.sqrt(1. - ydt[iMin])
+    
+    # aRs is FINNICKY;
+    # fit can change drastically based on guess!!
+    # estimate aRs taking a = 1 / sin(q*pi) where q ~ 0.02
+    aRsEst = 1. / num.sin(num.pi * 0.02)
+    
+    # estimate inc to be 90 degrees
+    incEst = num.pi / 2
+    
+    u1Est = 0.1
+    u2Est = 0.1
+    
+    firstGuess = num.array([incEst, aRsEst, RpRsEst, u1Est, u2Est]) 
+    lcData = lc.lcFinal
+    eData  = lc.eData
+    return modelLC(kid, lcData, eData, firstGuess)
+
 # returns ydata indices of all points NOT IN TRANSIT using eData 
 # in catalogue and using periods, t0s, and qs from file
 # except the last set of these encountered
@@ -123,10 +143,16 @@ def excludeKnownTransitIdx(lc, ctype):
     eMask = kep.pipeline.FlagEclipses( \
         rawlcData,lc.eData,lc.BJDREFI)['eMask']
     return num.where(eMask == 0)[0]
+
+def insertEstimatedEData(lc, periods, t0s, qs, i):
+    lc.eData['KOI']['fake' + str(i + 1)] = { \
+        'Period':periods[i], \
+        'T0':t0s[i], \
+        'Duration':qs[i]}
     
-# only used if no data found in file
+# only used if no data found in file;
+# crude estimates to be determined by fit
 def insertCrudeEData(lc, fakeCount):
-    # crude estimates to be determined by fit
     print 'no eData found in file; using hardcode guesses'
     period = kep.postqats.getBestPeriodByKID(kid)
     t0 = 60.
@@ -136,32 +162,36 @@ def insertCrudeEData(lc, fakeCount):
         'T0':t0, \
         'Duration':q}
     
+def singleMain(lc, ctype):
+    if not lc.eData['eDataExists']:
+        lc.eData['eDataExists'] = True
+        period, t0, q = geteDataFromFile(kid)
+        if period == -1:
+            insertCrudeEData(lc, 0)
+        else:
+            insertEstimatedEData(lc, [period], [t0], [q], 0)
+    kw = kep.quicklc.quickKW(ctype=ctype)
+    lc.runPipeline(kw)
+
 def multiMain(lc, nPlanets, ctype):
     useCrude = False
-    if eDataInFile(lc.KID):
-        periods, t0s, qs = alleDataFromFile(lc.KID)
-    else:
-        useCrude = True
+    periods, t0s, qs = alleDataFromFile(lc.KID)
+    useCrude = len(periods) < 1
     if lc.eData['eDataExists']:
+        koiCount = len(lc.eData['KOI'])
         if len(lc.eData['KOI']) > nPlanets or \
         len(lc.eData['KOI']) + len(periods) > nPlanets + 1:
             print 'recorded KOIs exceed expected planet count;'
             print 'exiting'
             exit()
-    if lc.eData['eDataExists']:
-        koiCount = len(lc.eData['KOI'])
     else:
         koiCount = 0
     # insert eData of known transits to be removed
-    fakeCount = 1
+    fakeCount = 0
     while koiCount < nPlanets:
         if not useCrude:
-            lc.eData['KOI']['fake' + str(fakeCount)] = { \
-                'Period':periods[fakeCount - 1], \
-                'T0':t0s[fakeCount - 1], \
-                'Duration':qs[fakeCount - 1]}
-            if fakeCount == len(periods):
-                useCrude = True
+            insertEstimatedEData(lc, periods, t0s, qs, fakeCount)
+            useCrude = fakeCount == len(periods)
         else:
             insertCrudeEData(lc, fakeCount)
         fakeCount += 1
@@ -172,14 +202,15 @@ def multiMain(lc, nPlanets, ctype):
         del lc.eData['KOI'][key]
     # insert preliminary eData of transit to be modeled
     if not useCrude:
-        for i in range(len(periods[fakeCount - 1:])):
-            lc.eData['KOI']['fake' + str(fakeCount + i)] = { \
-                'Period':periods[fakeCount - 1 + i], \
-                'T0':t0s[fakeCount - 1 + i], \
-                'Duration':qs[fakeCount - 1 + i]}
+        insertEstimatedEData(lc, periods, t0s, qs, fakeCount)
     else:
         insertCrudeEData(lc, fakeCount)
-    return idx
+    # exclude known transits from lightcurve
+    kw = kep.quicklc.quickKW(ctype=ctype)
+    lc.runPipeline(kw)
+    lc.lcFinal['x']      = lc.lcFinal['x'][idx]
+    lc.lcFinal['ydt']    = lc.lcFinal['ydt'][idx]
+    lc.lcFinal['yerrdt'] = lc.lcFinal['yerrdt'][idx]
 
 
 if __name__ == '__main__':
@@ -227,38 +258,14 @@ if __name__ == '__main__':
 
 kid = sys.argv[1]
 lc = kep.keplc.keplc(kid)
+
+# exclude known planets from lightcurve
 if opts.nPlanets:
-    Tidx = multiMain(lc, opts.nPlanets, opts.ctype)
+    multiMain(lc, opts.nPlanets, opts.ctype)
+else:
+    singleMain(lc, opts.ctype)
 
-kw = kep.quicklc.quickKW(ctype=opts.ctype)
-lc.runPipeline(kw)
-if not lc.eData['eDataExists']:
-    insertCrudeEData(lc, 0)
-lcData = lc.lcFinal
-eData = lc.eData
-
-if opts.nPlanets:
-    lcData['x'] = lcData['x'][Tidx]
-    lcData['ydt'] = lcData['ydt'][Tidx]
-    lcData['yerrdt'] = lcData['yerrdt'][Tidx]
-
-# estimate RpRs without picking up outliers
-ydt = lc.lcFinal['ydt']
-idx = ydt.argsort()
-iMin = idx[num.floor(0.1585*len(idx))]
-RpRsEst = num.sqrt(1. - ydt[iMin])
-
-# aRs is FINNICKY;
-# fit can change drastically based on guess!!
-# estimate aRs taking a = 1 / sin(q*pi) and q ~ 0.02
-aRsEst = 1. / num.sin(num.pi * 0.02)
-
-# estimate inc to be 90 degrees
-incEst = num.pi / 2
-
-firstGuess = num.array([incEst, aRsEst, RpRsEst, 0.1, 0.1]) 
-mod = modelLC(kid, lcData, eData, firstGuess)
-
+mod = makeModelLC(lc)
 if opts.all:
     allPlots(mod, opts.unfold, opts.error)
 else:
