@@ -2,7 +2,6 @@ import numpy as num
 import pylab
 from scipy.interpolate import interp1d
 import scipy
-import pdb
 "contains functions"
 
 def getNumBool(List,bool):

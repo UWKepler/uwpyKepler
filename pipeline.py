@@ -3,7 +3,6 @@ from func import *
 from lcmod import ApplyMaskPortions
 import scipy
 import warnings
-import pdb
 warnings.simplefilter('ignore', num.RankWarning)
 #import pylab
 
@@ -205,7 +204,7 @@ def FlagOutliers(lcData,medwin,threshold):
 
 def DetrendData(lcData, window, polyorder, **kwargs):
     """Detrends the data"""
-    badPortions = []
+
     for portion in lcData.keys():
         lcData = ApplyMaskPortions(lcData,'ALLMask',portion)
         nsize = len(lcData[portion]['x'])
@@ -220,13 +219,9 @@ def DetrendData(lcData, window, polyorder, **kwargs):
         total2 = 0
         for key in idict.keys():
             # iterate through each range pair
-            #badP = False
             for i in range(len(idict[key])):
                 i1 = idict[key][i][0]
                 i2 = idict[key][i][1]
-                #if badP:
-                    #badP = False
-                    #i1 = adjustedNext_i1
                 unmasked = \
                 num.where(lcData[portion]['x'][i1:i2].mask == False)[0]
                 xdata =\
@@ -237,18 +232,6 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                 all_data_x =\
                 num.ma.getdata(lcData[portion]['x'][i1:i2])
                 # find the fit
-                #if len(xdata) == 0:
-                    #print portion, 'is a bad portion'
-                    #badPortions.append(portion)
-                    #badP = True
-                    #adjustedNext_i1 = i2
-                    #continue
-                #if len(lcData[portion]['x'][i1:i2]) == len(num.where(lcData[portion]['x'][i1:i2].mask == True)[0]):
-                    #print portion, 'is a bad portion'
-                    #badPortions.append(portion)
-                    #for portionKey in lcData[portion].keys():
-                        #del lcData[portion][portionKey][i1:i2]
-                    #continue
                 if len(xdata) != 0:
                     for kw in kwargs:
                         if kw == 'funcs':
@@ -274,7 +257,6 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                 else:
                     outy = num.zeros(len(all_data_x)) - 1
 
-                #print len(all_data_x), key
                 if key == 1:
                     dtfunc1 = num.hstack((dtfunc1,outy))
                     total1 += len(all_data_x)
@@ -286,9 +268,7 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                     #pylab.plot(xdata,ydata,'g.')
                     #pylab.plot(all_data_x,outy,'c-',linewidth=3)
                     
-        #dtfunc1 = interpMaskedAreas(dtfunc1)
-        #dtfunc2 = interpMaskedAreas(dtfunc2)
-        
+
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
         #pylab.plot(lcData[portion]['x'],mergedy,'k-')
 
