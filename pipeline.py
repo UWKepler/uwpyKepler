@@ -3,6 +3,7 @@ from func import *
 from lcmod import ApplyMaskPortions
 import scipy
 import warnings
+import pdb
 warnings.simplefilter('ignore', num.RankWarning)
 #import pylab
 
@@ -204,7 +205,7 @@ def FlagOutliers(lcData,medwin,threshold):
 
 def DetrendData(lcData, window, polyorder, **kwargs):
     """Detrends the data"""
-    
+    badPortions = []
     for portion in lcData.keys():
         lcData = ApplyMaskPortions(lcData,'ALLMask',portion)
         nsize = len(lcData[portion]['x'])
@@ -219,9 +220,13 @@ def DetrendData(lcData, window, polyorder, **kwargs):
         total2 = 0
         for key in idict.keys():
             # iterate through each range pair
+            #badP = False
             for i in range(len(idict[key])):
                 i1 = idict[key][i][0]
                 i2 = idict[key][i][1]
+                #if badP:
+                    #badP = False
+                    #i1 = adjustedNext_i1
                 unmasked = \
                 num.where(lcData[portion]['x'][i1:i2].mask == False)[0]
                 xdata =\
@@ -232,22 +237,42 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                 all_data_x =\
                 num.ma.getdata(lcData[portion]['x'][i1:i2])
                 # find the fit
-                for kw in kwargs:
-                    if kw == 'funcs':
-                        funcs = kwargs[kw]
-                        funcIndices = range(len(funcs))
-                        coeff = \
-                        kep.linLeastSquares.linLeastSquares \
-                            (xdata, ydata, funcs, len(funcs))
-                        outy = num.zeros(len(all_data_x))
-                        for i in funcIndices:
-                            outy = funcs[i](all_data_x)*coeff[i] \
-                                 + outy
-                if len(kwargs) == 0:
-                    coeff = scipy.polyfit \
-                            (xdata, ydata, polyorder)
-                    # apply the polynomial
-                    outy = scipy.polyval(coeff,all_data_x)
+                #if len(xdata) == 0:
+                    #print portion, 'is a bad portion'
+                    #badPortions.append(portion)
+                    #badP = True
+                    #adjustedNext_i1 = i2
+                    #continue
+                #if len(lcData[portion]['x'][i1:i2]) == len(num.where(lcData[portion]['x'][i1:i2].mask == True)[0]):
+                    #print portion, 'is a bad portion'
+                    #badPortions.append(portion)
+                    #for portionKey in lcData[portion].keys():
+                        #del lcData[portion][portionKey][i1:i2]
+                    #continue
+                if len(xdata) != 0:
+                    for kw in kwargs:
+                        if kw == 'funcs':
+                            funcs = kwargs[kw]
+                            funcIndices = range(len(funcs))
+                            coeff = \
+                            kep.linLeastSquares.linLeastSquares \
+                                (xdata, ydata, funcs, len(funcs))
+                            outy = num.zeros(len(all_data_x))
+                            for i in funcIndices:
+                                outy = funcs[i](all_data_x)*coeff[i] \
+                                    + outy
+                    if len(kwargs) == 0:
+                        try:
+                            coeff = scipy.polyfit \
+                                (xdata, ydata, polyorder)
+                        except:
+                            pdb.set_trace()
+                        # apply the polynomial
+                        outy = scipy.polyval(coeff,all_data_x)
+                # handles case where all_data_x is completely masked
+                # -1 serves as flag for later correction
+                else:
+                    outy = num.zeros(len(all_data_x)) - 1
 
                 #print len(all_data_x), key
                 if key == 1:
@@ -260,7 +285,10 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                     total2 += len(all_data_x)
                     #pylab.plot(xdata,ydata,'g.')
                     #pylab.plot(all_data_x,outy,'c-',linewidth=3)
-
+                    
+        #dtfunc1 = interpMaskedAreas(dtfunc1)
+        #dtfunc2 = interpMaskedAreas(dtfunc2)
+        
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
         #pylab.plot(lcData[portion]['x'],mergedy,'k-')
 
@@ -318,4 +346,12 @@ def StackPortions(lcData):
     'NoMask':NoMask}
     
     return oData
-    
+
+def CorrectNegVals(lcData):
+    if len(num.where(lcData['ydt'] < 1)[0]) > 0:
+        lcData['correction'] = \
+            interpMaskedAreas(lcData['x'], lcData['correction'])
+        lcData['ydt'] = lcData['y'] / lcData['correction']
+        lcData['yerrdt'] = lcData['yerr'] / lcData['correction']
+        print 'caught empty x vector'
+    return lcData

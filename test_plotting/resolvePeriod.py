@@ -83,7 +83,7 @@ if __name__ == '__main__':
     parser.add_option('-a','--animate',\
                         type=float,\
                         dest='animate',\
-                        default=True,\
+                        default=None,\
                         help='input a frame number to make\n' \
                         'a movie with one period per frame;\n' \
                         'period range is still defined by' \
@@ -92,6 +92,11 @@ if __name__ == '__main__':
                         action='store_true',\
                         dest='interactive',\
                         default=False,\
+                        help='enter interactive mode')
+    parser.add_option('-b','--bin',\
+                        type=int,\
+                        dest='bin',\
+                        default=None,\
                         help='enter interactive mode')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
@@ -139,6 +144,10 @@ else:
 zf = opts.zoomfac
 t_dur0 = kep.qats.tdur(1.4,0,p0)
 t_dur  = t_dur0/(10.**(zf-1))
+
+if opts.bin:
+    lcData['x'], lcData['ydt'] = \
+        kep.binningdetect.bin(lcData['x'], lcData['ydt'], opts.bin)
 if opts.interactive:
     phase = kep.func.foldPhase(lcData['x'],0,p0)
     pylab.plot(phase, lcData['ydt'], 'b.')

@@ -29,7 +29,8 @@ class lcData:
             self.lcData4 = pipeline.SplitPortions(self.lcData3,kw.gapSize)
             self.lcData5 = pipeline.FlagOutliers(self.lcData4,kw.oWin,kw.oThreshold)
             self.lcData6 = pipeline.DetrendData(self.lcData5,kw.dWin,kw.dPolyorder)
-            self.lcData = pipeline.StackPortions(self.lcData6)
+            self.lcData7 = pipeline.StackPortions(self.lcData6)
+            self.lcData  = pipeline.CorrectNegVals(self.lcData7)
         else:
             raise NameError('No lightcurve data found')
         

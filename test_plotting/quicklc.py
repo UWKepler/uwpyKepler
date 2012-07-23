@@ -15,7 +15,7 @@ def quickKW(**kwargs):
     gapSize=2
     oWin=15
     oThreshold=5
-    dWin=50
+    dWin=100
     dPolyorder=6
     agap=1
     durfac=2

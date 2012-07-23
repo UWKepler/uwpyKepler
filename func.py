@@ -1,5 +1,8 @@
 import numpy as num
 import pylab
+from scipy.interpolate import interp1d
+import scipy
+import pdb
 "contains functions"
 
 def getNumBool(List,bool):
@@ -103,3 +106,39 @@ def foldPhase(xdata,t0,period):
     #pylab.show()
 
     return phase
+    
+def interpMaskedAreas(x, dtfunc):
+    idx = num.where(dtfunc == -1)[0]
+    # find consecutive points of dtfunc set at -1
+    diffs = idx - num.roll(idx, 1)
+    setIdx1 = num.where(diffs > 1)[0]
+    setIdx2 = num.where(diffs > 1)[0] - 1
+    setIdx1 = num.hstack( (num.array([0]), setIdx1) )
+    setIdx2 = num.hstack( (setIdx2, num.array([-1])) )
+    # each int in setIdx1 is beginning of a set of points
+    # each int in setIdx2 is end of a set of points
+    for i in range(len(setIdx1)):
+        i1 = setIdx1[i]
+        i2 = setIdx2[i]
+        vals_to_interp = dtfunc[ idx[i1]:idx[i2]+1]
+        
+        # construct interpolation from points on either side of vals
+        # first ydata
+        nVals = len(vals_to_interp)
+        left = num.array( \
+            [ dtfunc[idx[i1]-1-nVals], dtfunc[idx[i1]-1] ])
+        right = num.array( \
+            [ dtfunc[idx[i2]+1], dtfunc[idx[i2]+1+nVals] ])
+        vals_to_construct_interp = num.hstack( (left, right) )
+        vtci = vals_to_construct_interp
+        
+        # now xdata
+        leftx = num.array([ x[idx[i1]-1-nVals], x[idx[i1]-1] ])
+        rightx = num.array([ x[idx[i2]+1], x[idx[i2]+1+nVals] ])
+        x_vtci = num.hstack( (leftx, rightx) )
+        # conduct interpolation
+        intpCoeffs = scipy.polyfit(x_vtci, vtci, 3)
+        dtfunc[ idx[i1]:idx[i2]+1 ] = \
+            scipy.polyval(intpCoeffs, x[ idx[i1]:idx[i2]+1 ])
+        
+    return dtfunc
