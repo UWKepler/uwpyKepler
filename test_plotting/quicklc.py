@@ -15,9 +15,9 @@ def quickKW(**kwargs):
     gapSize=2
     oWin=15
     oThreshold=5
-    dWin=100
+    dWin=150
     dPolyorder=6
-    agap=1
+    agap=2
     durfac=2
     for key in kwargs:
         if key == 'ctype':

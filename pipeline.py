@@ -328,7 +328,7 @@ def StackPortions(lcData):
     return oData
 
 def CorrectNegVals(lcData):
-    if len(num.where(lcData['ydt'] < 1)[0]) > 0:
+    if len(num.where(lcData['correction'] == -1)[0]) > 0:
         lcData['correction'] = \
             interpMaskedAreas(lcData['x'], lcData['correction'])
         lcData['ydt'] = lcData['y'] / lcData['correction']

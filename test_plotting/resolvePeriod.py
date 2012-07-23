@@ -155,7 +155,7 @@ if opts.interactive:
         lcData['x'], lcData['ydt'])
     pylab.show()
     sys.exit()
-if opts.animate:
+elif opts.animate:
     nFrames = opts.animate
     testPs = num.arange(p0-t_dur,p0+t_dur,2*t_dur/nFrames)
     fileNames = []
