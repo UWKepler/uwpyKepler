@@ -253,7 +253,7 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                         # apply the polynomial
                         outy = scipy.polyval(coeff,all_data_x)
                 # handles case where all_data_x is completely masked
-                # -1 serves as flag for later correction
+                # -1 serves as flag for correction after portion stack
                 else:
                     outy = num.zeros(len(all_data_x)) - 1
 
@@ -268,7 +268,12 @@ def DetrendData(lcData, window, polyorder, **kwargs):
                     #pylab.plot(xdata,ydata,'g.')
                     #pylab.plot(all_data_x,outy,'c-',linewidth=3)
                     
-
+        # ensure -1 flags are not taken out by weighted average
+        idx1 = num.where(dtfunc1 == -1)[0]
+        idx2 = num.where(dtfunc2 == -1)[0]
+        dtfunc1[idx2] = -1
+        dtfunc2[idx1] = -1
+        
         mergedy = weight1*dtfunc1 + weight2*dtfunc2
         #pylab.plot(lcData[portion]['x'],mergedy,'k-')
 
