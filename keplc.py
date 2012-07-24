@@ -41,6 +41,7 @@ class kw:
         self.agap = None
         self.durfac = None
         printString = ''
+        self.detChoice = 'polynomial'
         for key in kwargs:
             if key == 'ctype':
                 self.ctype = kwargs[key]
@@ -70,4 +71,4 @@ class kw:
                 self.detChoice = kwargs[key]
                 printString += ' detChoice='+str(kwargs[key])+','
 
-        self.printString = printString[:-1] 
+        self.printString = printString[:-2] 
