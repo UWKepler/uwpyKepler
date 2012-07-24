@@ -110,6 +110,19 @@ def write_NoDuplicates(file, mod):
     for line in lines:
         print >> ofile, line.strip()
 
+def paramsFromFile(kid, file):
+    ifile = open(file, 'r')
+    lines = ifile.readlines()
+    for i in range(len(lines)):
+        if lines[i].startswith(str(kid)):
+            oline = lines[i].split()
+            output = []
+            for el in oline:
+                output.append(float(el))
+            return output
+    print 'no data found in file; exiting'
+    sys.exit()
+
 def makeModelLC(lc):
     # estimate RpRs without picking up outliers
     ydt = lc.lcFinal['ydt']
@@ -211,7 +224,26 @@ def multiMain(lc, nPlanets, ctype):
     lc.lcFinal['x']      = lc.lcFinal['x'][idx]
     lc.lcFinal['ydt']    = lc.lcFinal['ydt'][idx]
     lc.lcFinal['yerrdt'] = lc.lcFinal['yerrdt'][idx]
-
+    
+def knownMain(lc, fileName, ctype, unfold, error):
+    modParams = paramsFromFile(kid, fileName)
+    kw = kep.quicklc.quickKW(ctype=ctype)
+    lc.runPipeline(kw)
+    initParams = modParams[4:]
+    periods, t0s, qs = modParams[1:4]
+    periods = periods,
+    qs = qs,
+    t0s = t0s,
+    insertEstimatedEData(lc, periods, t0s, qs, 0)
+    global mod
+    mod = modelLC(kid, lc.lcFinal, lc.eData, initParams)
+    mod.period = modParams[1]
+    mod.t0 = modParams[2]
+    mod.q = modParams[3]
+    pylab.title('%s: ' % mod.kid + 'transit fit')
+    pylab.ylabel('corrflux')
+    foldOrUnfold(unfold, error)
+    print 'model chi square =', mod.getChiSqr()
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage=\
@@ -227,7 +259,7 @@ if __name__ == '__main__':
                         dest='write',\
                         default=None,\
                         help='write best fit '\
-                        'parameters to given file')
+                        'parameters to specified file')
     parser.add_option('-u','--unfold',\
                         action='store_true',\
                         dest='unfold',\
@@ -245,6 +277,12 @@ if __name__ == '__main__':
                         help='input number known planets' \
                         'in system;\nmasks these when calculating' \
                         'fit')
+    parser.add_option('-k','--knownObj',\
+                        type='string',\
+                        dest='knownObj',\
+                        default=None,\
+                        help='plot transit model from' \
+                        'parameters stored in specified file')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
                         choices=cChoice,\
@@ -259,20 +297,24 @@ if __name__ == '__main__':
 kid = sys.argv[1]
 lc = kep.keplc.keplc(kid)
 
-# exclude known planets from lightcurve
-if opts.nPlanets:
-    multiMain(lc, opts.nPlanets, opts.ctype)
-else:
-    singleMain(lc, opts.ctype)
 
-mod = makeModelLC(lc)
-if opts.all:
-    allPlots(mod, opts.unfold, opts.error)
+if not opts.knownObj:
+    # exclude known planets from lightcurve
+    if opts.nPlanets:
+        multiMain(lc, opts.nPlanets, opts.ctype)
+    else:
+        singleMain(lc, opts.ctype)
+    
+    mod = makeModelLC(lc)
+    if opts.all:
+        allPlots(mod, opts.unfold, opts.error)
+    else:
+        normalRun(mod, opts.unfold, opts.error)
+    
+    if opts.write:
+        write_NoDuplicates(opts.write, mod)
 else:
-    normalRun(mod, opts.unfold, opts.error)
-
-if opts.write:
-    write_NoDuplicates(opts.write, mod)
+    knownMain(lc, opts.knownObj, opts.ctype, opts.unfold, opts.error)
 
 print 'BEST FIT PARAMETERS:'
 print 'period:', mod.period
