@@ -28,7 +28,7 @@ class lcData:
             self.lcData3 = pipeline.FlagEclipses(self.lcData2,eData,BJDREFI)
             self.lcData4 = pipeline.SplitPortions(self.lcData3,kw.gapSize)
             self.lcData5 = pipeline.FlagOutliers(self.lcData4,kw.oWin,kw.oThreshold)
-            self.lcData6 = pipeline.DetrendData(self.lcData5,kw.dWin,kw.dPolyorder)
+            self.lcData6 = pipeline.DetrendChoice(self.lcData5,kw.dWin,kw.dPolyorder, kw.detChoice)
             self.lcData7 = pipeline.StackPortions(self.lcData6)
             self.lcData  = pipeline.CorrectNegVals(self.lcData7)
         else:
@@ -66,5 +66,8 @@ class kw:
             elif key == 'durationfactor':
                 self.durfac = kwargs[key]
                 printString += ' durationfactor='+str(kwargs[key])+','
+            elif key == 'detChoice':
+                self.detChoice = kwargs[key]
+                printString += ' detChoice='+str(kwargs[key])+','
 
         self.printString = printString[:-1] 
