@@ -18,49 +18,6 @@ def makeMovie(fileNames):
     for file in fileNames:
         os.remove(file)
 
-class interactivePeriodResolver:
-    def __init__(self, p0, stepsize, x, ydt):
-        print '#-------------------------------------------#'
-        print 'Interactive Period Resolver\n'
-        print 'right arrow: increase period'
-        print 'left arrow:  decrease period'
-        print 'up arrow:    "zoom in"'
-        print '  (decrease period stepsize by factor of 10)'
-        print 'down arrow:  "zoom out"'
-        print '  (increase period stepsize by factor of 10)\n'
-        print 'TO EXIT: close figure'
-        print '#-------------------------------------------#'
-        self.phase = kep.func.foldPhase(x,0,p0)
-        self.period = p0
-        self.step = stepsize
-        self.x = x
-        self.ydt = ydt
-        self.fig = pylab.gcf()
-        self.cid = \
-            self.fig.canvas.mpl_connect('key_press_event', self)
-        
-    def __call__(self, event):
-        if event.key == 'right':
-            self.period += self.step
-            print 'current period = ' + str(self.period)
-            self.phase = kep.func.foldPhase(self.x,0,self.period)
-            pylab.ion()
-            pylab.cla()
-            pylab.plot(self.phase, self.ydt, 'b.')
-            pylab.ioff()
-        elif event.key == 'left':
-            self.period -= self.step
-            print 'current period = ' + str(self.period)
-            self.phase = kep.func.foldPhase(self.x,0,self.period)
-            pylab.ion()
-            pylab.cla()
-            pylab.plot(self.phase, self.ydt, 'b.')
-            pylab.ioff()
-        elif event.key == 'up':
-            self.step /= 10.
-        elif event.key == 'down':
-            self.step *= 10.
-
 KID = sys.argv[1]
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage=\
@@ -149,9 +106,7 @@ if opts.bin:
     lcData['x'], lcData['ydt'] = \
         kep.binningdetect.bin(lcData['x'], lcData['ydt'], opts.bin)
 if opts.interactive:
-    phase = kep.func.foldPhase(lcData['x'],0,p0)
-    pylab.plot(phase, lcData['ydt'], 'b.')
-    pFinder = interactivePeriodResolver(p0, 2*t_dur/10., \
+    pFinder = kep.analysis.PeriodResolver(p0, 2*t_dur/10., \
         lcData['x'], lcData['ydt'])
     pylab.show()
     sys.exit()

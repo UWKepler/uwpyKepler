@@ -9,9 +9,25 @@ import copy
 eDatafileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
 name = 'eDataDiscoveries.txt'
 name2 = 'eDataFromFits.txt'
+name3 = 'binary_eDataDiscoveries.txt'
 
-def writeEDataToFile(kid, period, t0, q):
-    ofile = open(eDatafileDir + name, 'r')
+def writeEDataToFile(kid, period, t0, q, **kwargs):
+    fileName = name
+    insertInFile = False
+    overwriteIdx = 0
+    for kw in kwargs:
+        # writes to binary file instead of planet file
+        if kw == 'binary':
+            if kwargs[kw]:
+                fileName = name3
+        # adds another file entry; not overwrite existing
+        elif kw == 'insert':
+            insertInFile = kwargs[kw]
+        # specifies which file entry to overwrite if multiple
+        # 0 overwrites first, 1 second, 2 third, etc.
+        elif kw == 'overwrite':
+            overwriteIdx = kwargs[kw]
+    ofile = open(eDatafileDir + fileName, 'r')
     newline = str(kid) + '\t' \
         + str(period) + '\t' \
         + str(t0) + '\t' \
@@ -20,16 +36,24 @@ def writeEDataToFile(kid, period, t0, q):
     kids = [line.split()[0] for line in lines]
     if str(kid) in kids:
         idx = kids.index(str(kid))
-        lines[idx] = newline
+        if insertInFile:
+            lines.insert(idx+1, newline)
+        else:
+            lines[idx + overwriteIdx] = newline
     else:
         lines.append(newline)
     ofile.close()
-    ofile = open(eDatafileDir + name, 'w')
+    ofile = open(eDatafileDir + fileName, 'w')
     for line in lines:
         print >> ofile, line.strip()
 
-def geteDataFromFile(kid):
-    dFile = open(eDatafileDir + name, 'r')
+def geteDataFromFile(kid, **kwargs):
+    fileName = name
+    for kw in kwargs:
+        if kw == 'binary':
+            if kwargs[kw]:
+                fileName = name3
+    dFile = open(eDatafileDir + fileName, 'r')
     lines = dFile.readlines()
     for line in lines:
         if line.split()[0] == str(kid):
@@ -40,11 +64,16 @@ def geteDataFromFile(kid):
             return period, t0, q
     return -1, -1, -1
     
-def alleDataFromFile(kid):
+def alleDataFromFile(kid, **kwargs):
     periods = []
     t0s     = []
     qs      = []
-    dFile = open(eDatafileDir + name, 'r')
+    fileName = name
+    for kw in kwargs:
+        if kw == 'binary':
+            if kwargs[kw]:
+                fileName = name3
+    dFile = open(eDatafileDir + fileName, 'r')
     lines = dFile.readlines()
     for line in lines:
         if line.split()[0] == str(kid):
@@ -54,8 +83,13 @@ def alleDataFromFile(kid):
             qs.append( float(line[3]) )
     return periods, t0s, qs
     
-def eDataInFile(kid):
-    dFile = open(eDatafileDir + name, 'r')
+def eDataInFile(kid, **kwargs):
+    fileName = name
+    for kw in kwargs:
+        if kw == 'binary':
+            if kwargs[kw]:
+                fileName = name3
+    dFile = open(eDatafileDir + fileName, 'r')
     lines = dFile.readlines()
     for line in lines:
         if line.split()[0] == str(kid):
@@ -329,5 +363,74 @@ class modelLC:
         signal = num.sum(1 - self.ydata[idx])
         noise = num.sum(self.yerr[idx]**2) / num.sqrt(N)
         return signal / noise
+
+class T0Resetter:
+    def __init__(self, t0, period):
+        self.t0 = t0
+        self.t0_0 = t0
+        self.period = period
+        self.fig = pylab.gcf()
+        self.axes = pylab.gca()
+        # connection ID
+        self.cid = \
+            self.fig.canvas.mpl_connect('button_release_event', self)
     
-    
+    def __call__(self, event):
+        if event.inaxes != self.axes:
+            return
+        self.t0 = self.t0_0 + (event.xdata - 0.5) * self.period
+        print 't0 will reset to:', self.t0
+
+def resetT0(t0, period):
+    print '#-----------------------------#'
+    print 'Click on center of transit'
+    print 'to reset t0 to the proper value\n'
+    print 'TO EXIT: close figure'
+    print '#-----------------------------#'
+    tReset = T0Resetter(t0, period)
+    pylab.show()
+    return tReset.t0
+
+class PeriodResolver:
+    def __init__(self, p0, stepsize, x, ydt):
+        print '#-------------------------------------------#'
+        print 'Interactive Period Resolver\n'
+        print 'right arrow: increase period'
+        print 'left arrow:  decrease period'
+        print 'up arrow:    "zoom in"'
+        print '  (decrease period stepsize by factor of 10)'
+        print 'down arrow:  "zoom out"'
+        print '  (increase period stepsize by factor of 10)\n'
+        print 'TO EXIT: close figure'
+        print '#-------------------------------------------#'
+        self.phase = kep.func.foldPhase(x,0,p0)
+        self.period = p0
+        self.step = stepsize
+        self.x = x
+        self.ydt = ydt
+        pylab.plot(self.phase, self.ydt, 'b.')
+        self.fig = pylab.gcf()
+        self.cid = \
+            self.fig.canvas.mpl_connect('key_press_event', self)
+        
+    def __call__(self, event):
+        if event.key == 'right':
+            self.period += self.step
+            print 'current period = ' + str(self.period)
+            self.phase = kep.func.foldPhase(self.x,0,self.period)
+            pylab.ion()
+            pylab.cla()
+            pylab.plot(self.phase, self.ydt, 'b.')
+            pylab.ioff()
+        elif event.key == 'left':
+            self.period -= self.step
+            print 'current period = ' + str(self.period)
+            self.phase = kep.func.foldPhase(self.x,0,self.period)
+            pylab.ion()
+            pylab.cla()
+            pylab.plot(self.phase, self.ydt, 'b.')
+            pylab.ioff()
+        elif event.key == 'up':
+            self.step /= 10.
+        elif event.key == 'down':
+            self.step *= 10.

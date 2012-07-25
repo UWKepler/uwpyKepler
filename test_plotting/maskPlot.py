@@ -6,7 +6,6 @@ import numpy as num
 import pylab
 import optparse
 import os
-import pdb
 
 def sharexPlot(lc):
     lcData = lc.lcFinal
@@ -40,32 +39,6 @@ def foldPlot(lc):
     ty = lcData['ydt'][idx]
     pylab.plot(phase, lcData['ydt'], 'b.')
     pylab.plot(tphase, ty, 'ro')
-    
-class t0Resetter:
-    def __init__(self, t0, period):
-        self.t0 = t0
-        self.period = period
-        self.fig = pylab.gcf()
-        self.axes = pylab.gca()
-        # connection ID
-        self.cid = \
-            self.fig.canvas.mpl_connect('button_release_event', self)
-    
-    def __call__(self, event):
-        if event.inaxes != self.axes:
-            return
-        self.t0 = t0 + (event.xdata - 0.5) * self.period
-        print 't0 will reset to:', self.t0
-
-def resetT0(t0, period):
-    print '#-----------------------------#'
-    print 'Click on center of transit'
-    print 'to reset t0 to the proper value\n'
-    print 'TO EXIT: close figure'
-    print '#-----------------------------#'
-    tReset = t0Resetter(t0, period)
-    pylab.show()
-    return tReset.t0
 
 
 kid = sys.argv[1]
@@ -82,6 +55,18 @@ if __name__ == '__main__':
                         dest='findT0',\
                         default=False,\
                         help='enter interactive t0 resetter')
+    parser.add_option('-b','--binary',\
+                        action='store_true',\
+                        dest='binary',\
+                        default=False,\
+                        help='tells script to read from or' \
+                        'write to binary eData file')
+    parser.add_option('-a','--append',\
+                        action='store_true',\
+                        dest='append',\
+                        default=False,\
+                        help='when -t selected, tells script' \
+                        'to append to eData file')
     cChoice = ('LC','SC','')
     parser.add_option('-c','--ctype',\
                         choices=cChoice,\
@@ -93,7 +78,7 @@ if __name__ == '__main__':
                         +') [default: %default]')
 
     opts, args = parser.parse_args()
-    period, t0, q = kep.analysis.geteDataFromFile(kid)
+    period, t0, q = kep.analysis.geteDataFromFile(kid, binary=opts.binary)
     lc = kep.keplc.keplc(kid)
     lc.eData['eDataExists'] = True
     lc.eData['KOI'] = {'fake':\
@@ -101,14 +86,15 @@ if __name__ == '__main__':
     kw = kep.quicklc.quickKW(ctype=opts.ctype)
     lc.runPipeline(kw)
     lc.lcFinal['x'] = lc.lcFinal['x'] + lc.BJDREFI
-    
+
     if opts.fold:
         foldPlot(lc)
         pylab.show()
     elif opts.findT0:
         foldPlot(lc)
-        newt0 = resetT0(t0, period)
-        kep.analysis.writeEDataToFile(kid, period, newt0, q)
+        newt0 = kep.analysis.resetT0(t0, period)
+        kep.analysis.writeEDataToFile(kid, period, newt0, q, \
+            binary=opts.binary, append=opts.append)
         print 't0 reset to:', newt0
     else:
         sharexPlot(lc)
