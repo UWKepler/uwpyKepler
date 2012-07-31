@@ -97,22 +97,31 @@ def eDataInFile(kid, **kwargs):
     return False
     
 def geteDataFromModelFile(kid):
+    periods = []
+    t0s     = []
+    qs      = []
+    incs    = []
+    aRss    = []
+    RpRss   = []
+    u1s     = []
+    u2s     = []
     dFile = open(eDatafileDir + name2, 'r')
     lines = dFile.readlines()
     for line in lines:
         if line.split()[0] == str(kid):
             line   = line.split()
-            period = float(line[1])
-            t0     = float(line[2])
-            q      = float(line[3])
-            inc    = float(line[4])
-            aRs    = float(line[5])
-            RpRs   = float(line[6])
-            u1     = float(line[7])
-            u2     = float(line[8])
-            params = [period, t0, q, inc, aRs, RpRs, u1, u2]
-            return params
-    return num.zeros(8) - 1
+            periods.append( float(line[1]) )
+            t0s.append(     float(line[2]) )
+            qs.append(      float(line[3]) )
+            incs.append(    float(line[4]) )
+            aRss.append(    float(line[5]) )
+            RpRss.append(   float(line[6]) )
+            u1s.append(     float(line[7]) )
+            u2s.append(     float(line[8]) )
+    params = [periods, t0s, qs, incs, aRss, RpRss, u1s, u2s]
+    if len(params[0]) == 0:
+        return num.zeros(8) - 1
+    return params
     
 class modelLC:
     def __init__(self, kid, lcData, eData, guess):

@@ -51,3 +51,38 @@ def bin(x, y, binsize):
     
     return bx, by
 
+# bins data given binsize in x time units
+def binTime(x, y, binsize):
+    if binsize == 0:
+        return x, y
+    xmin = x.min()
+    xmax = x.max()
+    nbins = num.ceil(float(xmax - xmin) / binsize)
+    bx = num.zeros(nbins)
+    by = num.zeros(nbins)
+    timeCuts = num.arange(xmin, xmax, binsize)
+    timeCuts = num.hstack( (timeCuts, xmax) )
+    for i in range(len(timeCuts) - 1):
+        cutIdx = num.where( (x >= timeCuts[i]) & \
+        (x < timeCuts[i + 1]) )[0]
+        bx[i] = num.mean(x[cutIdx])
+        by[i] = num.mean(y[cutIdx])
+
+    return bx, by
+
+# bins data by time given number of bins
+def binTime_nBins(x, y, nBins):
+    if nBins >= len(x):
+        return x, y
+    xmin = x.min()
+    xmax = x.max()
+    bx = num.zeros(nBins)
+    by = num.zeros(nBins)
+    timeCuts = num.linspace(xmin, xmax, nBins + 1)
+    for i in range(len(timeCuts) - 1):
+        cutIdx = num.where( (x >= timeCuts[i]) & \
+        (x < timeCuts[i + 1]) )[0]
+        bx[i] = num.mean(x[cutIdx])
+        by[i] = num.mean(y[cutIdx])
+
+    return bx, by
