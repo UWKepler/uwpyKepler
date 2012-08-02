@@ -31,4 +31,6 @@ import tquick
 
 import analysis
 
+import nhatQatsLC
+
 #import qats_nhat

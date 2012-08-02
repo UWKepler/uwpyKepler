@@ -120,7 +120,7 @@ def geteDataFromModelFile(kid):
             u2s.append(     float(line[8]) )
     params = [periods, t0s, qs, incs, aRss, RpRss, u1s, u2s]
     if len(params[0]) == 0:
-        return num.zeros(8) - 1
+        return [[] for i in range(8)]
     return params
     
 class modelLC:
