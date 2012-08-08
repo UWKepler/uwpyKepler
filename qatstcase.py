@@ -35,7 +35,8 @@ def main(FileName):
                 Y.periods[num.argmax(Y.snrLC)], max(Y.snrLC/normalizedPower), max(Y.snrLC)
         for i in range(len(Y.SignalPower)):
             print >> dfile, Y.periods[i],'|',Y.snrLC[i],'|',\
-                            Y.snrFLAT[i],'|',normalizedPower[i]
+                            Y.snrFLAT[i],'|',normalizedPower[i],'|',\
+                            Y.tmin[i],'|',Y.tmax[i],'|',Y.q[i]
         dfile.close()
         
 if __name__ == '__main__':

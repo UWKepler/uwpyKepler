@@ -6,8 +6,8 @@ import sys
 import os
 import copy
 
-eDatafileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
-name = 'eDataDiscoveries.txt'
+eDatafileDir = '/astro/store/student-scratch1/martincj/condor/discoveries/'
+name = 'discoveries.txt'
 name2 = 'eDataFromFits.txt'
 name3 = 'binary_eDataDiscoveries.txt'
 
