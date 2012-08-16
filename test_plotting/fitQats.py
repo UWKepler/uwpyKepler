@@ -24,7 +24,7 @@ print 'best fit chi sqr: ' + str(minSqr)
 print 'best qats period chi sqr: ' + str(qatsPeriodSqr)
 
 fig = pylab.figure()
-ax = fig.add_subplot(111)
+ax = fig.add_subplot(211)
 ax.semilogx()
 ax.plot(periods, snr, 'k-',\
         periods, bestFit, 'c-',\

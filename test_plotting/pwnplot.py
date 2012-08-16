@@ -17,6 +17,9 @@ def rawplot(kid,ctype):
     lcData = kep.iodb.ReadLightCurve(kid,selection=ctype)
     BJDREFI = kep.iodb.getBJDREFI(kid)
     x = lcData['x']+BJDREFI
+    idx = num.where(lcData['y'] != -99)[0]
+    x = x[idx]
+    lcData['y'] = lcData['y'][idx]
     pylab.title('KID: %s' % kid)
     pylab.xlabel('BJD')
     pylab.ylabel('Flux')
