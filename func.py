@@ -141,3 +141,11 @@ def interpMaskedAreas(x, dtfunc):
             scipy.polyval(intpCoeffs, x[ idx[i1]:idx[i2]+1 ])
         
     return dtfunc
+    
+    
+def autoCor(x):
+    """ autocorrelates using fast fourier transform"""
+
+    fft = num.fft.fft(x)
+    crf = num.real(num.fft.ifft(fft*num.conjugate(fft)))/num.var(x)
+    return crf

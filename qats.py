@@ -206,6 +206,9 @@ class qatslc:
         
         snr0 = qats_cython.snr(self.lcData['y'],NPoints,tmin,tmax,q,nperiod+1)
         snr1 = qats_cython.snr(self.lcData['flat'],NPoints,tmin,tmax,q,nperiod+1)
+        self.tmin = tmin
+        self.tmax = tmax
+        self.q = q
         self.nperiod = nperiod+1
         self.periods = periods*self.dt
         self.Ndata = NPoints 

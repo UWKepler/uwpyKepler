@@ -34,3 +34,5 @@ import analysis
 import nhatQatsLC
 
 #import qats_nhat
+
+import deprecated.nhat_qats_struct as nhat_qats_struct
