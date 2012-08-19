@@ -10,6 +10,18 @@ eDatafileDir = '/astro/store/student-scratch1/johnm26/dFiles/'
 name = 'eDataDiscoveries.txt'
 name2 = 'eDataFromFits.txt'
 name3 = 'binary_eDataDiscoveries.txt'
+koi_catalog = eDatafileDir + 'catalog.txt'
+
+def isKOI(lc):
+    catalog = open(koi_catalog, 'r')
+    lines = catalog.readlines()
+    kids = []
+    for line in lines:
+	split = line.split()
+	if split[1].isdigit():
+	    kids.append(int(split[1]))
+    catalog.close()
+    return lc.KID in kids or lc.eData['eDataExists']
 
 def writeEDataToFile(kid, period, t0, q, **kwargs):
     fileName = name

@@ -44,7 +44,7 @@ def getKIDsSource():
     
     return r1
 
-def returnSkyGroupKIDs(SGNumber):
+def returnSkyGroupKIDs(SGNumber, **kwargs):
     """
     Gets all distinct KIDs from the source table from \
     a given Sky Group (SGNumber)
@@ -58,6 +58,10 @@ def returnSkyGroupKIDs(SGNumber):
     results = cursor.fetchall()
     r1 = ["%s" % el[0] for el in results]
     
+    for kw in kwargs:
+	if kw == 'dict_output':
+	    if kwargs[kw]:
+		return {'SG' + str(SGNumber).zfill(3): r1}
     return r1
 
 def returnCoordKID(KIDlist):
