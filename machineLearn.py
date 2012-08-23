@@ -73,11 +73,13 @@ def testConfusionMatrix():
 if __name__ == '__main__':
     if 1:
         basedir       = "/astro/store/student-scratch1/martincj/condor/SpringBreakRuns/Scratch/TrainingWheels/"
-
+        
+        #Getting the lists and creating objects
         normalClass   = QatsEnsemble("Normal", os.path.join(basedir, "AverageObjects"))
-        variableClass = QatsEnsemble("Variable", "/tmp/caw1") #os.path.join(basedir, "VariableObjects"))
-        testClass     = QatsEnsemble("Test", "/tmp/caw2") #os.path.join(basedir, "VariableObjects"))
+        variableClass = QatsEnsemble("Variable", os.path.join(basedir, "VariableObjects"))
+        testClass     = QatsEnsemble("Test", os.path.join(basedir, "AverageTestObjects"))
 
+        #creating matrices
         normalClass.readMatrix()
         variableClass.readMatrix()
         testClass.readMatrix()
@@ -89,13 +91,12 @@ if __name__ == '__main__':
         classLabels    = num.zeros(normalClass.matrix.shape[0])
         classLabels    = num.concatenate((classLabels, 1 * num.ones(variableClass.matrix.shape[0])))
 
-        # Do the machine learning!
+        #Creating Classifiers
         decisionTree   = DecisionTreeClassifier(max_depth=None, min_samples_split=1, random_state=0)
-
         randomForest   = RandomForestClassifier(n_estimators=10, max_depth=None, min_samples_split=1, random_state=0)
-        
         extraTrees     = ExtraTreesClassifier(n_estimators=10, max_depth=None, min_samples_split=1, random_state=0)
 
+        #
         print "SCORE1", cross_val_score(decisionTree, trainingSample, classLabels)
         print "SCORE2", cross_val_score(randomForest, trainingSample, classLabels)
         print "SCORE3", cross_val_score(extraTrees, trainingSample, classLabels) #, cv = sklearn.cross_validation)???
