@@ -51,7 +51,7 @@ def readInputs(kids, inputRoot = "/astro/store/student-scratch1/johnm26/SPRING_B
 
     return inputMatrix
 
-def plotConfusionMatrix(matrix):
+def plotConfusionMatrix(matrix, title):
     names = ['Average', 'Variable', 'EB']
     fig = pylab.figure()
     ax  = fig.add_subplot(111)
@@ -62,6 +62,7 @@ def plotConfusionMatrix(matrix):
 
     pylab.xticks(range(len(names)), names)
     pylab.yticks(range(len(names)), names)
+    pylab.title(title)
     pylab.colorbar(im)
     pylab.show()
 
@@ -185,64 +186,64 @@ if __name__ == '__main__':
         ########################################
         #Visualizing the learning
         ########################################
-        #plotConfusionMatrix(decisionTreeConfusionMatrix)
-        #plotConfusionMatrix(randomForestConfusionMatrix)
-        #plotConfusionMatrix(extraTreesConfusionMatrix)
-        #plotConfusionMatrix(SVCrbfConfusionMatrix)
-        #plotConfusionMatrix(SVClinearConfusionMatrix)
-        #plotConfusionMatrix(SVCpolyConfusionMatrix)
-        #plotConfusionMatrix(LinearSVCConfusionMatrix)
-        #plotConfusionMatrix(NuSVCConfusionMatrix)
+        plotConfusionMatrix(decisionTreeConfusionMatrix, 'decisionTreeConfusionMatrix')
+        plotConfusionMatrix(randomForestConfusionMatrix, 'randomForestConfusionMatrix')
+        plotConfusionMatrix(extraTreesConfusionMatrix, 'extraTreesConfusionMatrix')
+        plotConfusionMatrix(SVCrbfConfusionMatrix, 'SVCrbfConfusionMatrix')
+        plotConfusionMatrix(SVClinearConfusionMatrix, 'SVClinearConfusionMatrix')
+        plotConfusionMatrix(SVCpolyConfusionMatrix, 'SVCpolyConfusionMatrix')
+        plotConfusionMatrix(LinearSVCConfusionMatrix, 'LinearSVCConfusionMatrix')
+        plotConfusionMatrix(NuSVCConfusionMatrix, 'NuSVCConfusionMatrix')
         
-        X = trainingSet
-        y = trainingLabels
+        #X = trainingSet
+        #y = trainingLabels
         
-        X = X[y != 0, :2]
-        y = y[y != 0]
+        #X = X[y != 0, :2]
+        #y = y[y != 0]
         
-        n_sample = len(X)
+        #n_sample = len(X)
         
-        num.random.seed(0)
-        order = num.random.permutation(n_sample)
-        X = X[order]
-        y = y[order].astype(num.float)
+        #num.random.seed(0)
+        #order = num.random.permutation(n_sample)
+        #X = X[order]
+        #y = y[order].astype(num.float)
         
-        X_train = X[:.9 * n_sample]
-        y_train = y[:.9 * n_sample]
-        X_test = X[.9 * n_sample:]
-        y_test = y[.9 * n_sample:]
-        # fit the model
-        for fig_num, kernel in enumerate(('linear', 'rbf', 'poly')):
-            clf = svm.SVC(kernel=kernel, gamma=10)
+        #X_train = X[:.9 * n_sample]
+        #y_train = y[:.9 * n_sample]
+        #X_test = X[.9 * n_sample:]
+        #y_test = y[.9 * n_sample:]
+        ## fit the model
+        #for fig_num, kernel in enumerate(('linear', 'rbf', 'poly')):
+            #clf = svm.SVC(kernel=kernel, gamma=10)
 
-            clf.fit(X_train, y_train)
+            #clf.fit(X_train, y_train)
         
-            pylab.figure(fig_num)
-            pylab.clf()
-            pylab.scatter(X[:, 0], X[:, 1], c=y, zorder=10, cmap=pylab.cm.Paired)
-            print 'eh'
-            # Circle out the test data
-            pylab.scatter(X_test[:, 0], X_test[:, 1],
-                    s=80, facecolors='none', zorder=10)
+            #pylab.figure(fig_num)
+            #pylab.clf()
+            #pylab.scatter(X[:, 0], X[:, 1], c=y, zorder=10, cmap=pylab.cm.Paired)
+            #print 'eh'
+            ## Circle out the test data
+            #pylab.scatter(X_test[:, 0], X_test[:, 1],
+                    #s=80, facecolors='none', zorder=10)
         
-            pylab.axis('tight')
-            x_min = X[:, 0].min()
-            x_max = X[:, 0].max()
-            y_min = X[:, 1].min()
-            y_max = X[:, 1].max()
-            print '2'
-            XX, YY = num.mgrid[x_min:x_max:200j, y_min:y_max:200j]
-            Z = clf.decision_function(num.c_[XX.ravel(), YY.ravel()])
+            #pylab.axis('tight')
+            #x_min = X[:, 0].min()
+            #x_max = X[:, 0].max()
+            #y_min = X[:, 1].min()
+            #y_max = X[:, 1].max()
+            #print '2'
+            #XX, YY = num.mgrid[x_min:x_max:200j, y_min:y_max:200j]
+            #Z = clf.decision_function(num.c_[XX.ravel(), YY.ravel()])
         
-            # Put the result into a color plot
-            Z = Z.reshape(XX.shape)
-            pylab.pcolormesh(XX, YY, Z > 0, cmap=pylab.cm.Paired)
-            pylab.contour(XX, YY, Z, colors=['k', 'k', 'k'],
-                    linestyles=['--', '-', '--'],
-                    levels=[-.5, 0, .5])
+            ## Put the result into a color plot
+            #Z = Z.reshape(XX.shape)
+            #pylab.pcolormesh(XX, YY, Z > 0, cmap=pylab.cm.Paired)
+            #pylab.contour(XX, YY, Z, colors=['k', 'k', 'k'],
+                    #linestyles=['--', '-', '--'],
+                    #levels=[-.5, 0, .5])
         
-            pylab.title(kernel)
-            pylab.show()
+            #pylab.title(kernel)
+            #pylab.show()
 
     if 0:
         testConfusionMatrix()
