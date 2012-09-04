@@ -11,10 +11,11 @@ kid = sys.argv[1]
 dFile = open(kep.postqats.getdFileName(kid), 'r')
 order = 3
 periods, snr, snrLC, snrFlat = kep.postqats.getQatsData(dFile)
-bestPeriod, bestFit, minSqr,\
-qatsBestPeriod, qatsPeriodFit, qatsPeriodSqr\
-= kep.postqats.fitQats(kid, periods, snr, order,\
-                       qats_best_period_fit=True)
+output = \
+    kep.postqats.fitQats(kid, periods, snr, order,\
+                         qats_best_period_fit=True)
+bestPeriod, bestFit, minSqr = output[0]
+qatsBestPeriod, qatsPeriodFit, qatsPeriodSqr = output[1]
 bestPeriodIdx = periods.tolist().index(bestPeriod)
 qatsPeriodIdx = periods.tolist().index(qatsBestPeriod)
 
@@ -24,7 +25,8 @@ print 'best fit chi sqr: ' + str(minSqr)
 print 'best qats period chi sqr: ' + str(qatsPeriodSqr)
 
 fig = pylab.figure()
-ax = fig.add_subplot(211)
+#ax = fig.add_subplot(211)
+ax = pylab.gca()
 ax.semilogx()
 ax.plot(periods, snr, 'k-',\
         periods, bestFit, 'c-',\
