@@ -202,31 +202,49 @@ class QatsFeaturesModel:
     #####
     # central features method #
     #####
-    def returnFeatures(self, **kwargs):
-        self.setCMax()
-        cmax = self.getCMax()
+    def returnFeatures(self, iters = 1, **kwargs):
+        self.setConvolved()
+        #cmax = self.getCMax()
         self.setD_chiSqr()
         imin = self.chiSqrs.argmin()
         #coeffs = self.getPolynomCoeffs()[imin]
         coeffs = self.getCoeffs()[imin]
         # iters defines how many peaks the model will examine
         # for each feature
-        iters = 1
+        n_cmax       = iters
+        n_snrmax     = iters
+        n_peakwidth  = iters
+        n_dchi       = iters
+        n_peakperiod = iters
         for kw in kwargs:
-            if kw == 'iterations':
-                iters = kwargs[kw]
-        snrMaxes   = num.zeros(iters)
-        peakWidths = num.zeros(iters)
-        dchis      = num.zeros(iters)
-        peakPeriods = num.zeros(iters)
-        for i in num.arange(iters) + 1:
+            if kw == 'n_cmax':
+                n_cmax = kwargs[kw]
+            elif kw == 'n_snrmax':
+                n_snrmax = kwargs[kw]
+            elif kw == 'n_peakwidth':
+                n_peakwidth = kwargs[kw]
+            elif kw == 'n_dchi':
+                n_dchi = kwargs[kw]
+            elif kw == 'n_peakperiod':
+                n_peakperiod = kwargs[kw]
+        cmaxes      = num.zeros(n_cmax)
+        snrMaxes    = num.zeros(n_snrmax)
+        peakWidths  = num.zeros(n_peakwidth)
+        dchis       = num.zeros(n_dchi)
+        peakPeriods = num.zeros(n_peakperiod)
+        for i in num.arange(n_cmax) + 1:
+            cmaxes[i - 1] = self.getCMax(which_peak=i)
+        for i in num.arange(n_snrmax) + 1:
             snrMaxes[i - 1] = self.getSnrMax(which_peak=i)
+        for i in num.arange(n_peakwidth) + 1:
             peakWidths[i - 1] = self.getPeakWidth(which_peak=i)
+        for i in num.arange(n_dchi) + 1:
             dchis[i - 1] = self.getMaxD_chiSqr(which_peak=i)
+        for i in num.arange(n_peakperiod) + 1:
             peakPeriods[i - 1] = self.getPeakPeriod(which_peak=i)
         
         features = num.array([])
-        features = num.hstack((features, cmax))
+        features = num.hstack((features, cmaxes))
         #print features
         features = num.hstack((features, coeffs))
         #print features
@@ -243,14 +261,14 @@ class QatsFeaturesModel:
     #####
     # 'SET' features methods #
     #####
-    def setCMax(self):
+    def setConvolved(self):
         imin = self.chiSqrs.argmin()
         baseline = self.polynom
         dataPeaks = self.snr - baseline
         modelPeaks = self.bestFit - baseline
         #cmax = max(dataPeaks * modelPeaks)
         self.convolved = dataPeaks * modelPeaks
-        self.cmax = max(self.convolved)
+        #self.cmax = max(self.convolved)
     
     def setD_chiSqr(self):
         baseline_chiSqr = chiSqr(self.snr, self.polynom)
@@ -275,8 +293,15 @@ class QatsFeaturesModel:
         #dataPeaks.sort()
         #return dataPeaks[maxes[-1 * wp]]
     
-    def getCMax(self):
-        return self.cmax
+    def getCMax(self, **kwargs):
+        wp = 1
+        for kw in kwargs:
+            if kw == 'which_peak':
+                wp = kwargs[kw]
+        imaxes = maxIndices(self.convolved)
+        maxes = self.convolved[imaxes]
+        maxes.sort()
+        return maxes[-1 * wp]
     
     def getPeakWidth(self, **kwargs):
         wp = 1

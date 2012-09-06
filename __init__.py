@@ -25,6 +25,8 @@ import qats
 
 import linLeastSquares
 
+import skclassify
+
 import test_plotting.quicklc as quicklc
 
 import tquick
