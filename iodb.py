@@ -130,9 +130,9 @@ def ReadLightCurve(KeplerID, **kwargs):
             return
         else:
             time    = num.ma.array([x[2] for x in results])
-            corflux = num.ma.array([x[8] for x in results])
-            corerr  = num.ma.array([x[4] for x in results])
-            qflag  = num.array([x[9] for x in results])
+            corflux = num.ma.array([x[5] for x in results])
+            corerr  = num.ma.array([x[6] for x in results])
+            qflag  = num.array([x[7] for x in results])
             sortindex = cadence.argsort()
             time = time[sortindex]
             corflux = corflux[sortindex]
