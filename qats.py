@@ -68,10 +68,14 @@ def getPTQM(period0,nperiod,f,N,ds):
 
 class qatslc:
 
-    def __init__(self,lcData,KID):
+    def __init__(self,lcData,KID,**kwargs):
         
         self.lcData = lcData
         self.kid = KID
+        self.maske = 'false'
+        for key in kwargs:
+            if key == 'maske':
+                self.maske = kwargs[key]
         self.status = 'Initial Input'
 
     def padLC(self,**kwargs):
@@ -83,12 +87,17 @@ class qatslc:
         i.e. indices of the array from the pipline
         """
         
-        #Default = no flaged points
+        #Default = pads either all eclipse data and all outliers (maske=='true'),
+        #or pads all outliers (maske=='false')
+        
+        
+        
         FlagIDs = []
         for key in kwargs:
             if key.lower() == 'flagids':
                 FlagIDs = kwargs[key]
-
+        if (len(FlagIDs) > 0) & (self.maske == 'true'):
+            print 'have both flagids and maske==true, maske is overridden'
         # the eclipse lightcurve data are the best place to start
         
         if len(FlagIDs) > 0:
@@ -100,9 +109,20 @@ class qatslc:
             y = y[FlagIDs]
             yerr = yerr[FlagIDs]
             cad = cad[FlagIDs]
-        else:
+            
+        elif self.maske.lower() == 'false': 
             x,y,yerr,cad = returnData(self.lcData,'elc')
-            pass
+        elif self.maske.lower() == 'true': #if true, masks all eclipses in database
+            x,y,yerr,cad = returnData(self.lcData,'flat')
+            #x,y,yerr,cad = returnData(self.lcData,'all')
+            #idx = num.where(((self.lcData['eMask'] == False) & (self.lcData['OKMask'] == False)))[0]
+            #x = x[idx]
+            #y = y[idx]
+            #yerr = yerr[idx]
+            #cad = cad[idx]
+        else:
+            print 'Dont recognize your maske keyword, assuming you want to mask eclipses'
+            x,y,yerr,cad = returnData(self.lcData,'flat')
 
         x0 = min(x)
         x1 = max(x)
@@ -131,8 +151,8 @@ class qatslc:
         existingIDX = getListIndicies(cadcomplete,cad)
     
         zeros = num.zeros(len(xcomplete))
-        yerrcomplete = zeros                #padding errors with 0
-        padflag = zeros
+        yerrcomplete = zeros+0                #padding errors with 0
+        padflag = zeros+1e0
         ycomplete = zeros+1e0               #padding lc with 1
         
         # padded datasets
@@ -143,7 +163,7 @@ class qatslc:
         sigma = func.compute1Sigma(ycomplete[existingIDX])
         flatgauss = 1e0 + sigma*num.random.randn(len(ycomplete))
         self.sigma = sigma
-        qflag = zeros[existingIDX] = 1
+        padflag[existingIDX] = 0. #only padded cadences are set to 1.
         self.lcData = {'x':xcomplete,\
                        'y':ycomplete,\
                        'yerr':yerrcomplete,\

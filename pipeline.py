@@ -5,6 +5,7 @@ import scipy
 import warnings
 import copy
 import pylab as py
+import pdb ####TESTING
 warnings.simplefilter('ignore', num.RankWarning)
 #import pylab
 
@@ -75,7 +76,6 @@ def FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
             # look for duration multiplier to adjust
             # wrong kepler transit durations
             dfac = float(kwargs[key])
-
     i = 0
     # use eclipse data to create the transit mask
     if eclipseData['eDataExists']:
@@ -97,7 +97,7 @@ def FlagEclipses(lcData,eclipseData,BJDREFI, **kwargs):
                 lcData['eMask']=mask1
             else:
                 lcData['eMask']=\
-                num.ma.mask_or(mask1,lcData['eMask'])
+                num.ma.mask_or(mask1,lcData['eMask'],shrink=False)
             i +=1
     else:
         lcData['eMask'] = lcData['NoMask']
@@ -157,14 +157,14 @@ def FlagOutliers(lcData,medwin,threshold):
         Outputs - the data dictionary now contains mask arrays named
                 'OutlierMask' and 'OTMask'
     """
-    
     for portion in lcData.keys():
+        print portion
         lcData[portion]['x'].mask \
-        = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'])
+        = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'],shrink=False)
         lcData[portion]['y'].mask \
-        = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'])
+        = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'],shrink=False)
         lcData[portion]['yerr'].mask \
-        = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'])
+        = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'],shrink=False)
 	npts = len(lcData[portion]['x'])
         # defining the window
         medflux = []
@@ -196,12 +196,11 @@ def FlagOutliers(lcData,medwin,threshold):
 	lcData[portion]['x'][idx] = num.ma.masked
         mask2 = num.ma.copy(lcData[portion]['x'].mask)
         lcData[portion]['OMask']=mask2
-        mask3 = num.ma.mask_or(mask2,lcData[portion]['eMask'])
-        mask4 = num.ma.mask_or(mask3,lcData[portion]['KEMask'])
-        mask5 = num.ma.mask_or(mask2,lcData[portion]['KEMask'])
+        mask3 = num.ma.mask_or(mask2,lcData[portion]['eMask'],shrink=False)
+        mask4 = num.ma.mask_or(mask3,lcData[portion]['KEMask'],shrink=False)
+        mask5 = num.ma.mask_or(mask2,lcData[portion]['KEMask'],shrink=False)
         lcData[portion]['ALLMask'] = mask4
         lcData[portion]['OKMask'] = mask5
-
     return lcData
 
 def DetrendData(lcData, window, polyorder, **kwargs):

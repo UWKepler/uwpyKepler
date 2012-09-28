@@ -15,7 +15,7 @@ def main(FileName):
         kw = kep.keplc.kw(**tr.kw)
         X = kep.keplc.keplc(tr.kid)
         X.runPipeline(kw)
-        Y = kep.qats.qatslc(X.lcFinal,X.KID)
+        Y = kep.qats.qatslc(X.lcFinal,X.KID,kw.maske)
         Y.padLC()
         Y.addNoise()
         Y.runQATS(f=0.01)

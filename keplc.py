@@ -21,7 +21,7 @@ class keplc:
 class lcData:
     
     def __init__(self, KID,eData,BJDREFI, kw):
-        self.lcData0 = iodb.ReadLightCurve(KID,selection=kw.ctype)
+        self.lcData0 = iodb.ReadLightCurve(KID,selection=kw.ctype,data=kw.data)
         if not self.lcData0 == None:
             self.lcData1 = pipeline.FlagKeplerEvents(self.lcData0)
             self.lcData2 = pipeline.RemoveBadEvents(self.lcData1)
@@ -40,35 +40,42 @@ class kw:
         
         self.agap = None
         self.durfac = None
-        printString = ''
         self.detChoice = 'polynomial'
+        self.data = 'pdc'
+        self.maske = 'false'
+        printString = ''
         for key in kwargs:
-            if key == 'ctype':
+            if key == 'ctype': #cadence type, 'LC' = long cadence, 'SC' = short cadence data 
                 self.ctype = kwargs[key]
                 printString += ' ctype='+str(kwargs[key])+','
-            elif key == 'gsize':
+            elif key == 'gsize': #minimum gapsize (in days) to create a new data portion 
                 self.gapSize = kwargs[key]
                 printString += ' gsize='+str(kwargs[key])+','
-            elif key == 'owin':
+            elif key == 'owin': #window, in cadences, used for computing the median for sigma clipping outliers
                 self.oWin = kwargs[key]
                 printString += ' owin='+str(kwargs[key])+','
-            elif key.lower().startswith('othresh'):
+            elif key.lower().startswith('othresh'): #sigma clipping threshold for outlier rejection
                 self.oThreshold = kwargs[key]
                 printString += ' othreshold='+str(kwargs[key])+','
-            elif key == 'dwin':
+            elif key == 'dwin': #detrending window size in cadences
                 self.dWin = kwargs[key]
                 printString += ' dwin='+str(kwargs[key])+','
-            elif key == 'polyorder':
+            elif key == 'polyorder': #polynomial order to be used in detrend fitting
                 self.dPolyorder = kwargs[key]
                 printString += ' polyorder='+str(kwargs[key])+','
-            elif key == 'agap':
+            elif key == 'agap': #unused?
                 self.agap = kwargs[key]
                 printString += ' agap='+str(kwargs[key])+','
-            elif key == 'durationfactor':
+            elif key == 'durationfactor': #unused?
                 self.durfac = kwargs[key]
                 printString += ' durationfactor='+str(kwargs[key])+','
-            elif key == 'detChoice':
+            elif key == 'detChoice': #detrending method, a few to choose from, not much difference in results? pipeline.py has 'em
                 self.detChoice = kwargs[key]
                 printString += ' detChoice='+str(kwargs[key])+','
-
+            elif key == 'data': #either use the 'pdc' (corrected) fluxes or the raw 'sap', pdc by default
+                self.data = kwargs[key]
+                printString += ' data='+str(kwargs[key])+','
+            elif key == 'maske': #'true' = mask all eclipse times associated with KOIs in the database, 'false' = don't mask 'em
+                self.maske = kwargs[key]
+                printString += ' maske='+str(kwargs[key])+','
         self.printString = printString[:-2] 

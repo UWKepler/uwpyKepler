@@ -16,9 +16,13 @@ def main(FileName):
         X = kep.keplc.keplc(tr.kid)
         X.runPipeline(kw)
         lc = X.lcData.lcData
-        Y = kep.qats.qatslc(X.lcFinal,X.KID)
-        idx = num.where((X.lcFinal['eMask'] == False))[0]
-        Y.padLC(flagids=idx)
+        Y = kep.qats.qatslc(X.lcFinal,X.KID,maske=kw.maske)
+        
+        #OLD MASKING METHOD
+        #idx = num.where((X.lcFinal['eMask'] == False))[0]
+        #Y.padLC(flagids=idx)
+        
+        Y.padLC()
         Y.addNoise()
         Y.runQATS(f=0.01)
         
@@ -37,10 +41,10 @@ def main(FileName):
         normalizedPower3 = normalizedPower2/normalizedPower2 ### ADDED ###
                 
         plt.subplot(211) ### ADDED ###
-        plt.title('unflipped,'+' KID = '+X.KID)
-        plt.plot(Y.periods,Y.snrFLAT/normalizedPower,'r-') 
-        plt.plot(Y.periods,Y.snrLC/normalizedPower,'b-')
-        plt.plot(Y.periods,normalizedPower/normalizedPower,'k-')
+        plt.title('KID = '+X.KID)
+        plt.plot(Y.periods,Y.snrFLAT,'r-') 
+        plt.plot(Y.periods,Y.snrLC,'b-')
+        plt.plot(Y.periods,normalizedPower,'k-')
                 #plt.plot(Y.periods,normalizedPower2, 'k-') ### ADDED ###
         plt.setp(plt.gca().set_xscale('log'))
         plt.ylabel('Signal Power')
@@ -49,7 +53,7 @@ def main(FileName):
         plt.setp(plt.gca().set_xscale('log')) ### ADDED ###
         plt.xlabel('Period (days)') ### MOVED ###
         plt.ylabel('F Transform')
-        plt.savefig('sn.SG0XX.unflipped.'+X.KID+'.png') ### MOVED ###
+        plt.savefig('sn.test.'+X.KID+'_'+kw.maske+'.png') ### MOVED ###
         #coeff = num.polyfit(num.log10(Y.periods),num.log10(Y.snrLC),1)
         #outy = scipy.polyval(coeff,num.log10(Y.periods))
         #normalizedPower = 10**(outy)
