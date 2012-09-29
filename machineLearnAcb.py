@@ -131,7 +131,7 @@ if __name__ == '__main__':
                                  (extraTrees, "Extra Trees"),
                                  (gradientBoost, "Gradient Boosting")):
             
-            print "SCORE", name, cross_val_score(classifier, trainingSample, classLabels)
+            #print "SCORE", name, cross_val_score(classifier, trainingSample, classLabels)
 
             predictions   = classifier.predict(normalClass.matrix[-ntovalidate:])
             predictions   = num.concatenate((predictions, classifier.predict(variableClass.matrix[-ntovalidate:])))
