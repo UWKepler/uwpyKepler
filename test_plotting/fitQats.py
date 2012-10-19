@@ -29,7 +29,7 @@ fig = pylab.figure()
 ax = pylab.gca()
 ax.semilogx()
 ax.plot(periods, snr, 'k-',\
-        periods, bestFit, 'c-',\
+        periods[:-1], bestFit, 'c-',\
         periods[bestPeriodIdx], snr[bestPeriodIdx], 'ro',\
         #periods[bestPeriodIdx], bestFit[bestPeriodIdx], 'ro',\
         periods[qatsPeriodIdx], snr[qatsPeriodIdx], 'bo',\

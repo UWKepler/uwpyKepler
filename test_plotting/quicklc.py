@@ -19,8 +19,9 @@ def quickKW(**kwargs):
     dPolyorder=6
     agap=2
     durfac=2
-    detChoice = 'polynomial'
-    
+    detChoice='polynomial'
+    data='pdc'
+
     for key in kwargs:
         if key == 'ctype':
             ctype = kwargs[key]
@@ -40,6 +41,8 @@ def quickKW(**kwargs):
             durfac = kwargs[key]
         elif key == 'detChoice':
             detChoice = kwargs[key]
+        elif key == 'data':
+            data = kwargs[key]
     kw = kep.keplc.kw(\
     ctype=ctype,\
     gsize=gapSize,\
@@ -49,7 +52,9 @@ def quickKW(**kwargs):
     polyorder=dPolyorder,\
     agap=agap,\
     durfac=durfac,\
-    detChoice=detChoice)
+    detChoice=detChoice,\
+    data=data)
+
     return kw
 
 def getCarterQatsData(kid):

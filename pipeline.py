@@ -158,7 +158,7 @@ def FlagOutliers(lcData,medwin,threshold):
                 'OutlierMask' and 'OTMask'
     """
     for portion in lcData.keys():
-        print portion
+        #print portion
         lcData[portion]['x'].mask \
         = num.ma.mask_or(lcData[portion]['eMask'],lcData[portion]['KEMask'],shrink=False)
         lcData[portion]['y'].mask \

@@ -1,10 +1,16 @@
 import numpy as num
 
+# pre  : func(x) returns array of same length for all func in funcs
+# pre  : elements of y correspond to elements of funcs(x)
+# post : returns best fit coefficients for fitting x to y with funcs
 def linLeastSquares(x, y, funcs, nterms, **kwargs):
-    # create an array of arrays; each equal in length to len(x)
-    col = num.array([num.zeros(len(x))]*nterms)
+    # create an array of arrays; 
+    # each equal in length to len(func[0](x))
+    firstEval = funcs[0](x)
+    col = num.zeros( (nterms, len(firstEval)) )
+    col[0] = firstEval
     # apply functions to data to determine columns
-    for i in range(len(col)):
+    for i in range(len(col))[1:]:
         col[i] = funcs[i](x)
     # expand columns another dimension to attain rows
     row = num.array([col]*nterms)

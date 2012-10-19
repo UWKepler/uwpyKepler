@@ -2,6 +2,7 @@ import uwpyKepler as kep
 import numpy as num
 import scipy
 import pylab
+import os
 
 # returns KID from QATS .data file
 # cursor must be at start of file
@@ -11,9 +12,8 @@ def getKID(dfile):
     return KID
 
 # change this with new sets of qats runs
-def getdFileName(kid):
-    import os
-    kid = str(kid)
+def getdFileName(kid, quiet = True):
+    kid = str(int(kid))
     sgStr = str(kep.dbinfo.getSkyGroup(kid)).zfill(3)
     basedir = '/astro/store/student-scratch1/johnm26'
     primary_path = os.path.join(basedir, 'SPRING_BREAK_RUNS/SG' + sgStr)
@@ -22,9 +22,11 @@ def getdFileName(kid):
     dFileName = os.path.join(primary_path, fname)
     if not os.path.isfile(dFileName):
         dFileName = os.path.join(secondary_path, fname)
-    # this block commented so as not to interfere with condor
-    #if not os.path.isfile(dFileName):
-        #print 'WARNING: ' + kid + 'qats data file not found'
+    
+    # quiet defaults to False so as not to interfere with condor
+    if not quiet:
+        if not os.path.isfile(dFileName):
+            print 'WARNING: ' + kid + 'qats data file not found'
 
     return dFileName
 
@@ -65,60 +67,70 @@ def getQatsData(dfile):
         
 # used in flagQats fitting
 # note: m=1 and n=1 when p0=p1 or p0=p2
-def firstFareyVal(p0,p1,p2):
-    m   = 1. # start on right side for when p0 = p1
-    n   = 1.
-    ln  = 0. # 'left numerator'
-    ld  = 1. # 'left denominator'
-    rn  = 1. # 'right numerator'
-    rd  = 1. # 'right denominator'
+def firstFareyVals(p0,p1,p2):
+    #print p1
+    #print p2
+
+    m   = num.ones(len(p1))  # start on right side for when p0 = p1
+    n   = num.ones(len(p1))
+    ln  = num.zeros(len(p1)) # 'left numerator'
+    ld  = num.ones(len(p1))  # 'left denominator'
+    rn  = num.ones(len(p1))  # 'right numerator'
+    rd  = num.ones(len(p1))  # 'right denominator'
     pRatio1 = p1/p0
     pRatio2 = p2/p0
-    if pRatio2 > 1:
-        temp = pRatio1
-        pRatio1 = 1./pRatio2
-        pRatio2 = 1./temp
-    while m/n < pRatio1 or m/n > pRatio2:
-        if m/n < pRatio1:
-            ln = m
-            ld = n
-            m += rn
-            n += rd
-        else:
-            rn = m
-            rd = n
-            m += ln
-            n += ld
+
+    idx = num.where(pRatio2 > 1)
+    temp = pRatio1[idx]
+    pRatio1[idx] = 1./pRatio2[idx]
+    pRatio2[idx] = 1./temp
+
+    idx = num.where((m/n > pRatio2) | (m/n < pRatio1))[0]
+    while len(idx) != 0:
+        idxG = num.where(m/n > pRatio2)[0]
+        rn[idxG] = m[idxG]
+        rd[idxG] = n[idxG]
+        m[idxG] += ln[idxG]
+        n[idxG] += ld[idxG]
+
+        idxL = num.where(m/n < pRatio1)[0]
+        ln[idxL] = m[idxL]
+        ld[idxL] = n[idxL]
+        m[idxL] += rn[idxL]
+        n[idxL] += rd[idxL]
+
+        idx = num.where((m/n > pRatio2) | (m/n < pRatio1))[0]
+
     return m, n
 
-def firstFareyVals(periods, p0):
-    Qs = []
-    for i in range(len(periods) - 1):
-        m, n = kep.postqats.firstFareyVal(p0, periods[i], periods[i + 1])
-        Qs.append(1. / num.sqrt(m * n))
-    Qs.append(Qs[-1])
-    return num.array(Qs)
+def sqrtMN(p0, Ps):
+    m, n = firstFareyVals(p0, Ps[:-1], Ps[1:])
+    return num.sqrt(m * n)
 
 def fitQats(kid, periods, snr, polyOrder, **kwargs):
     order = polyOrder
     allCoeffs = []
     chiSqrs = []
     fits = []
+    # periods and snr set to indices [:-1] b/c farey sequence
+    # only returns values for periods[:-1]
+    snr_cut = snr[:-1]
+    periods_cut = periods[:-1]
     for p0 in periods:
-        findQs = lambda Ps: firstFareyVals(Ps, p0)
-        funcs = map(lambda n: lambda x: x**n, range(order + 1)[::-1])
-        funcs.append(findQs)
-        #funcs = [order, order - 1 ... 1, 0, findQs]
+        findQs = lambda Ps: 1. / sqrtMN(p0, periods)
+        # funcs = [order, order - 1 ... 1, 0, findQs]
         # where the terms before 'findQs' denote the power
         # the data are raised to
+        funcs = map(lambda n: lambda x: x[:-1]**n, range(order + 1)[::-1])
+        funcs.append(findQs)
         coeffs, fareyVals = \
         kep.linLeastSquares.linLeastSquares\
-        (periods, snr, funcs, order + 2, return_func_vals=-1)
+        (periods, snr_cut, funcs, order + 2, return_func_vals=-1)
         allCoeffs.append(coeffs)
-        polynom = scipy.polyval(coeffs[:-1], periods)
+        polynom = scipy.polyval(coeffs[:-1], periods_cut)
         fit = polynom + coeffs[-1] * fareyVals
         fits.append(fit)
-        sqrs = (snr - fit)**2 / fit
+        sqrs = (snr_cut - fit)**2 / fit
         chiSqr = sqrs.sum()
         chiSqrs.append(chiSqr)
     minSqr = min(chiSqrs)
@@ -149,7 +161,6 @@ def fitQats(kid, periods, snr, polyOrder, **kwargs):
     return tuple(returnList)
 
 def getFitFileName(kid, **kwargs):
-    import os
     path = './'
     fname = str(kid) + 'QatsFit.txt'
     for kw in kwargs:
@@ -176,7 +187,19 @@ def getNthMaxIndex(a, n):
     return num.where(a == maxes[idx[-1 * n]])[0]
 
 class QatsFeaturesModel:
-    def __init__(self, kid, periods, snr):
+    #####
+    # initialization methods #
+    #####
+    # pass kid, periods, snr at initialization
+    # or use method: setQatsData()
+    # or use method: fromFile()
+    def __init__(self, *args):
+        data = [None, None, None]
+        for i in range(len(args)):
+            data[i] = args[i]
+        self.kid, self.periods, self.snr = data
+    
+    def setQatsData(self, kid, periods, snr):
         self.kid      = kid
         self.periods  = periods
         self.snr      = snr
@@ -194,9 +217,9 @@ class QatsFeaturesModel:
     def setBestFit(self):
         imin = self.chiSqrs.argmin()
         self.polynom = scipy.polyval(self.coeffs[imin][:-1], \
-            self.periods)
+            self.periods[:-1])
         self.bestFit = self.polynom + self.coeffs[imin][-1] * \
-            firstFareyVals(self.periods, self.periods[imin])
+            1. / sqrtMN(self.periods[imin], self.periods)
         self.minSqr  = self.chiSqrs[imin]
     
     #####
@@ -264,14 +287,14 @@ class QatsFeaturesModel:
     def setConvolved(self):
         imin = self.chiSqrs.argmin()
         baseline = self.polynom
-        dataPeaks = self.snr - baseline
+        dataPeaks = self.snr[:-1] - baseline
         modelPeaks = self.bestFit - baseline
         #cmax = max(dataPeaks * modelPeaks)
         self.convolved = dataPeaks * modelPeaks
         #self.cmax = max(self.convolved)
     
     def setD_chiSqr(self):
-        baseline_chiSqr = chiSqr(self.snr, self.polynom)
+        baseline_chiSqr = chiSqr(self.snr[:-1], self.polynom)
         self.d_chiSqr = baseline_chiSqr - self.chiSqrs
     
     #####
@@ -285,7 +308,7 @@ class QatsFeaturesModel:
         for kw in kwargs:
             if kw == 'which_peak':
                 wp = kwargs[kw]
-        dataPeaks = self.snr - self.polynom
+        dataPeaks = self.snr[:-1] - self.polynom
         imaxes = maxIndices(dataPeaks)
         maxes = dataPeaks[imaxes]
         maxes.sort()
@@ -308,7 +331,7 @@ class QatsFeaturesModel:
         for kw in kwargs:
             if kw == 'which_peak':
                 wp = kwargs[kw]
-        snr = self.snr
+        snr = self.snr[:-1]
         dataPeaks = snr - self.polynom
         imax = getNthMaxIndex(dataPeaks, wp)
         snrRight = num.roll(snr, -1)
@@ -333,7 +356,7 @@ class QatsFeaturesModel:
         for kw in kwargs:
             if kw == 'which_peak':
                 wp = kwargs[kw]
-        dataPeaks = self.snr - self.polynom
+        dataPeaks = self.snr[:-1] - self.polynom
         imax = getNthMaxIndex(dataPeaks, wp)
         return self.periods[imax][0]
     
@@ -363,9 +386,13 @@ class QatsFeaturesModel:
     def toFile(self, **kwargs):
         fname = getFitFileName(self.kid, **kwargs)
         ofile = open(fname, 'w')
+        # column 1: periods
         periods = self.periods.reshape(len(self.periods), -1)
+        # column 2: snr
         snr     = self.snr.reshape(len(self.snr), -1)
+        # column 3: chiSqrs
         chiSqrs = self.chiSqrs.reshape(len(self.chiSqrs), -1)
+        # column 4+: coeffs
         out = num.hstack((periods, snr, chiSqrs, self.coeffs))
         num.savetxt(ofile, out)
         ofile.close()
@@ -374,6 +401,8 @@ class QatsFeaturesModel:
         fname = getFitFileName(self.kid, **kwargs)
         ifile = open(fname, 'r')
         indata = num.loadtxt(ifile)
+        self.periods = indata[:, 0]
+        self.snr     = indata[:, 1]
         self.chiSqrs = indata[:, 2]
         self.coeffs  = indata[:, 3:]
         self.setBestFit()
@@ -390,7 +419,7 @@ class QatsFeaturesModel:
         qatsBestPeriod = getBestPeriodByKID(self.kid)
         iqats = num.where(self.periods == qatsBestPeriod)[0]
         ax.plot(self.periods, self.snr, 'k-',\
-        self.periods, self.bestFit, 'c-',\
+        self.periods[:-1], self.bestFit, 'c-',\
         self.periods[imin], self.snr[imin], 'ro',\
         self.periods[iqats], self.snr[iqats], 'bo',)
         ax.legend(('qats SNR', 'fit to qats', \
@@ -408,7 +437,7 @@ class QatsFeaturesModel:
         pylab.ylabel('convolved')
         pylab.xlabel('periods')
         imax = self.convolved.argmax()
-        pylab.plot(self.periods, self.convolved, 'k-')
+        pylab.plot(self.periods[:-1], self.convolved, 'k-')
         pylab.plot(self.periods[imax], self.convolved[imax], 'bo')
         pylab.show()
     
@@ -422,7 +451,7 @@ class QatsFeaturesModel:
         idx = []
         for n in num.arange(3) + 1:
             m = self.getSnrMax(which_peak=n)
-            idx.append(num.where(self.snr == m)[0])
+            idx.append(num.where(self.snr[:-1] - self.polynom == m)[0])
         idx = num.array(idx)
         pylab.plot(self.periods, self.snr, 'k-')
         pylab.plot(self.periods[idx], self.snr[idx], 'bo')

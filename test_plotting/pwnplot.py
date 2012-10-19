@@ -14,7 +14,7 @@ QATS_FILENAME_FORMAT_HEAD = 'sn.'
 QATS_FILENAME_FORMAT_MID = '.normal.unflipped.'
 
 def rawplot(kid,ctype):
-    lcData = kep.iodb.ReadLightCurve(kid,selection=ctype)
+    lcData = kep.iodb.ReadLightCurve(kid,selection=ctype,data='pdc')
     BJDREFI = kep.iodb.getBJDREFI(kid)
     x = lcData['x']+BJDREFI
     idx = num.where(lcData['y'] != -99)[0]

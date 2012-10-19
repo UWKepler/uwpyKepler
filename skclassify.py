@@ -5,6 +5,8 @@ import os
 
 TYPES = ('AverageObjects', 'VariableObjects', 'SinglePlanets', \
     'MultiPlanets', 'Binaries')
+LISTS = ('AverageObjects.txt', 'VariableObjects.txt', \
+    'SinglePlanets.txt', 'MultiPlanets.txt', 'EBList.txt')
 
 def extraTreePredictions(kidCapsule):
     classifier = ExtraTreesClassifier(n_estimators=50, \
@@ -51,6 +53,7 @@ class QatsEnsemble(object):
 
     def readKids(self):
         self.kids = num.loadtxt(self.infile, unpack = True)
+        self.kids = self.kids.astype(int)
 
     def readMatrix(self):
         if self.kids == None:
@@ -63,6 +66,14 @@ class KidsLabelCapsule:
         #self.balance = balance
         #self.setTrainingData(**kwargs)
         #self.setClassifyData(classifyKids)
+        
+    def __str__(self):
+        string = ''
+        for classification, ensemble in zip(TYPES, self.ensembles):
+            string += classification + ': ' + \
+                str(len(ensemble.kidsFound)) + '\n'
+        return string
+    
     def setAllFields(self, classifyKids, balance=True, **kwargs):
         self.setTrainingData(balance=balance, **kwargs)
         self.setClassifyData(classifyKids)
@@ -85,13 +96,13 @@ class KidsLabelCapsule:
                 multiPlanetKids = kwargs[kw]
             elif kw == 'binaryKids':
                 binaryKids = kwargs[kw]
-        basedir       = "/astro/store/student-scratch1/martincj/condor/SpringBreakRuns/Scratch/TrainingWheels/"
+        basedir       = "/astro/users/johnm26/kepArchive/allKidsOfTypeX/10_03_12Lists/kidListsFromCatalogs/testLearningLists_10_10_12"
         self.ensembles = []
         self.ensembles.append(QatsEnsemble("Normal", \
-            os.path.join(basedir, "AverageObjects"), \
+            os.path.join(basedir, "AverageObjects.txt"), \
             kids=normalKids))
         self.ensembles.append(QatsEnsemble("Variable", \
-            os.path.join(basedir, "VariableObjects"), \
+            os.path.join(basedir, "VariableObjects.txt"), \
             kids=variableKids))
         self.ensembles.append(QatsEnsemble("One Planet", \
             os.path.join(basedir, "SinglePlanets.txt"), \
@@ -108,6 +119,7 @@ class KidsLabelCapsule:
         #self.multiPlanetClass.readMatrix()
         #self.eclBinClass.readMatrix()
         for ensemble in self.ensembles:
+            print ensemble.name
             ensemble.readMatrix()
         if balance:
             self.balanceEnsembles()
@@ -181,53 +193,74 @@ class KidsLabelCapsule:
 def scaleMatrix(m, scale):
     m /= scale
 
+# helper method for getQatsFitFile
+def getSkyGroupStr(kid):
+    try:
+        sg = kep.dbinfo.getSkyGroup(kid)
+        return 'SG' + str(sg).zfill(3)
+    except:
+        #print "Wanring %d failed to find sky group" % kid
+        return None
+
+# helper method for readInputs
+def getQatsFitPath(kid):
+    fitPath = '/astro/store/student-scratch1/johnm26/fitQatsRuns/testPool'
+    fitFile = '%dQatsFit.txt' % kid
+    checkPath = os.path.join(fitPath, fitFile)
+    if not os.path.isfile(checkPath):
+        sgStr = getSkyGroupStr(kid)
+        fitPath = '/astro/store/student-scratch1/johnm26/fitQatsRuns/%s' % sgStr
+        checkPath = os.path.join(fitPath, fitFile)
+        if not os.path.isfile(checkPath):
+            return None
+    return fitPath
+
 def readInputs(kids, inputRoot = '/astro/store/student-scratch1/johnm26/SPRING_BREAK_RUNS'):
-    fitPath = \
-        '/astro/store/student-scratch1/johnm26/fitQatsRuns/testPool'
     kidsFound = []
     qatsFound = []
     for kid in kids:
-        try:
-            SG       = kep.dbinfo.getSkyGroup(kid)
-        except:
-            print "# WARNING", kid, "failed to find sky group"
-            continue
-
-        sgStr    = 'SG' + str(SG).zfill(3)
-        filename = "signal.%s.unflipped.%d.data" % (sgStr, kid)
-        infile   = os.path.join(inputRoot, sgStr, filename)
-        if not os.path.isfile(infile):
-            continue
-        fitFile = '%dQatsFit.txt' % kid
-        # new path contains non-trainer KIDs
-        if not os.path.isfile(os.path.join(fitPath, fitFile)):
-            fitPath = '/astro/store/student-scratch1/johnm26/fitQatsRuns/%s' % sgStr
-        if not os.path.isfile(os.path.join(fitPath, fitFile)):
+        #try:
+            #SG       = kep.dbinfo.getSkyGroup(kid)
+        #except:
+            #print "# WARNING", kid, "failed to find sky group"
+            #continue
+        #fitPath = \
+            #'/astro/store/student-scratch1/johnm26/fitQatsRuns/testPool'
+        #sgStr    = 'SG' + str(SG).zfill(3)
+        ##filename = "signal.%s.unflipped.%d.data" % (sgStr, kid)
+        ##infile   = os.path.join(inputRoot, sgStr, filename)
+        #infile = getdFileName(kid)
+        #if not os.path.isfile(infile):
+            #continue
+        #fitFile = '%dQatsFit.txt' % kid
+        ## new path contains non-trainer KIDs
+        #if not os.path.isfile(os.path.join(fitPath, fitFile)):
+            ##print os.path.join(fitPath, fitFile)
+            #fitPath = '/astro/store/student-scratch1/johnm26/fitQatsRuns/%s' % sgStr
+            #if not os.path.isfile(os.path.join(fitPath, fitFile)):
+        fitPath = getQatsFitPath(kid)
+        if fitPath == None:
             print '# Warning %s failed to find qats fit file' % kid
             continue
-        
-        dfile = open(infile, 'r')
-        periods, snr, snrLC, snrFlat = getQatsData(dfile)
-        qm = QatsFeaturesModel(kid, periods, snr)
-        qm.fromFile(path=fitPath, fname=fitFile)
-        dfile.close()
-        
-        kidsFound.append(kid)
-        qatsFound.append(qm.returnFeatures(n_cmax=5, n_snrmax=5, n_dchi=5))
+        else:
+            consecFails = 0
+            qatsdFileName = getdFileName(kid)
+            if not os.path.isfile(qatsdFileName):
+                continue
+            dfile = open(qatsdFileName, 'r')
+            periods, snr, snrLC, snrFlat = getQatsData(dfile)
+            qm = QatsFeaturesModel(kid, periods, snr)
+            qm.fromFile(path=fitPath)
+            dfile.close()
+            
+            kidsFound.append(kid)
+            qatsFound.append(qm.returnFeatures(n_cmax=7, n_snrmax=5, n_dchi=5))
 
     inputMatrix = num.zeros((len(kidsFound), len(qatsFound[0])))
     for i in range(len(kidsFound)):
         inputMatrix[i] = qatsFound[i]
-    
-    #inputMatrix = scaleMatrix(inputMatrix)
 
     return inputMatrix, num.array(kidsFound)
 
+#def readInputsFast(kids, directory)
 
-        
-        
-        
-        
-        
-        
-        
