@@ -23,10 +23,11 @@ def getdFileName(kid, quiet = True):
     if not os.path.isfile(dFileName):
         dFileName = os.path.join(secondary_path, fname)
     
-    # quiet defaults to False so as not to interfere with condor
-    if not quiet:
-        if not os.path.isfile(dFileName):
-            print 'WARNING: ' + kid + 'qats data file not found'
+    if not os.path.isfile(dFileName):
+        # quiet defaults to False so as not to interfere with condor
+        if not quiet:
+            print 'WARNING: ' + kid + ' qats data file not found'
+        return None
 
     return dFileName
 
@@ -64,6 +65,15 @@ def getQatsData(dfile):
     snr = snrLC/snrFLAT
     
     return periods, snr, snrLC, snrFLAT
+    
+def qatsData(kid, quiet = True):
+    dfileName = getdFileName(kid, quiet=quiet)
+    # if getdFileName cannot find file, returns None
+    # handle case where dfileName is None
+    if dfileName == None:
+        return None, None, None, None
+    dfile     = open(dfileName, 'r')
+    return getQatsData(dfile)
         
 # used in flagQats fitting
 # note: m=1 and n=1 when p0=p1 or p0=p2

@@ -55,10 +55,41 @@ class QatsEnsemble(object):
         self.kids = num.loadtxt(self.infile, unpack = True)
         self.kids = self.kids.astype(int)
 
-    def readMatrix(self):
+    def readMatrix(self, maxNKids = 0):
         if self.kids == None:
             self.readKids()
-        self.matrix, self.kidsFound = readInputs(self.kids)
+        self.matrix, self.kidsFound = readInputs(self.kids, maxNKids=maxNKids)
+
+# alternative implementation of QatsEnsemble
+# does not read kids from text file but files of
+# format '%sQatsFit.txt' % kid in a given directory
+class DirectoryQatsEnsemble():
+    # cannot input a kid list for this implementation
+    # kids are inferred from contents of indir (input directory)
+    def __init__(self, name, indir, matrix = None):
+        self.name   = name
+        self.indir  = indir
+        self.matrix = matrix
+    
+    def readMatrix(self, maxNKids = 0):
+        self.matrix, self.kidsFound = \
+            readInputsFromDirectory(self.indir, maxNKids=maxNKids)
+
+class ListAndDirectoryQatsEnsemble(QatsEnsemble):
+    def __init__(self, name, infile, indir, kids = None, matrix = None):
+        self.name   = name
+        self.infile = infile
+        self.indir  = indir
+        self.kids   = kids
+        self.matrix = matrix
+
+    def readMatrix(self, maxNKids = 0):
+        if self.kids == None:
+            self.readKids()
+        self.matrix, self.kidsFound = \
+            readInputsWithDirectoryReference(self.kids, \
+            self.indir, maxNKids=maxNKids)
+
 
 class KidsLabelCapsule:
     #def __init__(self, balance = True, **kwargs):
@@ -79,48 +110,23 @@ class KidsLabelCapsule:
         self.setClassifyData(classifyKids)
         self.scaleMatrices()
     
-    def setTrainingData(self, balance = True, **kwargs):
-        normalKids      = None
-        variableKids    = None
-        onePlanetKids   = None
-        multiPlanetKids = None
-        binaryKids      = None
-        for kw in kwargs:
-            if kw == 'normalKids':
-                normalKids = kwargs[kw]
-            elif kw == 'variableKids':
-                variableKids = kwargs[kw]
-            elif kw == 'onePlanetKids':
-                onePlanetKids = kwargs[kw]
-            elif kw == 'multiPlanetKids':
-                multiPlanetKids = kwargs[kw]
-            elif kw == 'binaryKids':
-                binaryKids = kwargs[kw]
-        basedir       = "/astro/users/johnm26/kepArchive/allKidsOfTypeX/10_03_12Lists/kidListsFromCatalogs/testLearningLists_10_10_12"
-        self.ensembles = []
-        self.ensembles.append(QatsEnsemble("Normal", \
-            os.path.join(basedir, "AverageObjects.txt"), \
-            kids=normalKids))
-        self.ensembles.append(QatsEnsemble("Variable", \
-            os.path.join(basedir, "VariableObjects.txt"), \
-            kids=variableKids))
-        self.ensembles.append(QatsEnsemble("One Planet", \
-            os.path.join(basedir, "SinglePlanets.txt"), \
-            kids=onePlanetKids))
-        self.ensembles.append(QatsEnsemble("Multi Planet", \
-            os.path.join(basedir, "MultiPlanets.txt"), \
-            kids=multiPlanetKids))
-        self.ensembles.append(QatsEnsemble("EclBin", \
-            os.path.join(basedir, "EBList.txt"), \
-            kids=binaryKids))
-        #self.normalClass.readMatrix()
-        #self.variablClass.readMatrix()
-        #self.onePlanetClass.readMatrix()
-        #self.multiPlanetClass.readMatrix()
-        #self.eclBinClass.readMatrix()
+    # balance restricts the number of kids in each classification
+    # to the number of kids in the smallest classification (balances dataset)
+    # directoryMode reads kids from directories instead of kidlist files (faster)
+    def setTrainingData(self, balance = True, mode = 'standard', **kwargs):
+        if mode == 'directory_reference':
+            self.ensembles = getDirRefEnsembles(**kwargs)
+        elif mode == 'directory':
+            self.ensembles = getDirectoryEnsembles()
+        else:
+            self.ensembles = getEnsembles(**kwargs)
+
+        maxKids = 0
         for ensemble in self.ensembles:
-            print ensemble.name
-            ensemble.readMatrix()
+            ensemble.readMatrix(maxNKids=maxKids)
+            if balance:
+                maxKids = len(ensemble.kidsFound)
+            print ensemble.name + ": " + str(len(ensemble.kidsFound)) + " KIDs"
         if balance:
             self.balanceEnsembles()
 
@@ -193,6 +199,11 @@ class KidsLabelCapsule:
 def scaleMatrix(m, scale):
     m /= scale
 
+# used by both versions of readInputs
+def qatsFeatureSet(qatsFeaturesModel):
+    return qatsFeaturesModel.returnFeatures(\
+        n_cmax=7, n_snrmax=7, n_dchi=7)
+
 # helper method for getQatsFitFile
 def getSkyGroupStr(kid):
     try:
@@ -215,46 +226,26 @@ def getQatsFitPath(kid):
             return None
     return fitPath
 
-def readInputs(kids, inputRoot = '/astro/store/student-scratch1/johnm26/SPRING_BREAK_RUNS'):
+def readInputs(kids, maxNKids = 0, inputRoot = '/astro/store/student-scratch1/johnm26/SPRING_BREAK_RUNS'):
     kidsFound = []
     qatsFound = []
+    kidCount  = 0
+    qm = QatsFeaturesModel()
     for kid in kids:
-        #try:
-            #SG       = kep.dbinfo.getSkyGroup(kid)
-        #except:
-            #print "# WARNING", kid, "failed to find sky group"
-            #continue
-        #fitPath = \
-            #'/astro/store/student-scratch1/johnm26/fitQatsRuns/testPool'
-        #sgStr    = 'SG' + str(SG).zfill(3)
-        ##filename = "signal.%s.unflipped.%d.data" % (sgStr, kid)
-        ##infile   = os.path.join(inputRoot, sgStr, filename)
-        #infile = getdFileName(kid)
-        #if not os.path.isfile(infile):
-            #continue
-        #fitFile = '%dQatsFit.txt' % kid
-        ## new path contains non-trainer KIDs
-        #if not os.path.isfile(os.path.join(fitPath, fitFile)):
-            ##print os.path.join(fitPath, fitFile)
-            #fitPath = '/astro/store/student-scratch1/johnm26/fitQatsRuns/%s' % sgStr
-            #if not os.path.isfile(os.path.join(fitPath, fitFile)):
         fitPath = getQatsFitPath(kid)
         if fitPath == None:
             print '# Warning %s failed to find qats fit file' % kid
             continue
         else:
-            consecFails = 0
-            qatsdFileName = getdFileName(kid)
-            if not os.path.isfile(qatsdFileName):
-                continue
-            dfile = open(qatsdFileName, 'r')
-            periods, snr, snrLC, snrFlat = getQatsData(dfile)
-            qm = QatsFeaturesModel(kid, periods, snr)
+            if maxNKids > 0:
+                kidCount += 1
+            if kidCount > maxNKids:
+                break
+            qm.kid = kid
             qm.fromFile(path=fitPath)
-            dfile.close()
-            
+
             kidsFound.append(kid)
-            qatsFound.append(qm.returnFeatures(n_cmax=7, n_snrmax=5, n_dchi=5))
+            qatsFound.append(qatsFeatureSet(qm))
 
     inputMatrix = num.zeros((len(kidsFound), len(qatsFound[0])))
     for i in range(len(kidsFound)):
@@ -262,5 +253,156 @@ def readInputs(kids, inputRoot = '/astro/store/student-scratch1/johnm26/SPRING_B
 
     return inputMatrix, num.array(kidsFound)
 
-#def readInputsFast(kids, directory)
+def readInputsFromDirectory(directory, maxNKids = 0):
+    kidsFound = []
+    qatsFound = []
+    kidCount  = 0
+    qm = QatsFeaturesModel()
+    for fileName in os.listdir(directory):
+        if fileName.endswith('QatsFit.txt'):
+            if maxNKids > 0:
+                kidCount += 1
+            if kidCount > maxNKids:
+                break
+            kid = int(fileName.split('QatsFit.txt')[0])
+            qm.kid = kid
+            qm.fromFile(path=directory)
 
+            kidsFound.append(kid)
+            qatsFound.append(qatsFeatureSet(qm))
+
+    inputMatrix = num.zeros((len(kidsFound), len(qatsFound[0])))
+    for i in range(len(kidsFound)):
+        inputMatrix[i] = qatsFound[i]
+
+    return inputMatrix, num.array(kidsFound)
+
+def kidsInDirectory(directory):
+    kids = []
+    fitPaths = []
+    for file in os.listdir(directory):
+        if file.endswith('QatsFit.txt'):
+            kids.append(int(file.split('QatsFit.txt')[0]))
+    return kids
+
+# check directory first to prevent
+# looping over entire kid list and checking if each
+# corresponding file exists
+def readInputsWithDirectoryReference(kids, directory, maxNKids = 0):
+    kidsFound = []
+    qatsFound = []
+    kidCount  = 0
+    qm = QatsFeaturesModel()
+    kidsWithFit = set(kidsInDirectory(directory))
+    kids = set(kids).intersection(kidsWithFit)
+    kidsWithPaths = zip(kids, map(getQatsFitPath, kids))
+    for kid, fitPath in kidsWithPaths:
+        if maxNKids > 0:
+            kidCount += 1
+        if kidCount > maxNKids:
+            break
+        qm.kid = kid
+        qm.fromFile(path=fitPath)
+
+        kidsFound.append(kid)
+        qatsFound.append(qatsFeatureSet(qm))
+
+    inputMatrix = num.zeros((len(kidsFound), len(qatsFound[0])))
+    for i in range(len(kidsFound)):
+        inputMatrix[i] = qatsFound[i]
+
+    return inputMatrix, num.array(kidsFound)
+    
+
+def getEnsembles(**kwargs):
+    normalKids      = None
+    variableKids    = None
+    onePlanetKids   = None
+    multiPlanetKids = None
+    binaryKids      = None
+    for kw in kwargs:
+        if kw == 'normalKids':
+            normalKids = kwargs[kw]
+        elif kw == 'variableKids':
+            variableKids = kwargs[kw]
+        elif kw == 'onePlanetKids':
+            onePlanetKids = kwargs[kw]
+        elif kw == 'multiPlanetKids':
+            multiPlanetKids = kwargs[kw]
+        elif kw == 'binaryKids':
+            binaryKids = kwargs[kw]
+    ensembles = []
+    basedir       = "/astro/users/johnm26/kepArchive/allKidsOfTypeX/10_03_12Lists/kidListsFromCatalogs/listsWithoutDuplicates10_24_12"
+    ensembles.append(QatsEnsemble("Normal", \
+        os.path.join(basedir, "AverageObjects.txt"), \
+        kids=normalKids))
+    ensembles.append(QatsEnsemble("Variable", \
+        os.path.join(basedir, "VariableObjects.txt"), \
+        kids=variableKids))
+    ensembles.append(QatsEnsemble("One Planet", \
+        os.path.join(basedir, "SinglePlanets.txt"), \
+        kids=onePlanetKids))
+    ensembles.append(QatsEnsemble("Multi Planet", \
+        os.path.join(basedir, "MultiPlanets.txt"), \
+        kids=multiPlanetKids))
+    ensembles.append(QatsEnsemble("EclBin", \
+        os.path.join(basedir, "EBList.txt"), \
+        kids=binaryKids))
+    return ensembles
+
+def getDirectoryEnsembles():
+    ensembles = []
+    basedir = "/astro/store/student-scratch1/johnm26/fitQatsRuns"
+    ensembles.append(DirectoryQatsEnsemble("Normal", \
+        os.path.join(basedir, "AverageObjects")))
+    ensembles.append(DirectoryQatsEnsemble("Variable", \
+        os.path.join(basedir, "VariableObjects")))
+    ensembles.append(DirectoryQatsEnsemble("One Planet", \
+        os.path.join(basedir, "SinglePlanets")))
+    ensembles.append(DirectoryQatsEnsemble("Multi Planet", \
+        os.path.join(basedir, "MultiPlanets")))
+    ensembles.append(DirectoryQatsEnsemble("EclBin", \
+        os.path.join(basedir, "EBList")))
+    return ensembles
+
+def getDirRefEnsembles(**kwargs):
+    normalKids      = None
+    variableKids    = None
+    onePlanetKids   = None
+    multiPlanetKids = None
+    binaryKids      = None
+    for kw in kwargs:
+        if kw == 'normalKids':
+            normalKids = kwargs[kw]
+        elif kw == 'variableKids':
+            variableKids = kwargs[kw]
+        elif kw == 'onePlanetKids':
+            onePlanetKids = kwargs[kw]
+        elif kw == 'multiPlanetKids':
+            multiPlanetKids = kwargs[kw]
+        elif kw == 'binaryKids':
+            binaryKids = kwargs[kw]
+    ensembles = []
+    basedir       = "/astro/users/johnm26/kepArchive/allKidsOfTypeX/10_03_12Lists/kidListsFromCatalogs/listsWithoutDuplicates10_24_12"
+    baseFitDir = "/astro/store/student-scratch1/johnm26/fitQatsRuns"
+    ensembles.append(ListAndDirectoryQatsEnsemble("Normal", \
+        os.path.join(basedir, "AverageObjects.txt"), \
+        os.path.join(baseFitDir, "AverageObjects"), \
+        kids=normalKids))
+    ensembles.append(ListAndDirectoryQatsEnsemble("Variable", \
+        os.path.join(basedir, "VariableObjects.txt"), \
+        os.path.join(baseFitDir, "VariableObjects"), \
+        kids=variableKids))
+    ensembles.append(ListAndDirectoryQatsEnsemble("One Planet", \
+        os.path.join(basedir, "SinglePlanets.txt"), \
+        os.path.join(baseFitDir, "SinglePlanets"), \
+        kids=onePlanetKids))
+    ensembles.append(ListAndDirectoryQatsEnsemble("Multi Planet", \
+        os.path.join(basedir, "MultiPlanets.txt"), \
+        os.path.join(baseFitDir, "MultiPlanets"), \
+        kids=multiPlanetKids))
+    ensembles.append(ListAndDirectoryQatsEnsemble("EclBin", \
+        os.path.join(basedir, "EBList.txt"), \
+        os.path.join(baseFitDir, "EBList"), \
+        kids=binaryKids))
+    return ensembles
